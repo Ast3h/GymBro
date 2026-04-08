@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymBros — Profilo</title>
+    <!-- Favicon-->
+     <link rel="icon" type="image/svg+xml" sizes="32x32" href="Favicon32x32.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+
+    <!-- Stili condivisi-->
+     <link rel="stylesheet" href="stili.css">
+
+     <style>
+        /* Stili specifici pagina profilo*/
+        .page-content{ 
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding-left: 20px;
+        }
+
+        .prof-header{
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding-bottom: 24px;
+            border-bottom: 0.5px solid var(--border);
+            margin-bottom: 24px;
+            margin-left: 20px;
+        }
+
+        .avatar{
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: var(--accent-dim);
+            border: 2px solid var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .prof-info{ flex: 1;}
+
+        .prof-name{
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .prof-email{
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-top: 3px;
+        }
+
+        .obj-pill{
+            display: inline-block;
+            margin-top: 8px;
+            margin-bottom: 8px;
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+            padding: 3px 50px;
+            border-radius: 20px;
+            background: var(--accent-dim);
+            color: var(--accent);
+            border: 0.5px solid rgba(237, 36, 155, 0.3);
+        }
+
+        .saved-chip{
+            font-size: 0.72rem;
+            padding: 10px 14px;
+            border-radius: 20px;
+            background: var(--surface2);
+            color: var(--text);
+            border: 0.5px solid var(--border);
+            cursor: pointer;
+            text-decoration: none;
+            transition: border-color 0.18s, color 0.18s;
+        }
+
+        .saved-chip:hover{
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .logout-row{
+            padding-top: 20px;
+            border-top: 0.5px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        @media (max-width: 600px){
+            .prof-header {flex-wrap: wrap;}
+            .prof-header .btn-ghost{width: 100%; text-align: center;}
+        }
+
+        #schede-salvate{
+            padding-left: 38px;
+        }
+     </style>
+</head>
+<body>
+    
+    <!-- TOPBAR-->
+     <header class="topbar">
+        <div class="topbar-left">
+            <button class="hamburger-btn" id="hamburger-btn" onclick="togggleSidebar()">
+                <span></span><span></span><span></span> <!-- Visivamente tre linee che formano l'icona della bar-->
+            </button>
+            <a href="home.html" class="logo">
+            <img src="Favicon64x64.png" alt="" class="logo-img">
+            GYM<span>BROS</span>
+        </a>
+        </div>
+        <div class="topbar-icons">
+            <div class="color-switch pink" id="color-switch" onclick="toggleAccent()" title="Cambia colore">
+                <div class="switch-knob"></div>
+            </div>
+            <a href="notifiche.html" class="icon-btn" title="Notifiche">
+                <svg viewBox="0 0 24 24">
+                    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+                <div class="notif-dot" id="notif-dot"></div>
+            </a>
+            <a href="schede.html" class="icon-btn" title="Le mie schede">
+                <svg viewBox="0 0 24 24">
+                    <rect x="4" y="3" width="16" height="18" rx="2"/>
+                    <line x1="8" y1="8" x2="16" y2="8"/>
+                    <line x1="8" y1="12" x2="16" y2="12"/>
+                    <line x1="8" y1="16" x2="12" y2="16"/>
+                </svg>
+            </a>
+            <a href="profilo.html" class="icon-btn" title="Profilo">
+                <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="8" r="4"/>
+                    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                </svg>
+            </a>
+        </div>
+     </header>
+
+     <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+     <!-- SIDEBAR -->
+      <nav class="sidebar" id="sidebar">
+        <a href="home.html" class="sidebar-item">Home</a>
+        <a href="schede.html" class="sidebar-item">Schede</a>
+        <a href="alimentazione.html" class="sidebar-item">Alimentazione</a>
+        <a href="profilo.html" class="sidebar-item">Profilo</a>
+      </nav>
+
+      <!-- CONTENUTO -->
+       <div class="page-layout">
+        <div class="page-content">
+                
+                <!-- HEADER PROFILO -->
+                <div class="prof-header">
+                    <img id="prof-avatar" src="" alt="" class="avatar" style="object-fit:cover;">
+                    <div class="avatar" id="prof-avatar-initials"> NC</div>
+                </div>
+                    
+                <div class="prof-info">
+                    <div class="prof-name"  id="prof-name"> NOME COGNOME</div>
+                    <!-- BACKEND: utente.nome + ' ' + utente.cognome -->
+                    <div class="prof-email" id="prof-email"> EMAIL </div>
+                    <!-- BACKEND: utente.email -->
+                    <div class="obj-pill"   id="prof-obiettivo"> OBIETTIVO </div>
+                    <!-- BACKEND: utente.obiettivo -->
+                </div>
+
+                <div class="prof-info">
+                <!-- TODO: aprire modale modifica profilo-->
+                    <button class="btn-ghost" onclick="">Modifica</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Dati personali</div>
+                <div class="info-row">
+                    <span class="info-label">Nome</span>
+                    <span class="info-val" id="dato-nome">—</span>
+                    <!-- BACKEND: utente.nome-->
+            </div>
+            <div class="info-row">
+                    <span class="info-label">Età</span>
+                    <span class="info-val" id="dato-eta">—</span>
+                    <!-- BACKEND: utente.eta + ' anni' -->
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Peso</span>
+                        <span class="info-val" id="dato-peso">—</span>
+                        <!-- BACKEND: utente.peso + ' kg' -->
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Altezza</span>
+                        <span class="info-val" id="dato-altezza">—</span>
+                        <!-- BACKEND: utente.altezza + ' cm' -->
+                    </div>
+                </div>
+
+                <div class="section">
+                <div class="section-title">Preferenze allenamento</div>
+                <div class="info-row">
+                    <span class="info-label">Livello</span>
+                    <span class="info-val" id="pref-livello">—</span>
+                    <!-- BACKEND: utente.livello -->
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Giorni a settimana</span>
+                    <span class="info-val" id="pref-giorni">—</span>
+                    <!-- BACKEND: utente.giorni_settimana -->
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Zone preferite</span>
+                    <span class="info-val accent" id="pref-zone">—</span>
+                    <!-- BACKEND: utente.zone_preferite.join(' · ') -->
+                </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Schede salvate</div>
+                    <div class="saved-chips" id="schede-salvate">
+                        <!--
+                            BACKEND: per ogni scheda inserire:
+                            <a href="schede.html?id=ID" class="saved-chip">NOME</a>
+                        -->
+                        <span style="font-size:0.78rem; color:var(--muted);">Nessuna scheda salvata</span>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Impostazioni</div>
+                    <div class="info-row">
+                        <span class="info-label">Tema colore</span>
+                        <span class="info-val accent" id="impost-tema">Rosa</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Notifiche</span>
+                        <span class="info-val" id="impost-notifiche">—</span>
+                        <!-- BACKEND: utente.notifiche_attive ? 'Attive' : 'Disattive' -->
+                    </div>
+                </div>
+
+                <div class="logout-row">
+                    <!-- TODO: collegare a logout del backend -->
+                    <button class="btn-ghost btn-danger" onclick="">Disconnetti</button>
+                </div>
+
+
+                </div>
+            </div>
+       </div>
+
+       <!-- BOTTOM NAV MOBILE-->
+        <nav class="bottom-nav">
+            <a href="home.html" class="bottom-nav-item"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>Home</span></a>
+            <a href="esercizi.html" class="bottom-nav-item"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><span>Esercizi</span></a>
+            <a href="schede.html"   class="bottom-nav-item">
+                <svg viewBox="0 0 24 24">
+                    <rect x="4" y="3" width="16" height="18" rx="2"/>
+                    <line x1="8" y1="8" x2="16" y2="8"/>
+                    <line x1="8" y1="12" x2="16" y2="12"/>
+                    <line x1="8" y1="16" x2="12" y2="16"/>
+                </svg><span>Schede</span></a>
+            <a href="profilo.html"  class="bottom-nav-item active"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Profilo</span></a>
+        </nav>
+
+        <script>
+            function toggleSidebar(){
+                document.getElementById('sidebar').classList.toggle('open');
+                document.getElementById('sidebar-overlay').classList.toggle('open');
+            }
+            function closeSidebar(){
+                document.getElementById('sidebar').classList.remove('open');
+                document.getElementById('sidebar-overlay').classList.remove('open');
+            }
+
+            let accentIsPink=true;
+
+            function applyAccent(isPink){
+                const root= document.documentElement;
+                const sw= document.getElementById('color-switch');
+                const dot= document.getElementById('notif-dot');
+                const logo= document.querySelector('.logo span');
+                const tema= document.getElementById('impost-tema');
+                const c= isPink? '#ed249b' : "#8cc63f";
+                const dim= isPink? 'rgba(237, 36, 155, 0.12)' : 'rgba(140, 198, 63, 0.12)';
+                const glow= isPink? 'rgba(237, 36, 155, 0.12)' : 'rgba(140, 198, 63, 0.12)';
+                root.style.setProperty('--accent', c);
+                root.style.setProperty('--accent-dim', dim);
+                root.style.setProperty('--accent-glow', glow);
+                if(sw) {
+                    sw.classList.toggle('pink', isPink);
+                    sw.classList.toggle('green', !isPink);
+                }
+                if(dot){ dot.style.background= c;}
+                if(logo){ logo.style.color= c;}
+                if(tema){ tema.textContent= isPink ? 'Rosa':'Verde';}
+            }
+
+            function toggleAccent(){
+            accentIsPink= !accentIsPink;
+            applyAccent(accentIsPink);
+            localStorage.setItem('gymbros-accent', accentIsPink? 'pink' : 'green');
+        }
+
+            /* Applica il tema salvato al carimento della pagina*/
+            (function initAccent(){
+            const saved = localStorage.getItem('gymbros-accent');
+            if(saved=== 'green'){
+                accentIsPink= false;
+                applyAccent(false);
+            }else{
+                applyAccent(true);
+            }
+        })();
+
+            /*
+        ══════════════════════════════════════════════
+        BACKEND — popolare il profilo:
+
+        fetch('/api/utente/profilo').then(r => r.json()).then(u => {
+            document.getElementById('prof-avatar-initials').textContent = u.nome[0] + u.cognome[0];
+            document.getElementById('prof-name').textContent     = u.nome + ' ' + u.cognome;
+            document.getElementById('prof-email').textContent    = u.email;
+            document.getElementById('prof-obiettivo').textContent = u.obiettivo;
+            document.getElementById('dato-nome').textContent     = u.nome;
+            document.getElementById('dato-eta').textContent      = u.eta + ' anni';
+            document.getElementById('dato-peso').textContent     = u.peso + ' kg';
+            document.getElementById('dato-altezza').textContent  = u.altezza + ' cm';
+            document.getElementById('pref-livello').textContent  = u.livello;
+            document.getElementById('pref-giorni').textContent   = u.giorni_settimana;
+            document.getElementById('pref-zone').textContent     = u.zone_preferite.join(' · ');
+            document.getElementById('impost-notifiche').textContent = u.notifiche_attive ? 'Attive' : 'Disattive';
+            const chips = document.getElementById('schede-salvate');
+            chips.innerHTML = '';
+            u.schede.forEach(s => {
+                const a = document.createElement('a');
+                a.href = 'schede.html?id=' + s.id;
+                a.className = 'saved-chip';
+                a.textContent = s.nome;
+                chips.appendChild(a);
+            });
+            if (u.notifiche_non_lette > 0)
+                document.getElementById('notif-dot').classList.add('active');
+        });
+        ══════════════════════════════════════════════
+        */
+
+        </script>
+</body>
+</html>

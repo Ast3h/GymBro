@@ -143,7 +143,7 @@ print(f"Salvati {len(result)} esercizi su {len(exercises)} totali")
 import sqlite3
 import json
 
-conn = sqlite3.connect('dev.db')
+conn = sqlite3.connect('prisma/dev.db')
 cursor = conn.cursor()
 
 with open('/home/asteh/exercises_final.json', "r") as f:
@@ -152,6 +152,7 @@ with open('/home/asteh/exercises_final.json', "r") as f:
 
 
 for ex in exercises:
+    
     cursor.execute("INSERT INTO Exercise (id, bodyPart, macroPart, name, nameIt, videoUrl) VALUES (?, ?, ?, ?, ?, ?)",
     (ex['id'], ex['bodyPart'], ex['macroPart'], ex['name'], ex['nameIta'], ex['videoUrl']))
     print("INSERT INTO Exercise (id, bodyPart, macroPart, name, nameIt, videoUrl) VALUES (?, ?, ?, ?, ?, ?)",

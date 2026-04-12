@@ -140,25 +140,18 @@ print(f"Salvati {len(result)} esercizi su {len(exercises)} totali")
 """
 
 
-import sqlite3
-import json
+import requests
 
-conn = sqlite3.connect('prisma/dev.db')
-cursor = conn.cursor()
-
-with open('/home/asteh/exercises_final.json', "r") as f:
-    exercises = json.load(f)
-    
+url = "http://localhost:3000/workout-plans"
 
 
-for ex in exercises:
-    
-    cursor.execute("INSERT INTO Exercise (id, bodyPart, macroPart, name, nameIt, videoUrl) VALUES (?, ?, ?, ?, ?, ?)",
-    (ex['id'], ex['bodyPart'], ex['macroPart'], ex['name'], ex['nameIta'], ex['videoUrl']))
-    print("INSERT INTO Exercise (id, bodyPart, macroPart, name, nameIt, videoUrl) VALUES (?, ?, ?, ?, ?, ?)",
-    (ex['id'], ex['bodyPart'], ex['macroPart'], ex['name'], ex['nameIta'], ex['videoUrl']))
+
+body = {
+    "id" : 10,
+    "nome" : "mio allenamento"
+}
+
+response = requests.post(url, json=body, timeout=1)
 
 
-conn.commit()
 
-conn.close()

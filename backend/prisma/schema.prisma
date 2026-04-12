@@ -19,4 +19,36 @@ model Exercise{
   bodyPart String
   macroPart String
   videoUrl String
+  workout_ex workout_exercise[]
+  workout_set workout_set[]
+}
+
+model workout_plan{
+  userId Int 
+  workoutId Int @id @default(autoincrement())
+  name String
+  workout_ex workout_exercise[]
+  workout_set workout_set[]
+}
+// UserId deve puntare a UserId della tabella UserId
+
+model workout_exercise{
+  workoutId Int 
+  exerciseId Int
+  nSet Int
+  nRep Int?
+  workout workout_plan @relation( fields : [workoutId], references : [workoutId])
+  exercise Exercise @relation( fields : [exerciseId], references : [id])
+  @@id([workoutId, exerciseId])
+}
+
+model workout_set{
+  workoutId Int
+  setId Int
+  exerciseId Int
+  rep Int
+  pesi Int
+  workout workout_plan @relation( fields : [workoutId], references : [workoutId])
+  exercise Exercise @relation( fields : [exerciseId], references : [id])
+  @@id([workoutId, exerciseId, setId])
 }

@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymBro — Schede</title>
+
+    <link rel="icon" type="image/png" sizes="32x32" href="Favicon32x32.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="stili.css">
+
+    <style>
+        /* Stili specifici pagina schede*/
+        .page-content { max-width: 1200px;}
+
+        /* griglia schede*/
+        .schede-grid{
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        /* card singola scheda*/
+        .scheda-card{
+            background: var(--surface);
+            border: 0.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            transition: border-color 0.18s, background 0.18s;
+        }
+
+        .scheda-card:hover{
+            border-color: var(--accent);
+            background: var(--surface2);
+        }
+
+        .scheda-card.predefinita{ opacity: 0.78;}
+        .scheda-card.predefinita:hover{ opacity: 1;}
+
+        .scheda-name{
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .scheda-meta{
+            font-size: 0.72rem;
+            color: var(--muted);
+            margin-bottom: 10px;
+        }
+
+        .scheda-tags{
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .scheda-footer{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 0.5px solid var(--border);
+        }
+
+        .scheda-data{
+            font-size: 0.65rem;
+            color: var(--muted);
+        }
+
+        .scheda-actions{ 
+            display: flex;
+            gap: 8px;
+        }
+
+        .scheda-btn{
+            font-size: 0.62rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+            border: 0.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 3px 8px;
+            cursor: pointer;
+            background: none;
+            transition: color 0.18s border-color 0.18s;
+        }
+
+        .scheda-btn:hover{
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+        .scheda-btn.danger:hover{
+            color: #e24b4a;
+            border-color: #e24b4a;
+        }
+
+        /* card "Crea nuova": occupa una cella della griglia*/
+        .new-scheda-card{
+            background:      transparent;
+            border:          0.5px dashed var(--border);
+            border-radius:   var(--radius);
+            padding:         16px;
+            cursor:          pointer;
+            display:         flex;
+            align-items:     center;
+            justify-content: center;
+            min-height:      100px;
+            color:           var(--muted);
+            font-size:       0.72rem;
+            font-weight:     500;
+            letter-spacing:  0.1em;
+            text-transform:  uppercase;
+            transition:      border-color 0.18s, color 0.18s;
+        }
+
+        .new-scheda-card:hover{
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* stato vuoto*/
+        .empty-state{
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--muted);
+            font-size: 0.82rem;
+            border: 0.5px dashed var(--border);
+            border-radius: var(--radius);
+            grid-column:   1 / -1;
+        }
+
+        .empty-state p{
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 600px){
+            .schede-grid{ grid-template-columns: 1fr;}
+        }
+    </style>
+</head>
+<body>
+    <!-- TOPBAR-->
+    <header class="topbar">
+        <div class="topbar-left">
+            <button class="hamburger-btn" id="hamburger-btn" onclick="toggleSidebar()">
+                <span></span><span></span><span></span> <!-- Visivamente tre linee che formano l'icona della bar-->
+            </button>
+            <a href="home.html" class="logo">
+            <img src="Favicon64x64.png" alt="" class="logo-img">
+            GYM<span>BRO</span>
+        </a>
+        </div>
+        <div class="topbar-icons">
+            <div class="color-switch pink" id="color-switch" onclick="toggleAccent()" title="Cambia colore">
+                <div class="switch-knob"></div>
+            </div>
+                <!-- icona campanella -->
+                <div class="notif-wrap" id="notif-wrap">                
+                <button class="icon-btn" id="notif-btn"
+                        onclick="toggleNotifiche(event)"
+                        title="Notifiche"
+                        aria-label="Notifiche"
+                        aria-expanded="false">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                    <div class="notif-dot" id="notif-dot"></div>
+                </button>
+
+                <!-- dropdown -->
+                <div class="notif-dropdown" id="notif-dropdown" role="dialog" aria-label="Notifiche">
+
+                    <div class="notif-dropdown-header">
+                        <span class="notif-dropdown-title">Notifiche</span>
+                        <button class="notif-mark-all" id="notif-mark-all"
+                                onclick="segnaLette()" style="display:none;">
+                            Segna tutte come lette
+                        </button>
+                    </div>
+
+                    <!-- lista — popolata da JS -->
+                    <div class="notif-list" id="notif-list">
+                        <div class="notif-empty" id="notif-empty">
+                            Nessuna notifica per ora
+                        </div>
+                    </div>
+
+                    <div class="notif-dropdown-footer" id="notif-footer" style="display:none;">
+                        <button class="notif-see-all" onclick="vediTutte()">Vedi tutte</button>
+                    </div>
+
+                </div>
+            </div>
+
+            <a href="schede.html" class="icon-btn" title="Le mie schede">
+                <svg viewBox="0 0 24 24">
+                    <rect x="4" y="3" width="16" height="18" rx="2"/>
+                    <line x1="8" y1="8" x2="16" y2="8"/>
+                    <line x1="8" y1="12" x2="16" y2="12"/>
+                    <line x1="8" y1="16" x2="12" y2="16"/>
+                </svg>
+            </a>
+            <a href="profilo.html" class="icon-btn" title="Profilo">
+                <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="8" r="4"/>
+                    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                </svg>
+            </a>
+        </div>
+    </header>
+
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <!-- SIDEBAR -->
+    <nav class="sidebar" id="sidebar">
+        <a href="esercizi.html" class="sidebar-item" style="color:var(--text); border-bottom:0.5px solid var(--border); margin-bottom:4px; padding-bottom:12px;">Esercizi</a>
+        <a href="home.html" class="sidebar-item">Home</a>
+        <a href="schede.html" class="sidebar-item">Schede</a>
+        <a href="profilo.html" class="sidebar-item">Profilo</a>
+    </nav>
+
+    <!-- CONTENUTO -->
+    <div class="page-layout">
+        <div class="page-content">
+
+            <!-- LE MIE SCHEDE -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">Le mie schede</div>
+                </div>
+
+                <!-- filtri zona-->
+                <div class="chips-row" id="filtri-personali" style="margin-bottom: 16px;">
+                    <button class="chip active" onclick="filtraSchede('tutte', 'personali', this)">Tutte</button>
+                    <button class="chip" onclick="filtraSchede('Gambe', 'personali', this)">Gambe</button>
+                    <button class="chip" onclick="filtraSchede('Petto', 'personali', this)">Petto</button>
+                    <button class="chip" onclick="filtraSchede('Braccia', 'personali', this)">Braccia</button>
+                    <button class="chip" onclick="filtraSchede('Spalle', 'personali', this)">Spalle</button>
+                    <button class="chip" onclick="filtraSchede('Addome', 'personali', this)">Addome</button>
+                    <button class="chip" onclick="filtraSchede('Glutei', 'personali', this)">Glutei</button>
+                    <button class="chip" onclick="filtraSchede('Schiena', 'personali', this)">Schiena</button>
+                </div>
+
+                <!-- BACKEND: riempire con creaCardScheda() e rimuovere #empty-personali se ci sono schede-->
+                <div class="schede-grid" id="grid-schede-personali">
+                    <div class="empty-state" id="empty-personali">
+                        <p>Non hai ancora salvato nessuna scheda.</p>
+                    </div>
+                    <!-- card crea nuova — sempre presente in fondo -->
+                    <div class="new-scheda-card" id="new-scheda-card" onclick="">
+                        + Crea nuova
+                    </div>
+                </div>
+            </div>
+
+            <!-- SCHEDE PREDEFINITE -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">Schede predefinite</div>
+                </div>
+
+                <!-- filtri livello -->
+                <div class="chips-row" id="filtri-predefinite" style="margin-bottom: 16px;">
+                    <button class="chip active" onclick="filtraSchede('tutte', 'predefinite', this)">Tutte</button>
+                    <button class="chip" onclick="filtraSchede('Principiante', 'personali', this)">Principiante</button>
+                    <button class="chip" onclick="filtraSchede('Intermedio', 'personali', this)">Intermedio</button>
+                    <button class="chip" onclick="filtraSchede('Avanzato', 'personali', this)">Avanzato</button>
+                </div>
+
+                <!-- BACKEND: riempire e rimuovere #empty-predefinite se ci sono schede-->
+                <div class="schede-grid" id="grid-schede-predefinite">
+                    <div class="empty-state" id="empty-predefinite">
+                        <p>Nessuna scheda predefinita disponibile.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTTOM NAV MOBILE -->
+    <nav class="bottom-nav">
+        <a href="home.html" class="bottom-nav-item"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>Home</span></a>
+        <a href="esercizi.html" class="bottom-nav-item"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><span>Esercizi</span></a>
+        <a href="schede.html"   class="bottom-nav-item">
+            <svg viewBox="0 0 24 24">
+                <rect x="4" y="3" width="16" height="18" rx="2"/>
+                <line x1="8" y1="8" x2="16" y2="8"/>
+                <line x1="8" y1="12" x2="16" y2="12"/>
+                <line x1="8" y1="16" x2="12" y2="16"/>
+            </svg><span>Schede</span></a>
+        <a href="profilo.html"  class="bottom-nav-item active"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Profilo</span></a>
+    </nav>
+
+    <script>
+        function toggleSidebar(){
+                document.getElementById('sidebar').classList.toggle('open');
+                document.getElementById('sidebar-overlay').classList.toggle('open');
+            }
+        function closeSidebar(){
+                document.getElementById('sidebar').classList.remove('open');
+                document.getElementById('sidebar-overlay').classList.remove('open');
+            }
+
+        let accentIsPink=true;
+
+        function applyAccent(isPink){
+                const root= document.documentElement;
+                const sw= document.getElementById('color-switch');
+                const dot= document.getElementById('notif-dot');
+                const logo= document.querySelector('.logo span');
+                const tema= document.getElementById('impost-tema');
+                const c= isPink? '#ed249b' : "#8cc63f";
+                const dim= isPink? 'rgba(237, 36, 155, 0.12)' : 'rgba(140, 198, 63, 0.12)';
+                const glow= isPink? 'rgba(237, 36, 155, 0.12)' : 'rgba(140, 198, 63, 0.12)';
+                root.style.setProperty('--accent', c);
+                root.style.setProperty('--accent-dim', dim);
+                root.style.setProperty('--accent-glow', glow);
+                if(sw) {
+                    sw.classList.toggle('pink', isPink);
+                    sw.classList.toggle('green', !isPink);
+                }
+                if(dot){ dot.style.background= c;}
+                if(logo){ logo.style.color= c;}
+                if(tema){ tema.textContent= isPink ? 'Rosa':'Verde';}
+            }
+
+        function toggleAccent(){
+            accentIsPink= !accentIsPink;
+            applyAccent(accentIsPink);
+            localStorage.setItem('gymbros-accent', accentIsPink? 'pink' : 'green');
+        }
+
+        /* Applica il tema salvato al carimento della pagina*/
+            (function initAccent(){
+            const saved = localStorage.getItem('gymbros-accent');
+            if(saved=== 'green'){
+                accentIsPink= false;
+                applyAccent(false);
+            }else{
+                applyAccent(true);
+            }
+        })();
+
+        /* FILTRI */
+        function filtraSchede(zona, tipo, btn) {
+        const grid     = document.getElementById('grid-schede-' + tipo);
+        const filtriEl = document.getElementById('filtri-' + tipo);
+        const tutteBtn = filtriEl.querySelector('.chip:first-child');
+
+        /* se premi il chip già attivo, torna a "Tutte" */
+        if (btn.classList.contains('active') && zona !== 'tutte') {
+            filtriEl.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            tutteBtn.classList.add('active');
+            zona = 'tutte';
+        } else {
+            filtriEl.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        grid.querySelectorAll('.scheda-card').forEach(card => {
+            if (zona === 'tutte') {
+                card.style.display = 'block';
+            } else {
+                const zone = card.dataset.zone ? card.dataset.zone.split(',') : [];
+                card.style.display = zone.includes(zona) ? 'block' : 'none';
+            }
+        });
+    }
+
+        /*
+         * creaCardScheda(scheda)
+         *
+         * Costruisce dinamicamente una card scheda da un oggetto JSON.
+         * Chiamata dal backend per popolare le griglie.
+         *
+         * scheda = {
+         *   id:       string,
+         *   nome:     string,
+         *   esercizi: number,
+         *   giorni:   number,
+         *   zone:     string[],   // es. ['Gambe','Petto']
+         *   data:     string,     // es. '3 apr 2026'
+         *   tipo:     'personale' | 'predefinita',
+         *   livello:  string | null
+         * }
+         */
+        function creaCardScheda(scheda){
+            const card= document.createElement('div');
+            card.className= 'scheda-card' + (scheda.tipo === 'predefinita' ? 'predefinita' : '');
+            card.dataset.zone= scheda.zone.join(',');
+            card.dataset.id= scheda.id;
+
+            const tags= scheda.zone.map(z => `<span class= "tag">${z}</span>`).join('');
+            const livelloBadge= scheda.livello ? `<span class="tag">${scheda.livello}</span>`: '';
+
+            const azioni= scheda.tipo === 'personale' ?
+                `<div class="scheda-actions">
+                    <button class="scheda-btn" onclick="event.stopPropagation(); modificaScheda('${scheda.id}')">Modifica</button>
+                    <button class="scheda-btn danger" onclick="event.stopPropagation(); eliminaScheda('${scheda.id}')">Elimina</button>
+                </div>`
+                : `<div class="scheda-actions">
+                    <button class="scheda-btn" onclick="event.stopPropagation(); salvaScheda('${scheda.id}')">Salva</button>
+                </div>`;
+            card.innerHTML=
+                `<div class="scheda-name">${scheda.nome}</div>
+                <div class="scheda-meta">${scheda.esercizi} esercizi · ${scheda.giorni} giorni</div>
+                <div class="scheda-tags">${tags}${livelloBadge}</div>
+                <div class="scheda-footer">
+                    <span class="scheda-data">${scheda.data || ''}</span>
+                    ${azioni}
+                </div>`;
+            card.addEventListener('click', () => {
+                window.location.href= 'scheda-dettaglio.html?id=' + scheda.id;
+            });
+            return card;
+        }
+
+        /* AZIONI SCHEDE DA COLLEGARE AL BACKEND*/
+        function modificaScheda(id) {/*TODO*/}
+        function eliminaScheda(id) {/*TODO*/}
+        function salvaScheda(id) {/*TODO*/}
+
+        /*  ICONE PER TIPO  */
+        const NOTIF_ICONS = {
+            scheda: `<svg viewBox="0 0 24 24">
+                        <rect x="4" y="3" width="16" height="18" rx="2"/>
+                        <line x1="8" y1="8" x2="16" y2="8"/>
+                        <line x1="8" y1="12" x2="16" y2="12"/>
+                        <line x1="8" y1="16" x2="12" y2="16"/>
+                    </svg>`,
+            esercizio: `<svg viewBox="0 0 24 24">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="m21 21-4.35-4.35"/>
+                        </svg>`,
+            sistema: `<svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>`,
+        };
+
+        /* stato locale notifiche */
+        let _notifiche = [];
+
+        /*  APRI / CHIUDI DROPDOWN  */
+        function toggleNotifiche(e) {
+            e.stopPropagation();
+            const dropdown = document.getElementById('notif-dropdown');
+            const btn      = document.getElementById('notif-btn');
+            const isOpen   = dropdown.classList.contains('open');
+
+            if (!isOpen) {
+                dropdown.classList.add('open');
+                btn.setAttribute('aria-expanded', 'true');
+                /* carica notifiche ogni volta che si apre */
+                caricaNotifiche();
+            } else {
+                chiudiNotifiche();
+            }
+        }
+
+        function chiudiNotifiche() {
+            document.getElementById('notif-dropdown').classList.remove('open');
+            document.getElementById('notif-btn').setAttribute('aria-expanded', 'false');
+        }
+
+        /* chiudi cliccando fuori */
+        document.addEventListener('click', (e) => {
+            const wrap = document.getElementById('notif-wrap');
+            if (wrap && !wrap.contains(e.target)) chiudiNotifiche();
+        });
+
+        /*  CREA ELEMENTO NOTIFICA  */
+        function creaNotifItem(n) {
+            const item = document.createElement('div');
+            item.className = 'notif-item' + (n.letta ? '' : ' unread');
+            item.dataset.id = n.id;
+
+            const icona = NOTIF_ICONS[n.tipo] || NOTIF_ICONS.sistema;
+
+            item.innerHTML = `
+                <div class="notif-item-icon ${n.tipo}">${icona}</div>
+                <div class="notif-item-content">
+                    <div class="notif-item-title">${n.titolo}</div>
+                    <div class="notif-item-text">${n.testo}</div>
+                    <div class="notif-item-time">${n.ora}</div>
+                </div>
+                ${n.letta ? '' : '<div class="notif-unread-dot"></div>'}
+            `;
+
+            /* segna come letta al click */
+            item.addEventListener('click', () => segnaLetta(n.id));
+
+            return item;
+        }
+
+        /*  RENDERIZZA LISTA  */
+        function renderNotifiche(notifiche) {
+            _notifiche = notifiche;
+            const lista  = document.getElementById('notif-list');
+            const empty  = document.getElementById('notif-empty');
+            const footer = document.getElementById('notif-footer');
+            const markAll = document.getElementById('notif-mark-all');
+
+            lista.innerHTML = '';
+
+            if (notifiche.length === 0) {
+                lista.appendChild(empty);
+                footer.style.display   = 'none';
+                markAll.style.display  = 'none';
+                return;
+            }
+
+            footer.style.display = 'block';
+
+            const nonLette = notifiche.filter(n => !n.letta);
+            markAll.style.display = nonLette.length > 0 ? 'block' : 'none';
+
+            notifiche.forEach(n => lista.appendChild(creaNotifItem(n)));
+
+            /* aggiorna pallino topbar */
+            aggiornaNotifDot(nonLette.length);
+        }
+
+        /*  PALLINO TOPBAR  */
+        function aggiornaNotifDot(count) {
+            const dot = document.getElementById('notif-dot');
+            if (!dot) return;
+            if (count > 0) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+            }
+        }
+
+        /*  SEGNA LETTA  */
+        function segnaLetta(id) {
+            _notifiche = _notifiche.map(n => n.id === id ? { ...n, letta: true } : n);
+            renderNotifiche(_notifiche);
+
+            /*
+            * BACKEND:
+            * fetch(`/api/notifiche/${id}/letta`, { method: 'PATCH' });
+            */
+        }
+
+        /*  SEGNA TUTTE LETTE  */
+        function segnaLette() {
+            _notifiche = _notifiche.map(n => ({ ...n, letta: true }));
+            renderNotifiche(_notifiche);
+
+            /*
+            * BACKEND:
+            * fetch('/api/notifiche/letta-tutte', { method: 'PATCH' });
+            */
+        }
+
+        /*  VEDI TUTTE  */
+        function vediTutte() {
+            /* TODO: navigare a una pagina notifiche completa se serve */
+            chiudiNotifiche();
+        }
+
+        /*  CARICA NOTIFICHE  */
+        function caricaNotifiche() {}
+        
+        /*  CONTROLLO INIZIALE PALLINO  */
+        (function initNotifDot() {
+            /*
+            * BACKEND:
+            * fetch('/api/notifiche/count')
+            *     .then(r => r.json())
+            *     .then(({ non_lette }) => aggiornaNotifDot(non_lette));
+            *
+            * Per i test usa questo:
+            */
+            aggiornaNotifDot(2);
+        })();
+
+    </script>
+</body>
+</html>

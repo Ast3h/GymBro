@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymBro — Accedi</title>
+
+    <link rel="icon" type="image/png" sizes="32x32" href="Favicon32x32.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="stili.css">
+
+    <style>
+        /* Stili specifici auth */
+
+        /* home visibile sfocata dietro*/
+        body{overflow: hidden;}
+
+        /*  MODALE LOGIN  */
+        .auth-modal {
+            display:       flex;
+            width:         100%;
+            max-width:     480px;
+            overflow:      hidden;
+            border-radius: 12px;
+        }
+
+        /* colonna sinistra: form accedi */
+        .auth-left {
+            flex:           1;
+            padding:        28px 24px;
+            display:        flex;
+            flex-direction: column;
+            gap:            14px;
+        }
+
+        .auth-title {
+            font-size:   1.1rem;
+            font-weight: 500;
+            color:       var(--text);
+        }
+
+        .auth-sub {
+            font-size:  0.78rem;
+            color:      var(--muted);
+            margin-top: 2px;
+        }
+
+        /* colonna destra: invito registrazione */
+        .auth-right {
+            width:          150px;
+            padding:        28px 18px;
+            display:        flex;
+            flex-direction: column;
+            align-items:    center;
+            justify-content: center;
+            gap:            12px;
+            background:     var(--surface2);
+            border-left:    0.5px solid var(--border);
+            text-align:     center;
+            flex-shrink:    0;
+        }
+
+        .auth-right-title {
+            font-size:   0.9rem;
+            font-weight: 500;
+            color:       var(--text);
+            line-height: 1.3;
+        }
+
+        .auth-right-sub {
+            font-size:   0.72rem;
+            color:       var(--muted);
+            line-height: 1.5;
+        }
+
+        /*  FORM  */
+        .form-row {
+            display:        flex;
+            flex-direction: column;
+            gap:            5px;
+        }
+
+        .form-label {
+            font-size:      0.65rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color:          var(--muted);
+        }
+
+        .form-input {
+            width:         100%;
+            padding:       9px 12px;
+            border-radius: var(--radius);
+            border:        0.5px solid var(--border);
+            background:    var(--surface2);
+            color:         var(--text);
+            font-family:   var(--font-body);
+            font-size:     0.85rem;
+            outline:       none;
+            transition:    border-color 0.18s;
+        }
+
+        .form-input:focus { border-color: var(--accent); }
+
+        .forgot-link {
+            font-size:  0.72rem;
+            color:      var(--muted);
+            text-align: center;
+            cursor:     pointer;
+            background: none;
+            border:     none;
+            padding:    0;
+            transition: color 0.18s;
+        }
+
+        .forgot-link:hover { color: var(--text); }
+
+        /*  REGISTRAZIONE: occupa tutto il modale  */
+        .reg-modal {
+            width:          100%;
+            max-width:      480px;
+            max-height:     85vh;
+            border-radius:  12px;
+            display:        flex;
+            flex-direction: column;
+            overflow:       hidden;
+        }
+
+        .reg-header {
+            display:         flex;
+            align-items:     center;
+            justify-content: space-between;
+            padding:         20px 24px 14px;
+            border-bottom:   0.5px solid var(--border);
+            flex-shrink:     0;
+        }
+
+        .reg-body {
+            flex:      1;
+            overflow-y: auto;
+            padding:   16px 24px;
+            display:   grid;
+            grid-template-columns: 1fr 1fr;
+            gap:       12px;
+            align-content: start;
+        }
+
+        .reg-body .full { grid-column: 1 / -1; }
+
+        .optional-sep {
+            grid-column:    1 / -1;
+            display:        flex;
+            align-items:    center;
+            gap:            8px;
+            font-size:      0.65rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color:          var(--border);
+            margin-top:     4px;
+        }
+
+        .optional-sep::before,
+        .optional-sep::after {
+            content:    '';
+            flex:       1;
+            height:     0.5px;
+            background: var(--border);
+        }
+
+        /* obiettivo pill selezionabili */
+        .obj-options {
+            display:   flex;
+            flex-wrap: wrap;
+            gap:       6px;
+            margin-top: 2px;
+        }
+
+        .obj-opt {
+            font-size:      0.7rem;
+            padding:        4px 12px;
+            border-radius:  20px;
+            border:         0.5px solid var(--border);
+            background:     none;
+            color:          var(--muted);
+            cursor:         pointer;
+            transition:     all 0.18s;
+        }
+
+        .obj-opt:hover,
+        .obj-opt.selected {
+            border-color: var(--accent);
+            color:        var(--accent);
+            background:   var(--accent-dim);
+        }
+
+        /* barra livello */
+        .level-bar-wrap {
+            display:        flex;
+            flex-direction: column;
+            gap:            5px;
+        }
+
+        .level-bar {
+            display: flex;
+            gap:     5px;
+        }
+
+        .level-seg {
+            flex:          1;
+            height:        10px;
+            border-radius: 3px;
+            background:    var(--surface2);
+            border:        0.5px solid var(--border);
+            cursor:        pointer;
+            transition:    background 0.15s, border-color 0.15s;
+        }
+
+        .level-seg.on {
+            background:   var(--accent);
+            border-color: var(--accent);
+        }
+
+        .level-labels {
+            display:         flex;
+            justify-content: space-between;
+        }
+
+        .level-lbl {
+            font-size: 0.62rem;
+            color:     var(--muted);
+        }
+
+        .reg-footer {
+            display:    flex;
+            gap:        10px;
+            padding:    14px 24px 20px;
+            border-top: 0.5px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        /* errori validazione */
+        .field-error {
+            font-size:  0.68rem;
+            color:      #e24b4a;
+            margin-top: 2px;
+            display:    none;
+        }
+
+        .field-error.show { display: block; }
+
+        /* wrapper campo password con occhio */
+        .password-wrap {
+            position: relative;
+        }
+
+        .password-wrap .form-input {
+            padding-right: 40px;
+        }
+
+        .eye-btn {
+            position:   absolute;
+            right:      10px;
+            top:        50%;
+            transform:  translateY(-50%);
+            background: none;
+            border:     none;
+            cursor:     pointer;
+            padding:    0;
+            display:    flex;
+            align-items: center;
+        }
+
+        .eye-btn svg {
+            width:           18px;
+            height:          18px;
+            stroke:          var(--muted);
+            fill:            none;
+            stroke-width:    1.6;
+            stroke-linecap:  round;
+            stroke-linejoin: round;
+            transition:      stroke 0.18s;
+        }
+
+        .eye-btn:hover svg { stroke: var(--text); }
+        /*  MOBILE: sheet dal basso  */
+        @media (max-width: 600px) {
+            .modal-overlay {
+                align-items: flex-end;
+                padding:     0;
+            }
+
+            .auth-modal {
+                flex-direction: column;
+                border-radius:  14px 14px 0 0;
+                max-width:      100%;
+            }
+
+            .auth-right {
+                width:       100%;
+                border-left: none;
+                border-top:  0.5px solid var(--border);
+                flex-direction: row;
+                padding:     14px 20px;
+                gap:         12px;
+                text-align:  left;
+            }
+
+            .auth-right-title { font-size: 0.82rem; }
+            .auth-right-sub   { display: none; }
+
+            .reg-modal {
+                border-radius: 14px 14px 0 0;
+                max-width:     100%;
+                max-height:    92vh;
+            }
+
+            .reg-body {
+                grid-template-columns: 1fr;
+            }
+
+            .reg-body .full { grid-column: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- MODALE LOGIN -->
+    <div class="modal-overlay open" id="modal-auth">
+        <div class="modal auth-modal" id="auth-modal">
+
+            <!-- sinistra: accedi -->
+            <div class="auth-left">
+                <div>
+                    <div class="auth-title">Accedi</div>
+                    <div class="auth-sub">Bentornato su GymBro</div>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label" for="login-email">Email</label>
+                    <input class="form-input" type="email" id="login-email"
+                           placeholder="mario@email.com" autocomplete="email">
+                    <span class="field-error" id="login-email-err">Email non valida</span>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label" for="login-password">Password</label>
+                    <div class="password-wrap">
+                    <input class="form-input" type="password" id="login-password"
+                        placeholder="••••••••" autocomplete="current-password">
+                    <button class="eye-btn" type="button" onclick="togglePassword('login-password', this)">
+                        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                    </div>
+                    <span class="field-error" id="login-pass-err">Password errata</span>
+                </div>
+
+                <button class="btn-primary" onclick="submitLogin()">Accedi</button>
+
+                <button class="forgot-link" onclick="mostraResetPassword()">
+                    Password dimenticata?
+                </button>
+            </div>
+
+            <!-- destra: invito registrazione -->
+            <div class="auth-right">
+                <div class="auth-right-title">Nuovo su GymBro?</div>
+                <div class="auth-right-sub">Crea il tuo account gratuito e inizia ad allenarti</div>
+                <button class="btn-ghost" onclick="apriRegistrazione()"
+                        style="width:100%; font-size:0.7rem;">
+                    Registrati
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ── MODALE REGISTRAZIONE ── -->
+    <div class="modal-overlay" id="modal-reg">
+        <div class="modal reg-modal">
+
+            <div class="reg-header">
+                <div>
+                    <div class="auth-title">Crea account</div>
+                    <div class="auth-sub">* campi obbligatori</div>
+                </div>
+                <button class="modal-close" onclick="tornaLogin()">✕</button>
+            </div>
+
+            <div class="reg-body">
+
+                <!-- obbligatori -->
+                <div class="form-row">
+                    <label class="form-label" for="reg-nome">Nome *</label>
+                    <input class="form-input" type="text" id="reg-nome" placeholder="Mario" autocomplete="given-name">
+                    <span class="field-error" id="reg-nome-err">Campo obbligatorio</span>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label" for="reg-cognome">Cognome</label>
+                    <input class="form-input" type="text" id="reg-cognome" placeholder="Rossi" autocomplete="family-name">
+                </div>
+
+                <div class="form-row full">
+                    <label class="form-label" for="reg-email">Email *</label>
+                    <input class="form-input" type="email" id="reg-email" placeholder="mario@email.com" autocomplete="email">
+                    <span class="field-error" id="reg-email-err">Email non valida</span>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label" for="reg-password">Password *</label>
+                    <div class="password-wrap">
+                    <input class="form-input" type="password" id="reg-password"
+                        placeholder="Min. 8 caratteri" autocomplete="new-password">
+                    <button class="eye-btn" type="button" onclick="togglePassword('reg-password', this)">
+                        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                    </div>
+                    <span class="field-error" id="reg-pass-err">Minimo 8 caratteri</span>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label" for="reg-confirm">Conferma password *</label>
+                    <div class="password-wrap">
+                    <input class="form-input" type="password" id="reg-confirm"
+                        placeholder="••••••••" autocomplete="new-password">
+                    <button class="eye-btn" type="button" onclick="togglePassword('reg-confirm', this)">
+                        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                    </div>
+                    <span class="field-error" id="reg-confirm-err">Le password non coincidono</span>
+                </div>
+
+                <!-- obiettivo -->
+                <div class="form-row full">
+                    <label class="form-label">Obiettivo *</label>
+                    <div class="obj-options" id="obj-options">
+                        <button class="obj-opt" onclick="selezionaObiettivo(this, 'Massa muscolare')">Massa muscolare</button>
+                        <button class="obj-opt" onclick="selezionaObiettivo(this, 'Dimagrire')">Dimagrire</button>
+                        <button class="obj-opt" onclick="selezionaObiettivo(this, 'Forza')">Forza</button>
+                        <button class="obj-opt" onclick="selezionaObiettivo(this, 'Resistenza')">Resistenza</button>
+                        <button class="obj-opt" onclick="selezionaObiettivo(this, 'Benessere')">Benessere</button>
+                    </div>
+                    <span class="field-error" id="reg-obj-err">Seleziona un obiettivo</span>
+                </div>
+
+                <!-- livello -->
+                <div class="form-row full">
+                    <label class="form-label">
+                        Livello * — <span id="reg-level-name" style="color:var(--accent);">non selezionato</span>
+                    </label>
+                    <div class="level-bar-wrap">
+                        <div class="level-bar" id="reg-level-bar">
+                            <div class="level-seg" onclick="setLivelloReg(1)"></div>
+                            <div class="level-seg" onclick="setLivelloReg(2)"></div>
+                            <div class="level-seg" onclick="setLivelloReg(3)"></div>
+                            <div class="level-seg" onclick="setLivelloReg(4)"></div>
+                            <div class="level-seg" onclick="setLivelloReg(5)"></div>
+                        </div>
+                        <div class="level-labels">
+                            <span class="level-lbl">Principiante</span>
+                            <span class="level-lbl">Avanzato</span>
+                        </div>
+                    </div>
+                    <span class="field-error" id="reg-level-err">Seleziona il tuo livello</span>
+                </div>
+
+                <!-- opzionali -->
+                <div class="optional-sep">Opzionali — compilabili dopo dal profilo</div>
+
+                <div class="form-row">
+                    <label class="form-label" for="reg-eta">Età</label>
+                    <input class="form-input" type="number" id="reg-eta" placeholder="anni" min="15" max="100">
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label" for="reg-peso">Peso (kg)</label>
+                    <input class="form-input" type="number" id="reg-peso" placeholder="kg" min="30" max="300">
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label" for="reg-altezza">Altezza (cm)</label>
+                    <input class="form-input" type="number" id="reg-altezza" placeholder="cm" min="100" max="250">
+                </div>
+
+            </div>
+
+            <div class="reg-footer">
+                <button class="btn-ghost" onclick="tornaLogin()">← Accedi</button>
+                <button class="btn-primary" style="flex:1;" onclick="submitRegistrazione()">Crea account</button>
+            </div>
+
+        </div>
+    </div>
+    <script>
+        const LIVELLI = ['', 'Principiante', 'Base', 'Intermedio', 'Avanzato', 'Elite'];
+        let livelloReg   = 0;
+        let obiettivoReg = '';
+
+        /* ── NAVIGAZIONE TRA MODALI ── */
+        function apriRegistrazione() {
+            document.getElementById('modal-auth').classList.remove('open');
+            document.getElementById('modal-reg').classList.add('open');
+        }
+
+        function tornaLogin() {
+            document.getElementById('modal-reg').classList.remove('open');
+            document.getElementById('modal-auth').classList.add('open');
+        }
+
+        /* ── OBIETTIVO ── */
+        function selezionaObiettivo(el, valore) {
+            document.querySelectorAll('.obj-opt').forEach(o => o.classList.remove('selected'));
+            el.classList.add('selected');
+            obiettivoReg = valore;
+        }
+
+        /* ── LIVELLO REGISTRAZIONE ── */
+        function setLivelloReg(valore) {
+            livelloReg = valore;
+            document.querySelectorAll('#reg-level-bar .level-seg').forEach((seg, i) => {
+                seg.classList.toggle('on', i < valore);
+            });
+            document.getElementById('reg-level-name').textContent = LIVELLI[valore];
+        }
+
+        /* ── VALIDAZIONE LOGIN ── */
+        function submitLogin() {
+            let ok = true;
+
+            const email = document.getElementById('login-email').value.trim();
+            const pass  = document.getElementById('login-password').value;
+
+            const emailErr = document.getElementById('login-email-err');
+            const passErr  = document.getElementById('login-pass-err');
+
+            emailErr.classList.remove('show');
+            passErr.classList.remove('show');
+
+            if (!email || !email.includes('@')) {
+                emailErr.classList.add('show'); ok = false;
+            }
+            if (!pass) {
+                passErr.classList.add('show'); ok = false;
+            }
+
+            if (!ok) return;
+
+            /*
+             * BACKEND:
+             * fetch('/api/auth/login', {
+             *     method: 'POST',
+             *     headers: { 'Content-Type': 'application/json' },
+             *     body: JSON.stringify({ email, password: pass })
+             * })
+             * .then(r => r.json())
+             * .then(data => {
+             *     if (data.token) {
+             *         localStorage.setItem('gymbros-token', data.token);
+             *         window.location.href = 'home.html';
+             *     } else {
+             *         document.getElementById('login-pass-err').textContent = data.messaggio;
+             *         document.getElementById('login-pass-err').classList.add('show');
+             *     }
+             * });
+             */
+        }
+
+        /* ── VALIDAZIONE REGISTRAZIONE ── */
+        function submitRegistrazione() {
+            let ok = true;
+
+            const nome     = document.getElementById('reg-nome').value.trim();
+            const email    = document.getElementById('reg-email').value.trim();
+            const password = document.getElementById('reg-password').value;
+            const confirm  = document.getElementById('reg-confirm').value;
+
+            /* reset errori */
+            ['reg-nome-err','reg-email-err','reg-pass-err','reg-confirm-err',
+             'reg-obj-err','reg-level-err'].forEach(id => {
+                document.getElementById(id).classList.remove('show');
+            });
+
+            if (!nome) {
+                document.getElementById('reg-nome-err').classList.add('show'); ok = false;
+            }
+            if (!email || !email.includes('@')) {
+                document.getElementById('reg-email-err').classList.add('show'); ok = false;
+            }
+            if (password.length < 8) {
+                document.getElementById('reg-pass-err').classList.add('show'); ok = false;
+            }
+            if (password !== confirm) {
+                document.getElementById('reg-confirm-err').classList.add('show'); ok = false;
+            }
+            if (!obiettivoReg) {
+                document.getElementById('reg-obj-err').classList.add('show'); ok = false;
+            }
+            if (livelloReg === 0) {
+                document.getElementById('reg-level-err').classList.add('show'); ok = false;
+            }
+
+            if (!ok) return;
+
+            const dati = {
+                nome,
+                cognome:  document.getElementById('reg-cognome').value.trim(),
+                email,
+                password,
+                obiettivo: obiettivoReg,
+                livello:   livelloReg,
+                eta:       document.getElementById('reg-eta').value     || null,
+                peso:      document.getElementById('reg-peso').value    || null,
+                altezza:   document.getElementById('reg-altezza').value || null,
+            };
+
+            /*
+             * BACKEND:
+             * fetch('/api/auth/registrazione', {
+             *     method: 'POST',
+             *     headers: { 'Content-Type': 'application/json' },
+             *     body: JSON.stringify(dati)
+             * })
+             * .then(r => r.json())
+             * .then(data => {
+             *     if (data.token) {
+             *         localStorage.setItem('gymbros-token', data.token);
+             *         localStorage.setItem('gymbros-livello', livelloReg);
+             *         window.location.href = 'home.html';
+             *     }
+             * });
+             */
+        }
+
+        function mostraResetPassword() {
+            /*
+             * BACKEND:
+             * Aprire un mini-form per inserire l'email e chiamare:
+             * fetch('/api/auth/reset-password', {
+             *     method: 'POST',
+             *     body: JSON.stringify({ email })
+             * });
+             */
+        }
+
+        function togglePassword(inputId, btn) {
+        const input = document.getElementById(inputId);
+        const isHidden = input.type === 'password';
+        input.type = isHidden ? 'text' : 'password';
+
+        /* cambia icona: occhio aperto / occhio sbarrato */
+        btn.querySelector('svg').innerHTML = isHidden
+            ? /* occhio sbarrato */
+            `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+            <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+            <line x1="1" y1="1" x2="23" y2="23"/>`
+            : /* occhio aperto */
+            `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>`;
+        }
+    </script>
+</body>
+</html>

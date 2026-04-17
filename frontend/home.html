@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GymBros</title>
+    <title>GymBro</title>
 
     <!-- Favicon-->
      <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -377,6 +377,35 @@
         #svg-male-back-mob #am47:hover path { fill: var(--accent) !important;}
         #svg-male-back-mob #am51:hover path { fill: var(--accent) !important;}
 
+        /* bordo sottile su tutte le zone interattive*/
+        #svg-fem #am23 path, #svg-fem #am37 path, #svg-fem #am43 path,
+        #svg-fem #am49 path, #svg-fem #am52 path, #svg-fem #am55 path,
+        #svg-fem-back #am23 path, #svg-fem-back #am27 path,
+        #svg-fem-back #am59 path, #svg-fem-back #am63 path, #svg-fem-back #am67 path,
+        #svg-male #am17 path, #svg-male #am21 path, #svg-male #am23 path,
+        #svg-male #am27 path, #svg-male #am32 path,
+        #svg-male-back #am17 path, #svg-male-back #am36 path,
+        #svg-male-back #am40 path, #svg-male-back #am47 path, #svg-male-back #am51 path {
+            stroke:       rgba(255, 255, 255, 0.08) !important;
+            stroke-width: 0.8 !important;
+        }
+
+        /* bordo sottile zone interattive mobile */
+        #svg-fem-mobile #am23 path, #svg-fem-mobile #am37 path,
+        #svg-fem-mobile #am43 path, #svg-fem-mobile #am49 path,
+        #svg-fem-mobile #am52 path, #svg-fem-mobile #am55 path,
+        #svg-fem-back-mob #am23 path, #svg-fem-back-mob #am27 path,
+        #svg-fem-back-mob #am59 path, #svg-fem-back-mob #am63 path,
+        #svg-fem-back-mob #am67 path,
+        #svg-male-mobile #am17 path, #svg-male-mobile #am21 path,
+        #svg-male-mobile #am23 path, #svg-male-mobile #am27 path,
+        #svg-male-mobile #am32 path,
+        #svg-male-back-mob #am17 path, #svg-male-back-mob #am36 path,
+        #svg-male-back-mob #am40 path, #svg-male-back-mob #am47 path,
+        #svg-male-back-mob #am51 path {
+            stroke:       rgba(255, 255, 255, 0.08) !important;
+            stroke-width: 0.8 !important;
+        }
         /* Colonna centrale*/
         .center-col{
             display: flex;
@@ -720,7 +749,7 @@
         <!-- Quando premi il logo in alto ti riporta alla schermata iniziale-->
         <a href="home.html" class="logo">
             <img src="Favicon64x64.png" alt="" class="logo-img">
-            GYM<span>BROS</span>
+            GYM<span>BRO</span>
         </a>
 
         <div class="topbar-icons">
@@ -731,13 +760,45 @@
              </div>
             
              <!-- Icona notifiche-->
-             <a href="notifiche.html" class="icon-btn icon-btn-notif" title="Notifiche">
-                <svg viewBox="0 0 24 24">
-                    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
-                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                </svg>
-                <div class="notif-dot" id="notif-dot"></div>
-             </a>
+             <div class="notif-wrap" id="notif-wrap">
+
+                <!-- icona campanella -->
+                <button class="icon-btn" id="notif-btn"
+                        onclick="toggleNotifiche(event)"
+                        title="Notifiche"
+                        aria-label="Notifiche"
+                        aria-expanded="false">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                    <div class="notif-dot" id="notif-dot"></div>
+                </button>
+
+                <!-- dropdown -->
+                <div class="notif-dropdown" id="notif-dropdown" role="dialog" aria-label="Notifiche">
+
+                    <div class="notif-dropdown-header">
+                        <span class="notif-dropdown-title">Notifiche</span>
+                        <button class="notif-mark-all" id="notif-mark-all"
+                                onclick="segnaLette()" style="display:none;">
+                            Segna tutte come lette
+                        </button>
+                    </div>
+
+                    <!-- lista — popolata da JS -->
+                    <div class="notif-list" id="notif-list">
+                        <div class="notif-empty" id="notif-empty">
+                            Nessuna notifica per ora
+                        </div>
+                    </div>
+
+                    <div class="notif-dropdown-footer" id="notif-footer" style="display:none;">
+                        <button class="notif-see-all" onclick="vediTutte()">Vedi tutte</button>
+                    </div>
+
+                </div>
+            </div>
             
              <!-- Icona scheda allenamento -->
              <a href="schede.html" class="icon-btn" title="Le mie schede">
@@ -764,7 +825,10 @@
         <!-- Sezione mobile -->
          <div class="mobile-svg-section" id="mobile-svg-section">
             <div class="mobile-svg-wrap">
-                <div class="mobile-body-label" id="mobile-body-label">Uomo</div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <div class="mobile-body-label" id="mobile-body-label">Uomo</div>
+                    <div class="view-label" id="mobile-view-label">Anteriore</div>
+                </div>
                 
 
                 <!-- SVG corpo UOMO mobile-->
@@ -1140,8 +1204,8 @@
                             <g id="am52"><path d="M289.016,329.693 C289.877,329.951,290.694,330.455,291.454,331.48 C293.963,334.864,294.873,340.192,296.34,344.119 C299.147,351.632,301.858,358.982,304.581,366.549 C305.246,368.397,305.603,370.329,306.118,372.208 C307.046,375.587,308.311,379.036,308.681,382.565 C308.753,383.254,308.861,385.847,309.621,386.124 C310.16,386.32,310.92,384.233,311.051,383.833 C311.875,381.326,311.701,377.936,312.34,375.355 C312.63,374.179,312.525,372.796,312.883,371.42 C313.597,368.682,314.871,365.884,316.134,363.359 C317.198,361.232,317.868,359.036,319.093,356.943 C320.606,354.354,322.017,351.66,322.945,348.86 C325.605,340.833,325.586,332.125,334.346,328.444 C335.76,327.85,338.568,328.207,339.946,329.01 C340.104,329.103,340.217,329.126,340.294,329.1 C340.636,328.981,340.912,328.702,341.169,328.346 C341.491,327.898,341.857,327.475,342.333,327.139 C344.533,325.584,346.992,323.701,349.609,324.155 C351.1,324.413,352.62,324.742,354.023,324.73 C354.988,324.721,355.799,324.629,356.357,324.138 C357.194,323.401,357.488,322.348,357.548,321.167 C357.624,319.682,357.974,318.42,357.814,316.918 C357.695,315.806,357.339,314.783,357.43,313.656 C357.475,313.092,357.525,312.528,357.579,311.964 C357.978,307.799,357.348,303.85,356.615,299.842 C356.244,297.815,355.943,295.735,355.899,293.694 C355.821,290.104,355.447,287.262,356.194,283.528 C356.592,281.543,357.36,279.464,358.237,277.585 C359.227,275.462,360.65,272.952,361.748,270.861 C363.13,268.227,364.852,265.739,366.537,263.289 C367.21,262.31,370.804,257.089,370.981,255.891 C371.065,255.32,371.829,253.465,371.668,252.94 C371.423,252.139,371.834,251.566,371.944,250.733 C372.191,248.861,372.919,245.584,373.119,243.501 C373.8,236.387,373.579,235.385,373.319,228.213 C373.241,226.09,372.917,223.66,372.148,221.329 C371.932,220.673,371.656,220.043,371.099,219.609 C370.581,219.205,369.977,218.819,369.439,218.476 C367.119,216.996,365.532,214.159,363.93,211.864 C361.324,208.13,358.929,204.983,356.389,201.217 C354.254,198.055,352.1,194.165,348.811,191.986 C348.148,191.546,347.453,190.841,346.93,190.695 C345.983,190.431,345.277,190.992,344.048,191.141 C342.757,191.298,341.311,191.276,339.732,192.266 C338.478,193.053,339.757,194.645,339.943,195.771 C340.746,200.624,340.446,204.638,340.142,209.065 C340.054,210.352,339.858,211.509,339.786,212.82 C339.631,215.667,339.036,218.706,338.564,221.481 C337.369,228.51,335.412,235.642,332.436,242.195 C330.238,247.034,323.61,252.853,321.209,257.691 C318.386,263.382,316.76,270.879,310.577,273.232 C309.906,273.487,309.171,273.561,308.172,273.159 C307.647,272.947,306.699,272.405,306.391,272.152 C305.302,271.255,303.075,269.307,302.29,268.34 C300.736,266.426,300.996,267.561,299.701,265.481 C299.546,265.232,298.392,264.347,298.211,264.114 C296.699,262.171,295.775,258.375,294.569,256.336 C293.488,254.51,292.191,254.021,291.332,252.1 C290.798,250.908,288.727,248.499,288.124,247.288 C283.263,237.522,279.908,227.547,278.556,216.527 C278.24,213.953,278.19,211.515,277.904,208.804 C277.628,206.183,277.109,203.289,277.158,200.779 C277.189,199.182,278.189,194.432,277.465,193.122 C276.497,191.371,272.476,192.302,270.648,192.084 C270.603,192.261,268.71,191.531,268.647,191.718 C267.546,194.953,266.676,195.75,264.403,198.128 C262.424,200.198,260.65,202.106,258.743,204.231 C257.247,205.899,256.542,207.389,254.981,209.003 C254.21,209.799,251.882,212.025,251.193,212.851 C250.246,213.984,246.938,216.656,245.043,218.553 C243.894,219.703,244.117,220.166,243.924,221.044 C243.256,224.073,244.297,232.102,244.306,235.219 C244.318,238.953,243.435,240.974,244.519,244.527 C245.907,249.077,246.649,248.894,246.058,253.783 C245.885,255.212,249.557,260.77,249.939,262.079 C250.113,262.678,251.106,263.938,251.323,264.515 C252.046,266.442,252.604,266.676,253.853,268.728 C255.172,270.896,256.11,272.289,257.365,274.453 C258.102,275.724,258.671,276.868,259.26,278.175 C259.769,279.302,260.641,280.213,260.923,281.442 C261.158,282.46,260.983,283.188,261.191,284.207 C261.513,285.781,260.962,288.377,261.128,289.962 C261.723,295.64,260.694,300.543,260.102,306.237 C259.633,310.737,259.146,314.241,259.206,318.785 C259.215,319.531,258.99,321.369,259.239,322.675 C259.852,325.894,259.393,329.404,258.979,332.777 C259.523,332.407,259.811,331.772,260.439,331.427 C263.274,329.874,267.173,329.571,270.326,329.975 C272.298,330.227,274.125,331.129,276.16,331.085 C280.484,330.993,284.872,328.45,289.016,329.693 z"/></g>
                         </g>
                         </svg>
-
             </div>
+            <div class="view-label" id="view-label-male">Anteriore</div>
 
             <div class="rotate-btn" onclick="rotateMale()">
                 <span class="rotate-label">⟳</span>
@@ -1152,7 +1216,7 @@
           <div class="center-col">
 
             <div>
-                <div class="hero-title">GYM<span>BROS</span></div>
+                <div class="hero-title">GYM<span>BRO</span></div>
                 <p class="hero-sub" style="margin-top: 14px;">
                     Il tuo allenamento,<br>
                         le tue regole
@@ -1161,13 +1225,11 @@
 
             <div class="divider">Account</div>
             <div class="btn-group">
-                <button class="btn-primary" onclick="">
+                <button class="btn-primary" onclick="window.location.href='auth.html'">
                     Registrati/Accedi
                 </button>
 
-                <button class="btn-secondary" onclick="">
-                    Esplora
-                </button>
+                <button class="btn-secondary" onclick="window.location.href='esercizi.html'">Esplora</button>
             </div>
         </div>
 
@@ -1298,7 +1360,9 @@
                 </g>
             </svg>
             </div>
-
+            
+            <div class="view-label" id="view-label-fem">Anteriore</div>
+            
             <div class="rotate-btn" onclick="rotateFem()">
                 <span class="rotate-label">⟳</span>
             </div>
@@ -1313,15 +1377,16 @@
             maleShowingFront= !maleShowingFront;
             const front= document.getElementById('svg-male');
             const back= document.getElementById('svg-male-back');
+            const label= document.getElementById('view-label-male');
 
             if(maleShowingFront){
                 front.style.display='block';
                 back.style.display= 'none';
-                label.textContent= 'Vista anteriore';
+                if(label) label.textContent= 'Anteriore';
             }else{
                 front.style.display='none';
                 back.style.display= 'block';
-                label.textContent= 'Vista posteriore';
+                if(label) label.textContent= 'Posteriore';
             }
         }
 
@@ -1332,15 +1397,16 @@
             femShowingFront= !femShowingFront;
             const front= document.getElementById('svg-fem');
             const back= document.getElementById('svg-fem-back');
+            const label= document.getElementById('view-label-fem');
 
             if(femShowingFront){
                 front.style.display='block';
                 back.style.display= 'none';
-                label.textContent= 'Vista anteriore';
+                if(label) label.textContent= 'Anteriore';
             }else{
                 front.style.display='none';
                 back.style.display= 'block';
-                label.textContent= 'Vista posteriore';
+                if(label) label.textContent= 'Posteriore';
             }
         }
 
@@ -1422,8 +1488,8 @@
             }
 
             /* aggiorna label vista mobile*/
-            const mobileLabel= document.getElementById('mobile-body-label');
-            const currentGender= mobileLabel.textContent === 'Donna' ? 'Donna' : 'Uomo';
+            const viewLabel = document.getElementById('mobile-view-label');
+            if(viewLabel) viewLabel.textContent = mobileShowingFront ? 'Anteriore' : 'Posteriore';
 
             /* Resetta rotazione mobile quando si cambia corpo con il toggle*/
             const originalMobileToggle= window.mobileToggle;
@@ -1635,6 +1701,144 @@
             { id: 'am47', href: 'esercizi.html?zona=Braccia'},
             { id: 'am51', href: 'esercizi.html?zona=Braccia'},
         ]);
+
+        /* stato locale notifiche */
+        let _notifiche = [];
+
+        /*  APRI / CHIUDI DROPDOWN  */
+        function toggleNotifiche(e) {
+            e.stopPropagation();
+            const dropdown = document.getElementById('notif-dropdown');
+            const btn      = document.getElementById('notif-btn');
+            const isOpen   = dropdown.classList.contains('open');
+
+            if (!isOpen) {
+                dropdown.classList.add('open');
+                btn.setAttribute('aria-expanded', 'true');
+                /* carica notifiche ogni volta che si apre */
+                caricaNotifiche();
+            } else {
+                chiudiNotifiche();
+            }
+        }
+
+        function chiudiNotifiche() {
+            document.getElementById('notif-dropdown').classList.remove('open');
+            document.getElementById('notif-btn').setAttribute('aria-expanded', 'false');
+        }
+
+        /* chiudi cliccando fuori */
+        document.addEventListener('click', (e) => {
+            const wrap = document.getElementById('notif-wrap');
+            if (wrap && !wrap.contains(e.target)) chiudiNotifiche();
+        });
+
+        /*  CREA ELEMENTO NOTIFICA  */
+        function creaNotifItem(n) {
+            const item = document.createElement('div');
+            item.className = 'notif-item' + (n.letta ? '' : ' unread');
+            item.dataset.id = n.id;
+
+            const icona = NOTIF_ICONS[n.tipo] || NOTIF_ICONS.sistema;
+
+            item.innerHTML = `
+                <div class="notif-item-icon ${n.tipo}">${icona}</div>
+                <div class="notif-item-content">
+                    <div class="notif-item-title">${n.titolo}</div>
+                    <div class="notif-item-text">${n.testo}</div>
+                    <div class="notif-item-time">${n.ora}</div>
+                </div>
+                ${n.letta ? '' : '<div class="notif-unread-dot"></div>'}
+            `;
+
+            /* segna come letta al click */
+            item.addEventListener('click', () => segnaLetta(n.id));
+
+            return item;
+        }
+
+        /*  RENDERIZZA LISTA  */
+        function renderNotifiche(notifiche) {
+            _notifiche = notifiche;
+            const lista  = document.getElementById('notif-list');
+            const empty  = document.getElementById('notif-empty');
+            const footer = document.getElementById('notif-footer');
+            const markAll = document.getElementById('notif-mark-all');
+
+            lista.innerHTML = '';
+
+            if (notifiche.length === 0) {
+                lista.appendChild(empty);
+                footer.style.display   = 'none';
+                markAll.style.display  = 'none';
+                return;
+            }
+
+            footer.style.display = 'block';
+
+            const nonLette = notifiche.filter(n => !n.letta);
+            markAll.style.display = nonLette.length > 0 ? 'block' : 'none';
+
+            notifiche.forEach(n => lista.appendChild(creaNotifItem(n)));
+
+            /* aggiorna pallino topbar */
+            aggiornaNotifDot(nonLette.length);
+        }
+
+        /*  PALLINO TOPBAR  */
+        function aggiornaNotifDot(count) {
+            const dot = document.getElementById('notif-dot');
+            if (!dot) return;
+            if (count > 0) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+            }
+        }
+
+        /*  SEGNA LETTA  */
+        function segnaLetta(id) {
+            _notifiche = _notifiche.map(n => n.id === id ? { ...n, letta: true } : n);
+            renderNotifiche(_notifiche);
+
+            /*
+            * BACKEND:
+            * fetch(`/api/notifiche/${id}/letta`, { method: 'PATCH' });
+            */
+        }
+
+        /*  SEGNA TUTTE LETTE  */
+        function segnaLette() {
+            _notifiche = _notifiche.map(n => ({ ...n, letta: true }));
+            renderNotifiche(_notifiche);
+
+            /*
+            * BACKEND:
+            * fetch('/api/notifiche/letta-tutte', { method: 'PATCH' });
+            */
+        }
+
+        /*  VEDI TUTTE  */
+        function vediTutte() {
+            /* TODO: navigare a una pagina notifiche completa se serve */
+            chiudiNotifiche();
+        }
+
+        /*  CARICA NOTIFICHE  */
+        function caricaNotifiche() {}
+        
+        /*  CONTROLLO INIZIALE PALLINO  */
+        (function initNotifDot() {
+            /*
+            * BACKEND:
+            * fetch('/api/notifiche/count')
+            *     .then(r => r.json())
+            *     .then(({ non_lette }) => aggiornaNotifDot(non_lette));
+            *
+            * Per i test usa questo:
+            */
+            aggiornaNotifDot(2);
+        })();
     </script>
 </body>
 </html>

@@ -29,6 +29,7 @@ model workout_plan{
   name String
   workout_ex workout_exercise[]
   workout_set workout_set[]
+  user User @relation( fields : [userId], references : [id])
 }
 // UserId deve puntare a UserId della tabella UserId
 
@@ -51,4 +52,18 @@ model workout_set{
   workout workout_plan @relation( fields : [workoutId], references : [workoutId])
   exercise Exercise @relation( fields : [exerciseId], references : [id])
   @@id([workoutId, exerciseId, setId])
+}
+
+
+model User{
+  id Int @id @default(autoincrement())
+  username String @unique
+  email String @unique
+  password String
+  nascita DateTime?
+  peso Float?
+  altezza Float?
+  avatarUrl String?
+  genere String?
+  workout_plan workout_plan[]
 }

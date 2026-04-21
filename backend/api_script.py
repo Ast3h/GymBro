@@ -142,16 +142,19 @@ print(f"Salvati {len(result)} esercizi su {len(exercises)} totali")
 
 import requests
 
-url = "http://localhost:3000/workout-plans"
+url = "http://localhost:3000/auth/register"
 
 
 
 body = {
-    "id" : 10,
-    "nome" : "mio allenamento"
+    "username" : "asteh_s",
+    "email" : "demo@uni.it",
+    "password" : "Pass23",
+    "altezza" : "1.72",
+    "genere" : "male"
 }
 
-response = requests.post(url, json=body, timeout=1)
+response = requests.post(url, json=body)
 
-
+print(response.text)
 

@@ -11,6 +11,8 @@
 
     <!-- Stili condivisi-->
      <link rel="stylesheet" href="stili.css">
+    <!-- Funzioni condivise-->
+     <script src="funzioni.js" defer></script>
 
      <style>
         /* Stili specifici pagina profilo*/
@@ -494,7 +496,7 @@
             <a href="profilo.html"  class="bottom-nav-item active"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Profilo</span></a>
         </nav>
 
-        <!-- ── MODALE MODIFICA DATI ── -->
+        <!--  MODALE MODIFICA DATI  -->
         <div class="modal-overlay" id="modal-modifica">
             <div class="modal">
                 <div class="modal-header">
@@ -554,57 +556,8 @@
 
 
         <script>
-            function toggleSidebar(){
-                document.getElementById('sidebar').classList.toggle('open');
-                document.getElementById('sidebar-overlay').classList.toggle('open');
-            }
-            function closeSidebar(){
-                document.getElementById('sidebar').classList.remove('open');
-                document.getElementById('sidebar-overlay').classList.remove('open');
-            }
 
-            let accentIsPink=true;
-
-            function applyAccent(isPink){
-                const root= document.documentElement;
-                const sw= document.getElementById('color-switch');
-                const dot= document.getElementById('notif-dot');
-                const logo= document.querySelector('.logo span');
-                const tema= document.getElementById('impost-tema');
-                const c= isPink? '#ed249b' : "#8cc63f";
-                const dim= isPink? 'rgba(237, 36, 155, 0.12)' : 'rgba(140, 198, 63, 0.12)';
-                const glow= isPink? 'rgba(237, 36, 155, 0.12)' : 'rgba(140, 198, 63, 0.12)';
-                root.style.setProperty('--accent', c);
-                root.style.setProperty('--accent-dim', dim);
-                root.style.setProperty('--accent-glow', glow);
-                if(sw) {
-                    sw.classList.toggle('pink', isPink);
-                    sw.classList.toggle('green', !isPink);
-                }
-                if(dot){ dot.style.background= c;}
-                if(logo){ logo.style.color= c;}
-                if(tema){ tema.textContent= isPink ? 'Rosa':'Verde';}
-            }
-
-            function toggleAccent(){
-            accentIsPink= !accentIsPink;
-            applyAccent(accentIsPink);
-            localStorage.setItem('gymbros-accent', accentIsPink? 'pink' : 'green');
-        }
-
-            /* Applica il tema salvato al carimento della pagina*/
-            (function initAccent(){
-            const saved = localStorage.getItem('gymbros-accent');
-            if(saved=== 'green'){
-                accentIsPink= false;
-                applyAccent(false);
-            }else{
-                applyAccent(true);
-            }
-        })();
-
-
-        /* ── AVATAR PICKER ── */
+        /*  AVATAR PICKER  */
         function toggleAvatarPicker() {
             document.getElementById('avatar-picker').classList.toggle('open');
         }
@@ -615,7 +568,7 @@
             /* BACKEND: inviare il numero avatar scelto a /api/utente/avatar */
         }
 
-        /* ── LIVELLO — barra di visualizzazione ── */
+        /*  LIVELLO — barra di visualizzazione  */
         const LIVELLI = ['', 'Principiante', 'Base', 'Intermedio', 'Avanzato', 'Elite'];
         let livelloCorrente = 1; 
 
@@ -633,7 +586,7 @@
 
         renderLivelloDisplay(livelloCorrente);
 
-        /* ── LIVELLO — barra della modale (cliccabile) ── */
+        /*  LIVELLO — barra della modale (cliccabile)  */
         function setLivello(valore) {
             livelloCorrente = valore;
             document.querySelectorAll('#modal-level-bar .modal-level-seg').forEach((seg, i) => {
@@ -642,7 +595,7 @@
             document.getElementById('modal-level-name').textContent = LIVELLI[valore];
         }
 
-        /* ── MODALE MODIFICA ── */
+        /*  MODALE MODIFICA  */
         function apriModaleModifica() {
             /* pre-popola i campi con i valori attuali */
             document.getElementById('input-nome').value    = document.getElementById('dato-nome').textContent.replace('—', '');
@@ -676,164 +629,6 @@
             renderLivelloDisplay(livelloCorrente);
 
             chiudiModaleModifica();}
-
-        /*  ICONE PER TIPO  */
-        const NOTIF_ICONS = {
-            scheda: `<svg viewBox="0 0 24 24">
-                        <rect x="4" y="3" width="16" height="18" rx="2"/>
-                        <line x1="8" y1="8" x2="16" y2="8"/>
-                        <line x1="8" y1="12" x2="16" y2="12"/>
-                        <line x1="8" y1="16" x2="12" y2="16"/>
-                    </svg>`,
-            esercizio: `<svg viewBox="0 0 24 24">
-                            <circle cx="11" cy="11" r="8"/>
-                            <path d="m21 21-4.35-4.35"/>
-                        </svg>`,
-            sistema: `<svg viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="12" y1="8" x2="12" y2="12"/>
-                        <line x1="12" y1="16" x2="12.01" y2="16"/>
-                    </svg>`,
-        };
-
-        /* stato locale notifiche */
-        let _notifiche = [];
-
-        /*  APRI / CHIUDI DROPDOWN  */
-        function toggleNotifiche(e) {
-            e.stopPropagation();
-            const dropdown = document.getElementById('notif-dropdown');
-            const btn      = document.getElementById('notif-btn');
-            const isOpen   = dropdown.classList.contains('open');
-
-            if (!isOpen) {
-                dropdown.classList.add('open');
-                btn.setAttribute('aria-expanded', 'true');
-                /* carica notifiche ogni volta che si apre */
-                caricaNotifiche();
-            } else {
-                chiudiNotifiche();
-            }
-        }
-
-        function chiudiNotifiche() {
-            document.getElementById('notif-dropdown').classList.remove('open');
-            document.getElementById('notif-btn').setAttribute('aria-expanded', 'false');
-        }
-
-        /* chiudi cliccando fuori */
-        document.addEventListener('click', (e) => {
-            const wrap = document.getElementById('notif-wrap');
-            if (wrap && !wrap.contains(e.target)) chiudiNotifiche();
-        });
-
-        /*  CREA ELEMENTO NOTIFICA  */
-        function creaNotifItem(n) {
-            const item = document.createElement('div');
-            item.className = 'notif-item' + (n.letta ? '' : ' unread');
-            item.dataset.id = n.id;
-
-            const icona = NOTIF_ICONS[n.tipo] || NOTIF_ICONS.sistema;
-
-            item.innerHTML = `
-                <div class="notif-item-icon ${n.tipo}">${icona}</div>
-                <div class="notif-item-content">
-                    <div class="notif-item-title">${n.titolo}</div>
-                    <div class="notif-item-text">${n.testo}</div>
-                    <div class="notif-item-time">${n.ora}</div>
-                </div>
-                ${n.letta ? '' : '<div class="notif-unread-dot"></div>'}
-            `;
-
-            /* segna come letta al click */
-            item.addEventListener('click', () => segnaLetta(n.id));
-
-            return item;
-        }
-
-        /*  RENDERIZZA LISTA  */
-        function renderNotifiche(notifiche) {
-            _notifiche = notifiche;
-            const lista  = document.getElementById('notif-list');
-            const empty  = document.getElementById('notif-empty');
-            const footer = document.getElementById('notif-footer');
-            const markAll = document.getElementById('notif-mark-all');
-
-            lista.innerHTML = '';
-
-            if (notifiche.length === 0) {
-                lista.appendChild(empty);
-                footer.style.display   = 'none';
-                markAll.style.display  = 'none';
-                return;
-            }
-
-            footer.style.display = 'block';
-
-            const nonLette = notifiche.filter(n => !n.letta);
-            markAll.style.display = nonLette.length > 0 ? 'block' : 'none';
-
-            notifiche.forEach(n => lista.appendChild(creaNotifItem(n)));
-
-            /* aggiorna pallino topbar */
-            aggiornaNotifDot(nonLette.length);
-        }
-
-        /*  PALLINO TOPBAR  */
-        function aggiornaNotifDot(count) {
-            const dot = document.getElementById('notif-dot');
-            if (!dot) return;
-            if (count > 0) {
-                dot.classList.add('active');
-            } else {
-                dot.classList.remove('active');
-            }
-        }
-
-        /*  SEGNA LETTA  */
-        function segnaLetta(id) {
-            _notifiche = _notifiche.map(n => n.id === id ? { ...n, letta: true } : n);
-            renderNotifiche(_notifiche);
-
-            /*
-            * BACKEND:
-            * fetch(`/api/notifiche/${id}/letta`, { method: 'PATCH' });
-            */
-        }
-
-        /*  SEGNA TUTTE LETTE  */
-        function segnaLette() {
-            _notifiche = _notifiche.map(n => ({ ...n, letta: true }));
-            renderNotifiche(_notifiche);
-
-            /*
-            * BACKEND:
-            * fetch('/api/notifiche/letta-tutte', { method: 'PATCH' });
-            */
-        }
-
-        /*  VEDI TUTTE  */
-        function vediTutte() {
-            /* TODO: navigare a una pagina notifiche completa se serve */
-            chiudiNotifiche();
-        }
-
-        /*  CARICA NOTIFICHE  */
-        function caricaNotifiche() {}
-        
-        /*  CONTROLLO INIZIALE PALLINO  */
-        (function initNotifDot() {
-            /*
-            * BACKEND:
-            * fetch('/api/notifiche/count')
-            *     .then(r => r.json())
-            *     .then(({ non_lette }) => aggiornaNotifDot(non_lette));
-            *
-            * Per i test usa questo:
-            */
-            aggiornaNotifDot(2);
-        })();
-
         </script>
 </body>
 </html>

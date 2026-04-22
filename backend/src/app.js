@@ -17,7 +17,22 @@ app.listen(3000, () => {
     console.log('server avviato su 3000')
 })
 
+/* FUNZIONE CHECK TOKEN */
+const auth = (req, res, next) => {
+    const token = req.headers.authorization?.split(' ')[1]
 
+    if(!token){
+        return res.status(401).json({error : "Unauthorized"})
+    }
+
+    try{
+        const plain = jwt.verify(token, process.env.JWT_SECRET)
+        req.id = plain.user_id
+        next()
+    }catch {
+        return res.status(401).json({error : "Unauthorized"})
+    }
+}
 
 
 /* DB AUTH ROUTE */
@@ -118,6 +133,35 @@ app.post('/auth/login', async (req,res) =>{
 
     res.json({token : token})
     
+})
+
+/* INFO PROFILO */
+
+app.get('/users/profile', auth, async(req, res) =>{
+    const id  = req.id
+    console.log("l'user id:" + id)
+    let user = 10
+    try{
+        user = await prisma.user.findUnique({
+            where : {id: id}
+        })
+        console.log(user)
+    } catch(error){
+        return res.status(400).json({error : error.message})
+    }
+    const cleaned_user = {
+        nome : user.nome,
+        cognome : user.cognome,
+        email : user.email,
+        eta : user.eta,
+        peso : user.peso,
+        altezza : user.altezza,
+        avatarUrl : user.avatarUrl,
+        genere : user.genere,
+        obiettivo : user.obiettivo,
+        livello : user.livello,
+    } 
+    res.json(cleaned_user)
 })
 
 /* 

@@ -557,6 +557,43 @@
 
         <script>
 
+        /* FETCH BACKEND*/
+        async function getProfilo(){
+            const response = await fetch('http://localhost:3000/users/profile', {
+                method : 'GET',
+                headers : {
+                    'Authorization' : 'Bearer ' + localStorage.getItem('gymbros-token')
+                }
+            })
+            const user = await response.json()
+            
+            document.getElementById('dato-nome').textContent = user.nome
+            document.getElementById('dato-eta').textContent = user.eta ? user.eta : '-'
+            document.getElementById('dato-peso').textContent = user.peso ? user.peso : '-'
+            document.getElementById('dato-altezza').textContent = user.altezza ? user.altezza : '-'
+            
+            const segmenti = document.querySelectorAll('.level-seg')
+            segmenti.forEach((seg, index) =>{
+                if(index<user.livello){
+                    seg.classList.add('on')
+                }else{
+                    seg.classList.remove('on')
+                }
+            })
+
+            const nome_livello = ['Principiante', 'Novizio', 'Intermedio', 'Esperto', 'Avanzato']
+            document.getElementById('level-name').textContent = nome_livello[user.livello-1]
+
+
+            /* 
+            
+            MANCANO SCHEDE SALVATE
+            
+            */
+        }
+
+        getProfilo()
+
         /*  AVATAR PICKER  */
         function toggleAvatarPicker() {
             document.getElementById('avatar-picker').classList.toggle('open');

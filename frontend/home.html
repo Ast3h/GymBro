@@ -1172,9 +1172,9 @@
                 </p>
             </div>
 
-            <div class="divider">Account</div>
+            <div id="account-divider" class="divider">Account</div>
             <div class="btn-group">
-                <button class="btn-primary" onclick="window.location.href='auth.html'">
+                <button id ="button_reg" class="btn-primary" onclick="window.location.href='auth.html'">
                     Registrati/Accedi
                 </button>
 
@@ -1277,6 +1277,12 @@
     </main>
 
     <script>
+        /* Check bottone login/reg*/
+        if(localStorage.getItem('gymbros-token')){
+            document.getElementById('button_reg').style.display = 'none'
+            document.getElementById('account-divider').style.display = 'none'
+        }
+
         /* Rotazione generale M */
         let maleShowingFront= true;
 

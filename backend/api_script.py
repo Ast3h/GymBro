@@ -140,6 +140,8 @@ print(f"Salvati {len(result)} esercizi su {len(exercises)} totali")
 """
 
 
+
+
 import requests
 
 url = "http://localhost:3000/auth/register"

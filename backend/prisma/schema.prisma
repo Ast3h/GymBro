@@ -57,13 +57,16 @@ model workout_set{
 
 model User{
   id Int @id @default(autoincrement())
-  username String @unique
+  nome String
+  cognome String
   email String @unique
   password String
-  nascita DateTime?
+  eta Int?
   peso Float?
   altezza Float?
   avatarUrl String?
   genere String?
+  obiettivo String
+  livello Int
   workout_plan workout_plan[]
 }

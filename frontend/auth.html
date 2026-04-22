@@ -353,8 +353,10 @@
                     </div>
                     <span class="field-error" id="login-pass-err">Password errata</span>
                 </div>
-
+                <span class="field-error" id="login-err-cred" style="text-align:center; font-size:0.75rem; display:block;">Credenziali errate</span>
                 <button class="btn-primary" onclick="submitLogin()">Accedi</button>
+
+                
 
                 <button class="forgot-link" onclick="mostraResetPassword()">
                     Password dimenticata?
@@ -524,7 +526,7 @@
         }
 
         /* ── VALIDAZIONE LOGIN ── */
-        function submitLogin() {
+        async function submitLogin() {
             let ok = true;
 
             const email = document.getElementById('login-email').value.trim();
@@ -545,28 +547,29 @@
 
             if (!ok) return;
 
-            /*
-             * BACKEND:
-             * fetch('/api/auth/login', {
-             *     method: 'POST',
-             *     headers: { 'Content-Type': 'application/json' },
-             *     body: JSON.stringify({ email, password: pass })
-             * })
-             * .then(r => r.json())
-             * .then(data => {
-             *     if (data.token) {
-             *         localStorage.setItem('gymbros-token', data.token);
-             *         window.location.href = 'home.html';
-             *     } else {
-             *         document.getElementById('login-pass-err').textContent = data.messaggio;
-             *         document.getElementById('login-pass-err').classList.add('show');
-             *     }
-             * });
-             */
+            
+            const response = await fetch('http://localhost:3000/auth/login', {
+                method : 'POST',
+                headers: {'Content-Type' : 'application/json'},
+                body: JSON.stringify({
+                    email : email,
+                    password : pass
+                })
+            })
+
+            if(response.ok){
+                const data = await response.json()
+                localStorage.setItem('gymbros-token', data.token)
+                window.location.href = 'home.html'
+            }else{
+                
+                document.getElementById('login-err-cred').classList.add('show')
+                
+            }
         }
 
         /* ── VALIDAZIONE REGISTRAZIONE ── */
-        function submitRegistrazione() {
+        async function submitRegistrazione() {
             let ok = true;
 
             const nome     = document.getElementById('reg-nome').value.trim();
@@ -629,6 +632,16 @@
              *     }
              * });
              */
+            const response = await fetch('http://localhost:3000/auth/register', {
+                method : 'POST',
+                headers : { 'Content-Type' : 'application/json'},
+                body: JSON.stringify(dati)
+            })
+
+            if(response.ok){
+                alert("Registrazione avvenuta con successo")
+                tornaLogin()
+            }
         }
 
         function mostraResetPassword() {

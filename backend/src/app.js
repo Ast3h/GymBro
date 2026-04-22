@@ -8,6 +8,10 @@ const bcrypt = require('bcryptjs')
 const app = express()
 app.use(express.json())
 
+const cors = require('cors')
+app.use(cors())
+
+const jwt = require('jsonwebtoken')
 
 app.listen(3000, () => {
     console.log('server avviato su 3000')
@@ -19,12 +23,20 @@ app.listen(3000, () => {
 /* DB AUTH ROUTE */
 app.post('/auth/register', async(req, res) =>{
     const email = req.body.email
-    const username = req.body.username
+    const nome = req.body.nome
+    const cognome = req.body.cognome
     const password = req.body.password
-    const data_N = req.body.data ? new Date(req.body.data) : undefined //DATA PASSATA IN FORMATO AAAA-MM-GG
+    const eta = parseInt(req.body.data) 
     const peso = parseFloat(req.body.peso)
     const altezza = parseFloat(req.body.altezza)
     const genere = req.body.genere
+    const livello = parseInt(req.body.livello)
+    const obiettivo = req.body.obiettivo
+
+
+    const checkObiettivo = ['Forza', 'Dimagrire', 'Resistenza', 'Benessere', 'Massa muscolare']
+
+    console.log("livello : " + livello + " obiettivo : " + obiettivo)
 
     //CONTROLLO EMAIL PASSWORD E USERNAME SIANO PRESENTI E VALIDI
     const reg_email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -40,20 +52,23 @@ app.post('/auth/register', async(req, res) =>{
     if(password.length < 8){
         return res.status(400).json({error : "La password deve contenere almeno 8 caratteri"})
     }
-    if(!username){
-        return res.status(400).json({error : "L'username è obbligatorio"})
+    if(!checkObiettivo.includes(obiettivo)){
+        return res.status(400).json({error : "Obiettivo non valido"})
     }
 
 
     try{
         const user = await prisma.user.create({
             data : { email : email,
-                username : username,
+                nome : nome,
+                cognome : cognome,
                 password : await bcrypt.hash(password, 10),
-                nascita : data_N,
+                eta : eta,
                 peso : peso,
                 altezza : altezza,
                 genere : genere,
+                livello : livello,
+                obiettivo : obiettivo,
             }
         })
         console.log(user)
@@ -76,11 +91,38 @@ app.post('/auth/register', async(req, res) =>{
 
 
 
+app.post('/auth/login', async (req,res) =>{
+    const email = req.body.email
+    const password = req.body.password
 
+    
+    const user = await prisma.user.findUnique({
+        where: {email : email}
+    })
+    if(!user){
+        return res.status(401).json({error : "Credenziali errate"})
+    }
+    console.log(user.password)
+    
+    if(await bcrypt.compare(password, user.password)){
+        console.log("COMPARE FUNZIONA BENE")
+    }else{
+        return res.status(401).json({error : "Credenziali errate"})
+    }
+    
+    const token = jwt.sign(
+        {user_id : user.id},
+        process.env.JWT_SECRET,
+        {expiresIn : '1d'}
+    )
+
+    res.json({token : token})
+    
+})
 
 /* 
 
-            ESERCIZI DB API 
+            ESERCIZI DB API     
 
 */
 

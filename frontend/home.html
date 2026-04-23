@@ -1278,11 +1278,26 @@
 
     <script>
         /* Check bottone login/reg*/
-        if(localStorage.getItem('gymbros-token')){
-            document.getElementById('button_reg').style.display = 'none'
-            document.getElementById('account-divider').style.display = 'none'
-        }
+        async function checkLogged(){
+            if(localStorage.getItem('gymbros-token')){
+                const response = await fetch('http://localhost:3000/users/profile', {
+                method : 'GET',
+                headers : {
+                    'Authorization' : 'Bearer ' + localStorage.getItem('gymbros-token')
+                }
+                })
 
+                if(response.status === 401){
+                    localStorage.removeItem('gymbros-token')
+                    return
+                }
+
+                document.getElementById('button_reg').style.display = 'none'
+                document.getElementById('account-divider').style.display = 'none'
+                
+            }
+        }
+        checkLogged()
         /* Rotazione generale M */
         let maleShowingFront= true;
 

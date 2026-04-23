@@ -497,7 +497,7 @@
             card.innerHTML = `
                 <div class="ez-img">
                     ${ez.img_url
-                        ? `<img src="${ez.img_url}" alt="${ez.nome}" style="width:100%;height:100%;object-fit:cover;">`
+                        ? `<video  src="${ez.img_url}" alt="${ez.nome}" style="width:100%;height:100%;object-fit:cover;"></video></video>`
                         : `<div class="ez-img-placeholder">◈</div>`}
                 </div>
                 <div class="ez-body">
@@ -520,7 +520,7 @@
 
             const imgContainer = document.getElementById('modal-img');
             imgContainer.innerHTML = ez.img_url
-                ? `<img src="${ez.img_url}" alt="${ez.nome}" style="width:100%;height:100%;object-fit:cover;">`
+                ? `<video autoplay loop muted playsinlines src="${ez.img_url}" alt="${ez.nome}" style="width:100%;height:100%;object-fit:cover;"></video>`
                 : `<div class="ez-modal-img-ph">◈</div>`;
 
             document.getElementById('modal-dettaglio').classList.add('open');
@@ -594,6 +594,34 @@
             }
         })();
 
+
+        async function loadEx(){
+            const response = await fetch('http://localhost:3000/fullexercises', {
+                method : 'GET',
+                headers : {
+                    'Authorization' : 'Bearer ' + localStorage.getItem('gymbros-token')
+                }
+            })
+            const divex = document.getElementById('grid-esercizi')
+            const data = await response.json()
+            data.forEach(data => {
+                const ez = {
+                id : data.id,
+                zone : [data.macroPart, data.bodyPart],
+                img_url : data.videoUrl,
+                nome : data.nameIt,
+                }
+            
+                
+                const new_card =creaCardEsercizio(ez)
+                divex.appendChild(new_card)
+            })
+            
+
+            
+        }
+
+        loadEx()
     </script>
 </body>
 </html>

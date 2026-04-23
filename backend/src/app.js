@@ -22,7 +22,9 @@ const auth = (req, res, next) => {
     const token = req.headers.authorization?.split(' ')[1]
 
     if(!token){
+        console.log("IL TOKEN NON C'È")
         return res.status(401).json({error : "Unauthorized"})
+        
     }
 
     try{
@@ -30,7 +32,9 @@ const auth = (req, res, next) => {
         req.id = plain.user_id
         next()
     }catch {
+        console.log("IL TOKEN È SBAGLIATO")
         return res.status(401).json({error : "Unauthorized"})
+       
     }
 }
 
@@ -203,7 +207,7 @@ app.get('/exercises/:macroPart/:bodyPart' , async (req, res) =>{
 
 
 ///FILTRARE CON ID
-app.get('/exercises' , async (req, res) =>{
+app.get('/exercises' , auth, async (req, res) =>{
     const macro = parseInt(req.query.id)
     console.log(macro)
     try{
@@ -217,6 +221,16 @@ app.get('/exercises' , async (req, res) =>{
     }
 })
 
+
+app.get('/fullexercises', auth, async (req,res) =>{
+    try{
+        const response = await prisma.exercise.findMany()
+        res.json(response)
+        console.log(response)
+    }catch (error){
+        return res.status(500).json({error : error.message})
+    }
+})
 
 //      SCHEDE ALLENAMENTO
 

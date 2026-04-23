@@ -474,7 +474,7 @@
 
             <!-- FOOTER -->
             <div class="prof-footer">
-                <button class="btn-ghost btn-danger" onclick="">Disconnetti</button>
+                <button class="btn-ghost btn-danger" onclick="userLogout()">Disconnetti</button>
                 <!-- TODO: collegare a logout del backend -->
                 <button class="btn-ghost" onclick="apriModaleModifica()">Modifica</button>
             </div>
@@ -565,6 +565,11 @@
                     'Authorization' : 'Bearer ' + localStorage.getItem('gymbros-token')
                 }
             })
+
+            if(response.status === 401){
+                localStorage.removeItem('gymbros-token')
+                window.location.href = "auth.html"
+            }
             const user = await response.json()
             
             document.getElementById('dato-nome').textContent = user.nome
@@ -572,6 +577,9 @@
             document.getElementById('dato-peso').textContent = user.peso ? user.peso : '-'
             document.getElementById('dato-altezza').textContent = user.altezza ? user.altezza : '-'
             
+            document.getElementById('prof-name').textContent = user.nome + ' ' + user.cognome
+            document.getElementById('prof-email').textContent = user.email
+            document.getElementById('prof-obiettivo').textContent = user.obiettivo
             const segmenti = document.querySelectorAll('.level-seg')
             segmenti.forEach((seg, index) =>{
                 if(index<user.livello){
@@ -593,6 +601,13 @@
         }
 
         getProfilo()
+
+
+        /* LOGOUT UTENTE */
+        function userLogout(){
+            localStorage.removeItem('gymbros-token')
+            window.location.href = "auth.html"
+        }
 
         /*  AVATAR PICKER  */
         function toggleAvatarPicker() {

@@ -196,6 +196,7 @@ app.patch('/users/avatar', auth, async(req,res)=>{
     }
 })
 
+
 /* 
 
             ESERCIZI DB API     
@@ -263,8 +264,8 @@ app.get('/fullexercises', auth, async (req,res) =>{
 //      SCHEDE ALLENAMENTO
 
 //CREA SCHEDA
-app.post('/workout-plans', async (req, res) =>{
-    const uid = parseInt(req.body.id)
+app.post('/workout-plans', auth,  async (req, res) =>{
+    const uid = req.id
     const nome = req.body.nome
 
     
@@ -282,3 +283,23 @@ app.post('/workout-plans', async (req, res) =>{
     
 })
 
+/* CARICA SCHEDE UTENTE */
+app.get('/users/workout-plans', auth, async (req, res) =>{
+    const id = req.id
+    try{
+        const workout = await prisma.workout_plan.findMany({
+            where : {userId : id},
+            include : {
+                _count : {
+                    select : {workout_ex : true}
+                }
+            }
+        })
+        
+        console.log(workout)
+        res.json(workout)
+
+    }catch(error){
+        res.status(500).json({error : error.message})
+    }
+})

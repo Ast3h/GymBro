@@ -258,7 +258,7 @@
                         <p>Non hai ancora salvato nessuna scheda.</p>
                     </div>
                     <!-- card crea nuova — sempre presente in fondo -->
-                    <div class="new-scheda-card" id="new-scheda-card" onclick="">
+                    <div class="new-scheda-card" id="new-scheda-card" onclick="openCreateScheda()">
                         + Crea nuova
                     </div>
                 </div>
@@ -284,6 +284,27 @@
                         <p>Nessuna scheda predefinita disponibile.</p>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!--FORM NOME SCHEDA -->
+    <div id="modal-crea-scheda" class="modal-overlay">
+        <div class="modal" style="max-width:360px;">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title">Nuova scheda</div>
+                    <div class="modal-sub">Dai un nome alla tua scheda</div>
+                </div>
+                <button class="modal-close" onclick="closeCreateScheda()">✕</button>
+            </div>
+            <div class="modal-body">
+                <input id="input-nome-scheda" type="text" placeholder="Es. Forza upper body"
+                    style="width:100%; padding:10px 12px; background:var(--surface2); border:0.5px solid var(--border); border-radius:var(--radius); color:var(--text); font-size:0.85rem; box-sizing:border-box; outline:none; font-family:inherit;">
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" onclick="creaScheda()">Crea scheda</button>
+                <button class="btn-ghost" onclick="closeCreateScheda()">Annulla</button>
             </div>
         </div>
     </div>
@@ -350,10 +371,10 @@
                 </div>`;
             card.innerHTML=
                 `<div class="scheda-name">${scheda.nome}</div>
-                <div class="scheda-meta">${scheda.esercizi} esercizi · ${scheda.giorni} giorni</div>
+                <div class="scheda-meta">${scheda.esercizi} esercizi </div>
                 <div class="scheda-tags">${tags}${livelloBadge}</div>
+                <span class="scheda-data">${scheda.data || ''}</span>
                 <div class="scheda-footer">
-                    <span class="scheda-data">${scheda.data || ''}</span>
                     ${azioni}
                 </div>`;
             card.addEventListener('click', () => {
@@ -366,6 +387,77 @@
         function modificaScheda(id) {/*TODO*/}
         function eliminaScheda(id) {/*TODO*/}
         function salvaScheda(id) {/*TODO*/}
+
+        function openCreateScheda(){
+            document.getElementById('modal-crea-scheda').classList.add('open')
+        }
+
+        function closeCreateScheda(){
+            document.getElementById('modal-crea-scheda').classList.remove('open')
+        }
+
+        async function creaScheda(){
+            const nome = document.getElementById('input-nome-scheda').value
+            document.getElementById('modal-crea-scheda').classList.remove('open')
+
+            const response = await fetch('http://localhost:3000/workout-plans', {
+                method : 'POST',
+                headers : {
+                    'Content-Type' : 'application/json',
+                    'Authorization' : 'Bearer ' + localStorage.getItem('gymbros-token')
+                },
+                body : JSON.stringify({
+                    nome : nome,
+                })
+            })
+
+            const data = await response.json()
+            console.log(data)
+            const scheda = {
+                id : data.workoutId,
+                nome : data.name,
+                tipo : 'personale',
+                zone : [],
+                esercizi : 0,
+                giorni : 0,
+                livello : null,
+                data : new  Date().toLocaleDateString('it-IT')
+            }
+            
+            
+        }
+
+        async function loadSchede(){
+            const response = await fetch('http://localhost:3000/users/workout-plans', {
+                method : 'GET',
+                headers : {
+                    'Content-Type' : 'application/json',
+                    'Authorization' : 'Bearer ' + localStorage.getItem('gymbros-token'),
+                }
+            })
+
+            const data = await response.json()
+            if(data){
+                
+                document.getElementById('empty-personali').remove()
+                data.forEach(allenamento =>{
+                    const scheda = {
+                        id : allenamento.workoutId,
+                        nome : allenamento.name,
+                        tipo : 'personale',
+                        zone : [],
+                        esercizi : allenamento._count.workout_ex,
+                        giorni : 0,
+                        livello : null,
+                        data : new  Date().toLocaleDateString('it-IT')
+                    }
+                    document.getElementById('grid-schede-personali').append(creaCardScheda(scheda))
+                })
+            }
+            
+        }
+
+        loadSchede()
 
     </script>
 </body>

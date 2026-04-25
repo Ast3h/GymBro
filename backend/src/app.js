@@ -168,6 +168,34 @@ app.get('/users/profile', auth, async(req, res) =>{
     res.json(cleaned_user)
 })
 
+/* CAMBIARE AVATAR URL */
+
+app.patch('/users/avatar', auth, async(req,res)=>{
+    const numUrl = parseInt(req.body.avatarNum)
+    const id = req.id
+    const avatar = {
+        1 : "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=Ryan",
+        2 : "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=Nolan",
+        3 : "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=Riley",
+        4 : "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=Ryker",
+    }
+    const url = avatar[numUrl]
+    if(!url){
+        return res.status(400).json({error : error.message})
+    }
+    try{
+        const avatar = await prisma.user.update({
+            where: {id : id},
+            data : {
+                avatarUrl : url
+            }
+        })
+        console.log(avatar)
+    }catch(error){
+        return res.status(500).json({error : error.message})
+    }
+})
+
 /* 
 
             ESERCIZI DB API     

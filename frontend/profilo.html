@@ -374,7 +374,9 @@
                     <img id="prof-avatar" src="" alt="" class="avatar">
                     e impostare src con l'url della foto profilo
                 -->
-                <div class="avatar" id="prof-avatar-initials">—</div>
+                <div class="avatar" id="prof-avatar-initials">
+                    <img id="prof-avatar-img" src="" alt="" class="avatar">
+                </div>
                 <!-- BACKEND: utente.nome[0] + utente.cognome[0] -->
 
                 <button class="avatar-change-btn" onclick="toggleAvatarPicker()">
@@ -388,10 +390,18 @@
                         <img src="avatar1.png" class="av-option" onclick="selezionaAvatar(1)">
                         per ognuna delle 4 immagini predefinite
                     -->
-                    <div class="av-option selected" onclick="selezionaAvatar(this, 1)">A</div>
-                    <div class="av-option"          onclick="selezionaAvatar(this, 2)">B</div>
-                    <div class="av-option"          onclick="selezionaAvatar(this, 3)">C</div>
-                    <div class="av-option"          onclick="selezionaAvatar(this, 4)">D</div>
+                    <div class="av-option selected" onclick="selezionaAvatar(this, 1)">
+                        <img src="https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=Ryan" class="av-option" onclick="selezionaAvatar(1)">
+                    </div>
+                    <div class="av-option"          onclick="selezionaAvatar(this, 2)">
+                        <img src="https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=Nolan" class="av-option" onclick="selezionaAvatar(1)">
+                    </div>
+                    <div class="av-option"          onclick="selezionaAvatar(this, 3)">
+                        <img src="https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=Riley" class="av-option" onclick="selezionaAvatar(1)">
+                    </div>
+                    <div class="av-option"          onclick="selezionaAvatar(this, 4)">
+                        <img src="https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=Ryker" class="av-option" onclick="selezionaAvatar(1)">
+                    </div>
                 </div>
 
                 <div class="prof-name"  id="prof-name">—</div>
@@ -577,6 +587,7 @@
             document.getElementById('dato-peso').textContent = user.peso ? user.peso : '-'
             document.getElementById('dato-altezza').textContent = user.altezza ? user.altezza : '-'
             
+            document.getElementById('prof-avatar-img').src = user.avatarUrl ? user.avatarUrl : `https://api.dicebear.com/7.x/initials/svg?seed=${user.nome}+${user.cognome}`
             document.getElementById('prof-name').textContent = user.nome + ' ' + user.cognome
             document.getElementById('prof-email').textContent = user.email
             document.getElementById('prof-obiettivo').textContent = user.obiettivo
@@ -617,7 +628,16 @@
         function selezionaAvatar(el, numero) {
             document.querySelectorAll('.av-option').forEach(o => o.classList.remove('selected'));
             el.classList.add('selected');
-            /* BACKEND: inviare il numero avatar scelto a /api/utente/avatar */
+            const response = fetch('http://localhost:3000/users/avatar', {
+                method : 'PATCH',
+                headers : {
+                    'Authorization' : 'Bearer ' + localStorage.getItem('gymbros-token'),
+                    'Content-Type' : 'application/json'
+                },
+                body : JSON.stringify({'avatarNum' : numero})
+            })
+
+
         }
 
         /*  LIVELLO — barra di visualizzazione  */

@@ -356,14 +356,14 @@
 
             <!-- filtri zona muscolare -->
             <div class="chips-row" id="filtri-zona" style="margin-bottom:16px;">
-                <button class="chip active" onclick="filtraZona('tutte',   this)">Tutti</button>
-                <button class="chip"        onclick="filtraZona('Gambe',   this)">Gambe</button>
-                <button class="chip"        onclick="filtraZona('Petto',   this)">Petto</button>
-                <button class="chip"        onclick="filtraZona('Braccia', this)">Braccia</button>
-                <button class="chip"        onclick="filtraZona('Spalle',  this)">Spalle</button>
-                <button class="chip"        onclick="filtraZona('Addome',  this)">Addome</button>
-                <button class="chip"        onclick="filtraZona('Schiena', this)">Schiena</button>
-                <button class="chip"        onclick="filtraZona('Glutei',  this)">Glutei</button>
+                <button class="chip active" id="filtro" onclick="filtraZona('tutte',   this), changeZonaUrl('tutti')">Tutti</button>
+                <button class="chip"    id="filtro"    onclick="filtraZona('gambe',   this), changeZonaUrl('gambe')">Gambe</button>
+                <button class="chip"   id="filtro"     onclick="filtraZona('petto',   this), changeZonaUrl('petto')">Petto</button>
+                <button class="chip"    id="filtro"    onclick="filtraZona('braccia', this), changeZonaUrl('braccia')">Braccia</button>
+                <button class="chip"    id="filtro"    onclick="filtraZona('spalle',  this), changeZonaUrl('spalle')">Spalle</button>
+                <button class="chip"    id="filtro"    onclick="filtraZona('addome',  this), changeZonaUrl('addome')">Addome</button>
+                <button class="chip"    id="filtro"    onclick="filtraZona('schiena', this), changeZonaUrl('schiena')">Schiena</button>
+                <button class="chip"     id="filtro"   onclick="filtraZona('glutei',  this), changeZonaUrl('glutei')">Glutei</button>
             </div>
 
             <!-- contatore risultati -->
@@ -456,25 +456,25 @@
 
         /* FILTRO ZONA */
         function filtraZona(zona, btn) {
-        const tutteBtn = document.querySelector('#filtri-zona .chip:first-child');
+            const tutteBtn = document.querySelector('#filtri-zona .chip:first-child');
 
-        /* se premi il chip già attivo, torna a "Tutti" */
-        if (btn && btn.classList.contains('active') && zona !== 'tutte') {
-            document.querySelectorAll('#filtri-zona .chip').forEach(c => c.classList.remove('active'));
-            tutteBtn.classList.add('active');
-            zona = 'tutte';
-        } else if (btn) {
-            document.querySelectorAll('#filtri-zona .chip').forEach(c => c.classList.remove('active'));
-            btn.classList.add('active');
-        }
+            /* se premi il chip già attivo, torna a "Tutti" */
+            if (btn && btn.classList.contains('active') && zona !== 'tutte') {
+                document.querySelectorAll('#filtri-zona .chip').forEach(c => c.classList.remove('active'));
+                tutteBtn.classList.add('active');
+                zona = 'tutte';
+            } else if (btn) {
+                document.querySelectorAll('#filtri-zona .chip').forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+            }
 
-        const cards = document.querySelectorAll('.ez-card');
-        let visibili = 0;
-        cards.forEach(card => {
-            const zone   = card.dataset.zone ? card.dataset.zone.split(',') : [];
-            const mostra = zona === 'tutte' || zone.includes(zona);
-            card.style.display = mostra ? 'block' : 'none';
-            if (mostra) visibili++;
+            const cards = document.querySelectorAll('.ez-card');
+            let visibili = 0;
+            cards.forEach(card => {
+                const zone   = card.dataset.zone ? card.dataset.zone.split(',') : [];
+                const mostra = zona === 'tutte' || zone.includes(zona);
+                card.style.display = mostra ? 'block' : 'none';
+                if (mostra) visibili++;
         });
 
         document.getElementById('count-label').textContent = visibili + ' esercizi';
@@ -594,6 +594,15 @@
             }
         })();
 
+        function changeZonaUrl(zona){
+            if(zona){
+                document.getElementById('zona-badge-label').textContent = zona;
+                document.getElementById('zona-badge').style.display = 'flex';
+                const chip = [...document.querySelectorAll('#filtri-zona .chip')]
+                    .find(c => c.textContent === zona);
+                if (chip) filtraZona(zona, chip);
+            }
+        }
 
         async function loadEx(){
             const response = await fetch('http://localhost:3000/fullexercises', {
@@ -618,10 +627,21 @@
             })
             
 
+            const params = new URLSearchParams(window.location.search)
+            const zona = params.get('zona')
+            
+            if (zona) {
+                const btn = Array.from(document.querySelectorAll('#filtro .chip'))
+                    .find(b => b.textContent.trim() === zona)
+                filtraZona(zona.toLowerCase(), btn)
+            }
+
             
         }
 
         loadEx()
+
+
     </script>
 </body>
 </html>

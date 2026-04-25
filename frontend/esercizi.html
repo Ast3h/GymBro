@@ -250,10 +250,187 @@
             transform: translateX(-50%) translateY(0);
         }      
 
+        /* MODALE CREA SCHEDA */
+    .crea-modal { max-width: 500px; max-height: 85vh; display: flex; flex-direction: column; }
+        .crea-modal .modal-body { 
+            display: flex;
+            flex-direction: column; 
+            gap: 14px; 
+            overflow-y: auto; 
+        }
+
+        .form-row   { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 5px; 
+        }
+        .form-label { 
+            font-size: 0.65rem; 
+            letter-spacing: 0.1em; 
+            text-transform: uppercase; 
+            color: var(--muted); 
+        }
+        .form-input { 
+            width: 100%; 
+            padding: 9px 12px; 
+            border-radius: var(--radius); 
+            border: 0.5px solid var(--border); 
+            background: var(--surface2); color: var(--text); 
+            font-family: var(--font-body); font-size: 0.85rem; 
+            outline: none; transition: border-color 0.18s; 
+        }
+        .form-input:focus { 
+            border-color: var(--accent); 
+        }
+
+        .search-input { 
+            flex: 1; 
+            padding: 8px 12px; 
+            border-radius: var(--radius); 
+            border: 0.5px solid var(--border); 
+            background: var(--surface2); 
+            color: var(--text); 
+            font-family: var(--font-body); 
+            font-size: 0.82rem; outline: none; 
+            transition: border-color 0.18s; 
+            width: 100%; 
+        }
+        .search-input:focus { 
+            border-color: var(--accent); 
+        }
+
+        .crea-chips { 
+            display: flex; 
+            gap: 6px; 
+            flex-wrap: wrap; 
+        }
+
+        .ez-results  { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 4px; max-height: 140px; 
+            overflow-y: auto; 
+        }
+        .ez-result-row { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            padding: 8px 10px; 
+            background: var(--surface2); 
+            border: 0.5px solid var(--border); 
+            border-radius: var(--radius); 
+            transition: border-color 0.18s; }
+        .ez-result-row:hover { 
+            border-color: var(--accent); 
+        }
+        .ez-result-name { 
+            font-size: 0.82rem; 
+            color: var(--text); 
+        }
+        .ez-result-zona { 
+            font-size: 0.68rem; 
+            color: var(--muted); 
+            margin-top: 2px; 
+        }
+
+        .ez-add-btn { 
+            font-size: 0.68rem; 
+            font-weight: 500; 
+            letter-spacing: 0.06em; 
+            color: var(--accent); 
+            border: 0.5px solid rgba(237,36,155,0.3); 
+            border-radius: var(--radius); 
+            padding: 4px 10px; 
+            background: none; 
+            cursor: pointer; 
+            white-space: nowrap; 
+            transition: background 0.18s; 
+        }
+        .ez-add-btn:hover { 
+            background: var(--accent-dim); 
+        }
+
+        .ez-no-results { 
+            font-size: 0.75rem; 
+            color: var(--muted); 
+            text-align: center; 
+            padding: 12px 0; 
+        }
+
+        .crea-sep { 
+            height: 0.5px; 
+            background: var(--border); 
+            flex-shrink: 0; 
+        }
+
+        .added-header { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+        }
+        .added-title  { 
+            font-size: 0.65rem; 
+            letter-spacing: 0.1em; 
+            text-transform: uppercase; 
+            color: var(--muted); 
+        }
+        .added-count  { 
+            font-size: 0.68rem; 
+            color: var(--accent); 
+            font-weight: 500; 
+        }
+
+        .added-list  { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 4px; 
+            max-height: 160px; 
+            overflow-y: auto; 
+        }
+        .added-row   { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            padding: 7px 10px; 
+            background: var(--accent-dim); 
+            border: 0.5px solid rgba(237,36,155,0.2); 
+            border-radius: var(--radius); 
+        }
+        .added-name  { 
+            font-size: 0.82rem; 
+            color: var(--text); 
+        }
+        .added-zona  { 
+            font-size: 0.68rem; 
+            color: var(--muted); margin-top: 2px; 
+        }
+        .added-empty { 
+            font-size: 0.75rem; 
+            color: var(--border); 
+            text-align: center; 
+            padding: 10px; 
+            border: 0.5px dashed var(--border); 
+            border-radius: var(--radius); 
+        }
+
+        .remove-btn { 
+            font-size: 0.9rem; 
+            color: var(--muted); 
+            background: none; 
+            border: none; 
+            cursor: pointer; 
+            transition: color 0.18s; 
+            padding: 0 2px; 
+        }
+        .remove-btn:hover { 
+            color: #e24b4a; 
+        }       
+
         @media (max-width: 600px) {
-            .esercizi-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+            .esercizi-grid { grid-template-columns: repeat(2, 1fr); }
+            .modal-overlay { align-items: flex-end; padding: 0; }
+            .crea-modal { border-radius: 14px 14px 0 0; max-width: 100%; max-height: 92vh; }
+            .crea-modal::before { content: ''; display: block; width: 32px; height: 3px; border-radius: 3px; background: var(--border); margin: 10px auto 0; flex-shrink: 0; }
         }        
     </style>
 </head>
@@ -446,6 +623,53 @@
         </div>
     </div>
 
+    <!-- MODALE CREAZIONE SCHEDA -->
+         <div class="modal-overlay" id="modal-crea-scheda">
+        <div class="modal crea-modal">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title">Crea nuova scheda</div>
+                    <div class="modal-sub">Dai un nome e aggiungi gli esercizi che vuoi</div>
+                </div>
+                <button class="modal-close" onclick="chiudiCreaScheda()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <label class="form-label" for="input-nome-scheda">Nome scheda *</label>
+                    <input class="form-input" type="text" id="input-nome-scheda" placeholder="Es. Push Pull Legs">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">Cerca esercizi</label>
+                    <input class="search-input" type="text" id="search-ez" placeholder="🔍 Cerca per nome..." oninput="cercaEsercizi()">
+                    <div class="crea-chips chips-row" id="crea-filtri" style="margin-top:8px;">
+                        <button class="chip active" onclick="filtraCreaZona('tutte',   this)">Tutti</button>
+                        <button class="chip"        onclick="filtraCreaZona('Gambe',   this)">Gambe</button>
+                        <button class="chip"        onclick="filtraCreaZona('Petto',   this)">Petto</button>
+                        <button class="chip"        onclick="filtraCreaZona('Braccia', this)">Braccia</button>
+                        <button class="chip"        onclick="filtraCreaZona('Spalle',  this)">Spalle</button>
+                        <button class="chip"        onclick="filtraCreaZona('Addome',  this)">Addome</button>
+                        <button class="chip"        onclick="filtraCreaZona('Schiena', this)">Schiena</button>
+                    </div>
+                </div>
+                <div class="ez-results" id="ez-results">
+                    <div class="ez-no-results" id="ez-no-results">Inizia a cercare o seleziona una zona</div>
+                </div>
+                <div class="crea-sep"></div>
+                <div class="added-header">
+                    <span class="added-title">Nella scheda</span>
+                    <span class="added-count" id="added-count">0 esercizi</span>
+                </div>
+                <div class="added-list" id="added-list">
+                    <div class="added-empty" id="added-empty">Nessun esercizio aggiunto ancora</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-ghost"    onclick="chiudiCreaScheda()">Annulla</button>
+                <button class="btn-primary"  onclick="salvaSchedaNuova()">Salva scheda</button>
+            </div>
+        </div>
+    </div>
+
     <!-- toast feedback aggiunta -->
     <div class="feedback-toast" id="feedback-toast"></div>
 
@@ -570,7 +794,8 @@
         }
 
         function nuovaSchedaDaEsercizio() {
-            /* TODO: aprire modale creazione nuova scheda, poi aggiungiAScheda(nuovaId) */
+            chiudiSelettore();
+            apriCreaScheda();
         }       
 
         /* TOAST FEEDBACK */
@@ -579,6 +804,131 @@
             toast.textContent = messaggio;
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 2200);
+        }
+        
+        /* MODALE CREA SCHEDA*/
+        let _tuttiEsercizi = [];
+        let _aggiunti      = [];
+        let _zonaFiltro    = 'tutte';
+
+        function apriCreaScheda() {
+            _aggiunti   = [];
+            _zonaFiltro = 'tutte';
+            document.getElementById('input-nome-scheda').value = '';
+            document.getElementById('search-ez').value         = '';
+            document.querySelectorAll('#crea-filtri .chip').forEach((c, i) => {
+                c.classList.toggle('active', i === 0);
+            });
+            aggiornaRisultati();
+            aggiornaAggiunti();
+            document.getElementById('modal-crea-scheda').classList.add('open');
+        }
+           
+        function chiudiCreaScheda() {
+            document.getElementById('modal-crea-scheda').classList.remove('open');
+        }
+
+            document.getElementById('modal-crea-scheda').addEventListener('click', function(e) {
+            if (e.target === this) chiudiCreaScheda();
+        });
+
+        function filtraCreaZona(zona, btn) {
+            _zonaFiltro = zona;
+            document.querySelectorAll('#crea-filtri .chip').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            aggiornaRisultati();
+        }
+
+        function cercaEsercizi() {
+            aggiornaRisultati();
+        }
+
+        function aggiornaRisultati() {
+            const query    = (document.getElementById('search-ez').value || '').toLowerCase().trim();
+            const results  = document.getElementById('ez-results');
+            const noRes    = document.getElementById('ez-no-results');
+            const idAggiunti = new Set(_aggiunti.map(e => e.id));
+
+            const filtrati = _tuttiEsercizi.filter(ez => {
+                const perZona     = _zonaFiltro === 'tutte' || ez.zone.includes(_zonaFiltro);
+                const perTesto    = !query || ez.nome.toLowerCase().includes(query);
+                const nonAggiunto = !idAggiunti.has(ez.id);
+                return perZona && perTesto && nonAggiunto;
+            });
+
+            results.innerHTML = '';
+
+            if (filtrati.length === 0) {
+                noRes.textContent = _tuttiEsercizi.length === 0
+                    ? 'Inizia a cercare o seleziona una zona'
+                    : 'Nessun esercizio trovato';
+                results.appendChild(noRes);
+                return;
+            }
+
+            filtrati.forEach(ez => {
+                const row = document.createElement('div');
+                row.className = 'ez-result-row';
+                row.innerHTML = `
+                    <div>
+                        <div class="ez-result-name">${ez.nome}</div>
+                        <div class="ez-result-zona">${ez.zone.join(' · ')}</div>
+                    </div>
+                    <button class="ez-add-btn" onclick="aggiungiEsercizio('${ez.id}')">+ Aggiungi</button>`;
+                results.appendChild(row);
+            });
+        }
+
+        function aggiungiEsercizio(id) {
+            const ez = _tuttiEsercizi.find(e => e.id === id);
+            if (!ez || _aggiunti.find(e => e.id === id)) return;
+            _aggiunti.push(ez);
+            aggiornaAggiunti();
+            aggiornaRisultati();
+        }
+
+        function rimuoviEsercizio(id) {
+            _aggiunti = _aggiunti.filter(e => e.id !== id);
+            aggiornaAggiunti();
+            aggiornaRisultati();
+        }
+
+        function aggiornaAggiunti() {
+            const lista = document.getElementById('added-list');
+            const count = document.getElementById('added-count');
+            const empty = document.getElementById('added-empty');
+
+            count.textContent = _aggiunti.length + ' ' + (_aggiunti.length === 1 ? 'esercizio' : 'esercizi');
+            lista.innerHTML   = '';
+
+            if (_aggiunti.length === 0) {
+                lista.appendChild(empty);
+                return;
+            }
+
+            _aggiunti.forEach(ez => {
+                const row = document.createElement('div');
+                row.className = 'added-row';
+                row.innerHTML = `
+                    <div>
+                        <div class="added-name">${ez.nome}</div>
+                        <div class="added-zona">${ez.zone.join(' · ')}</div>
+                    </div>
+                    <button class="remove-btn" onclick="rimuoviEsercizio('${ez.id}')">✕</button>`;
+                lista.appendChild(row);
+            });
+        }
+
+        function salvaSchedaNuova() {
+            const nome = document.getElementById('input-nome-scheda').value.trim();
+            if (!nome) {
+                document.getElementById('input-nome-scheda').focus();
+                document.getElementById('input-nome-scheda').style.borderColor = '#e24b4a';
+                return;
+            }
+            document.getElementById('input-nome-scheda').style.borderColor = '';
+            chiudiCreaScheda();
+            mostraFeedback('Scheda "' + nome + '" creata!');
         }
 
         /* LEGGE ?zona= DALL'URL */

@@ -330,9 +330,12 @@
 
             <!-- sinistra: accedi -->
             <div class="auth-left">
-                <div>
-                    <div class="auth-title">Accedi</div>
-                    <div class="auth-sub">Bentornato su GymBro</div>
+                <div style="display:flex; align-items:flex-start; justify-content:space-between;">
+                    <div>
+                        <div class="auth-title">Accedi</div>
+                        <div class="auth-sub">Bentornato su GymBro</div>
+                    </div>
+                    <button class="modal-close" onclick="window.location.href='home.html'" title="Torna alla home">&#x2715;</button>
                 </div>
 
                 <div class="form-row">
@@ -356,11 +359,6 @@
                 <span class="field-error" id="login-err-cred" style="text-align:center; font-size:0.75rem; display:block, none;">Credenziali errate</span>
                 <button class="btn-primary" onclick="submitLogin()">Accedi</button>
 
-                
-
-                <button class="forgot-link" onclick="mostraResetPassword()">
-                    Password dimenticata?
-                </button>
             </div>
 
             <!-- destra: invito registrazione -->
@@ -470,8 +468,16 @@
                 <div class="optional-sep">Opzionali — compilabili dopo dal profilo</div>
 
                 <div class="form-row">
-                    <label class="form-label" for="reg-eta">Età</label>
-                    <input class="form-input" type="number" id="reg-eta" placeholder="anni" min="15" max="100">
+                    <label class="form-label" for="reg-nascita">Data di nascita</label>
+                    <input class="form-input" type="date" id="reg-nascita" max="" style="color-scheme: dark;">
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label">Sesso</label>
+                    <div class="obj-options" id="sesso-options">
+                        <button class="obj-opt" onclick="selezionaSesso(this, 'male')">Uomo</button>
+                        <button class="obj-opt" onclick="selezionaSesso(this, 'female')">Donna</button>
+                    </div>
                 </div>
 
                 <div class="form-row">
@@ -497,6 +503,7 @@
         const LIVELLI = ['', 'Principiante', 'Base', 'Intermedio', 'Avanzato', 'Elite'];
         let livelloReg   = 0;
         let obiettivoReg = '';
+        let sessoReg     = '';
 
         /* ── NAVIGAZIONE TRA MODALI ── */
         function apriRegistrazione() {
@@ -514,6 +521,13 @@
             document.querySelectorAll('.obj-opt').forEach(o => o.classList.remove('selected'));
             el.classList.add('selected');
             obiettivoReg = valore;
+        }
+
+        /* ── SESSO ── */
+        function selezionaSesso(el, valore) {
+            document.querySelectorAll('#sesso-options .obj-opt').forEach(o => o.classList.remove('selected'));
+            el.classList.add('selected');
+            sessoReg = valore;
         }
 
         /* ── LIVELLO REGISTRAZIONE ── */
@@ -603,6 +617,18 @@
             }
 
             if (!ok) return;
+            
+            /* calcola età dalla data di nascita */
+            let etaCalcolata = null;
+            const nascita = document.getElementById('reg-nascita').value;
+            if (nascita) {
+                const oggi     = new Date();
+                const dataNasc = new Date(nascita);
+                let anni = oggi.getFullYear() - dataNasc.getFullYear();
+                const mese = oggi.getMonth() - dataNasc.getMonth();
+                if (mese < 0 || (mese === 0 && oggi.getDate() < dataNasc.getDate())) anni--;
+                etaCalcolata = anni;
+            }
 
             const dati = {
                 nome,
@@ -611,27 +637,12 @@
                 password,
                 obiettivo: obiettivoReg,
                 livello:   livelloReg,
-                eta:       document.getElementById('reg-eta').value     || null,
+                data:      etaCalcolata,
+                genere: sessoReg || null,
                 peso:      document.getElementById('reg-peso').value    || null,
                 altezza:   document.getElementById('reg-altezza').value || null,
             };
 
-            /*
-             * BACKEND:
-             * fetch('/api/auth/registrazione', {
-             *     method: 'POST',
-             *     headers: { 'Content-Type': 'application/json' },
-             *     body: JSON.stringify(dati)
-             * })
-             * .then(r => r.json())
-             * .then(data => {
-             *     if (data.token) {
-             *         localStorage.setItem('gymbros-token', data.token);
-             *         localStorage.setItem('gymbros-livello', livelloReg);
-             *         window.location.href = 'home.html';
-             *     }
-             * });
-             */
             const response = await fetch('http://localhost:3000/auth/register', {
                 method : 'POST',
                 headers : { 'Content-Type' : 'application/json'},
@@ -642,17 +653,6 @@
                 alert("Registrazione avvenuta con successo")
                 tornaLogin()
             }
-        }
-
-        function mostraResetPassword() {
-            /*
-             * BACKEND:
-             * Aprire un mini-form per inserire l'email e chiamare:
-             * fetch('/api/auth/reset-password', {
-             *     method: 'POST',
-             *     body: JSON.stringify({ email })
-             * });
-             */
         }
 
         function togglePassword(inputId, btn) {

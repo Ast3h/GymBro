@@ -390,6 +390,7 @@
                          class="av-option" data-num="4" onclick="selezionaAvatar(this, 4)"
                          alt="Avatar 4" title="Avatar 4">
                 </div>
+                 <div class="prof-name"  id="prof-name">—</div>
 
                 <div class="prof-email" id="prof-email">—</div>
 
@@ -563,7 +564,7 @@
                 window.location.href = "auth.html"
             }
             const user = await response.json()
-            
+            console.log(user)
             document.getElementById('dato-nome').textContent = user.nome
             document.getElementById('dato-eta').textContent = user.eta ? user.eta : '-'
             document.getElementById('dato-peso').textContent = user.peso ? user.peso : '-'

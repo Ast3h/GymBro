@@ -508,8 +508,8 @@
                         </div>
 
                         <div class="form-row">
-                            <label class="form-label">Età</label>
-                            <input class="form-input" type="number" id="input-eta" placeholder="Anni" min="10" max="100">
+                            <label class="form-label">Data di Nascita</label>
+                             <input class="form-input" type="date" id="input-nascita" max="" style="color-scheme: dark;">
                         </div>
 
                         <div class="form-row">
@@ -564,9 +564,21 @@
                 window.location.href = "auth.html"
             }
             const user = await response.json()
-            console.log(user)
+            
+            if(user.eta){
+                const oggi = new Date()
+                const nascita = new Date(user.eta)
+
+                let etaCalcolata = oggi.getFullYear() - nascita.getFullYear()
+
+                if(oggi.getMonth() > nascita.getMonth() || (oggi.getMonth() === nascita.getMonth() && oggi.getDate() >= nascita.getDate())){
+                    etaCalcolata++
+                }
+                
+                document.getElementById('dato-eta').textContent = etaCalcolata
+            }
+
             document.getElementById('dato-nome').textContent = user.nome
-            document.getElementById('dato-eta').textContent = user.eta ? user.eta : '-'
             document.getElementById('dato-peso').textContent = user.peso ? user.peso : '-'
             document.getElementById('dato-altezza').textContent = user.altezza ? user.altezza : '-'
             
@@ -636,7 +648,7 @@
 
 
         /*  LIVELLO — barra di visualizzazione  */
-        const LIVELLI = ['', 'Principiante', 'Base', 'Intermedio', 'Avanzato', 'Elite'];
+        const LIVELLI = ['', 'Principiante', 'Novizio', 'Intermedio', 'Esperto', 'Avanzato'];
         let livelloCorrente = 1; 
 
         function renderLivelloDisplay(valore) {
@@ -666,7 +678,7 @@
         function apriModaleModifica() {
             /* pre-popola i campi con i valori attuali */
             document.getElementById('input-nome').value    = document.getElementById('dato-nome').textContent.replace('—', '');
-            document.getElementById('input-eta').value     = document.getElementById('dato-eta').textContent.replace(' anni', '').replace('—', '');
+            //document.getElementById('input-eta').value     = document.getElementById('dato-eta').textContent.replace(' anni', '').replace('—', '');
             document.getElementById('input-peso').value    = document.getElementById('dato-peso').textContent.replace(' kg', '').replace('—', '');
             document.getElementById('input-altezza').value = document.getElementById('dato-altezza').textContent.replace(' cm', '').replace('—', '');
             /* sincronizza barra livello modale */
@@ -682,18 +694,38 @@
             if (e.target === this) chiudiModaleModifica();
         });
 
-        function salvaModifiche() {
+        async function salvaModifiche() {
             const nome    = document.getElementById('input-nome').value.trim();
-            const eta     = document.getElementById('input-eta').value.trim();
+            const data = document.getElementById('input-nascita').value;
             const peso    = document.getElementById('input-peso').value.trim();
             const altezza = document.getElementById('input-altezza').value.trim();
 
             /* aggiorna visualizzazione locale */
+            /*
             if (nome)    document.getElementById('dato-nome').textContent    = nome;
             if (eta)     document.getElementById('dato-eta').textContent      = eta + ' anni';
             if (peso)    document.getElementById('dato-peso').textContent     = peso + ' kg';
             if (altezza) document.getElementById('dato-altezza').textContent  = altezza + ' cm';
+            */
             renderLivelloDisplay(livelloCorrente);
+
+           
+            
+            const response = await fetch('http://localhost:3000/users/profile', {
+                method : 'PATCH',
+                headers : {
+                    "Authorization" : 'Bearer ' + localStorage.getItem('gymbros-token'),
+                    "Content-Type" : 'application/json'
+                },
+                body : JSON.stringify({
+                    name : nome,
+                    data : data,
+                    peso : peso,
+                    altezza : altezza,
+                    livello : livelloCorrente,
+                })
+            })
+
 
             chiudiModaleModifica();}
         </script>

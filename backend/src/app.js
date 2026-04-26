@@ -45,7 +45,7 @@ app.post('/auth/register', async(req, res) =>{
     const nome = req.body.nome
     const cognome = req.body.cognome
     const password = req.body.password
-    const eta = parseInt(req.body.data) 
+    const eta = new Date(req.body.data)
     const peso = parseFloat(req.body.peso)
     const altezza = parseFloat(req.body.altezza)
     const genere = req.body.genere
@@ -82,7 +82,7 @@ app.post('/auth/register', async(req, res) =>{
                 nome : nome,
                 cognome : cognome,
                 password : await bcrypt.hash(password, 10),
-                eta : eta,
+                dataNascita : eta,
                 peso : peso,
                 altezza : altezza,
                 genere : genere,
@@ -157,7 +157,7 @@ app.get('/users/profile', auth, async(req, res) =>{
         nome : user.nome,
         cognome : user.cognome,
         email : user.email,
-        eta : user.eta,
+        eta : user.dataNascita,
         peso : user.peso,
         altezza : user.altezza,
         avatarUrl : user.avatarUrl,
@@ -192,6 +192,34 @@ app.patch('/users/avatar', auth, async(req,res)=>{
         })
         console.log(avatar)
     }catch(error){
+        return res.status(500).json({error : error.message})
+    }
+})
+
+app.patch('/users/profile', auth, async(req,res)=>{
+    const name = req.body.name
+    const data = req.body.data ? new Date(req.body.data) : undefined
+    const peso = parseInt(req.body.peso)
+    const altezza = parseInt(req.body.altezza)
+    const livello = parseInt(req.body.livello)
+    const id = req.id
+
+    try {
+        const user = await prisma.user.findUnique({
+            where : {id : id}
+        })
+
+        const new_data = await prisma.user.update({
+            where : {id : id},
+            data : {
+                nome : name ?? user.nome,
+                peso : peso ?? user.peso,
+                altezza : altezza ?? user.altezza,
+                dataNascita : data ?? user.dataNascita,
+                livello : livello ?? user.livello,
+            }
+        })
+    } catch (error) {
         return res.status(500).json({error : error.message})
     }
 })

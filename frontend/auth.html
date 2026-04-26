@@ -500,7 +500,7 @@
         </div>
     </div>
     <script>
-        const LIVELLI = ['', 'Principiante', 'Base', 'Intermedio', 'Avanzato', 'Elite'];
+        const LIVELLI = ['', 'Principiante', 'Novizio', 'Intermedio', 'Esperto', 'Avanzato'];
         let livelloReg   = 0;
         let obiettivoReg = '';
         let sessoReg     = '';
@@ -637,7 +637,7 @@
                 password,
                 obiettivo: obiettivoReg,
                 livello:   livelloReg,
-                data:      etaCalcolata,
+                data:      nascita,
                 genere: sessoReg || null,
                 peso:      document.getElementById('reg-peso').value    || null,
                 altezza:   document.getElementById('reg-altezza').value || null,

@@ -61,7 +61,7 @@ model User{
   cognome String
   email String @unique
   password String
-  eta Int?
+  dataNascita DateTime?
   peso Float?
   altezza Float?
   avatarUrl String?

@@ -27,6 +27,9 @@ model workout_plan{
   userId Int 
   workoutId Int @id @default(autoincrement())
   name String
+  dataCreazione DateTime?
+  tipo String
+  livello Int?
   workout_ex workout_exercise[]
   workout_set workout_set[]
   user User @relation( fields : [userId], references : [id])

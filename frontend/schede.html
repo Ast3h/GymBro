@@ -376,14 +376,14 @@
 
                 <!-- filtri zona-->
                 <div class="chips-row" id="filtri-personali" style="margin-bottom: 16px;">
-                    <button class="chip active" onclick="filtraSchede('tutte', 'personali', this)">Tutte</button>
-                    <button class="chip" onclick="filtraSchede('Gambe', 'personali', this)">Gambe</button>
-                    <button class="chip" onclick="filtraSchede('Petto', 'personali', this)">Petto</button>
-                    <button class="chip" onclick="filtraSchede('Braccia', 'personali', this)">Braccia</button>
-                    <button class="chip" onclick="filtraSchede('Spalle', 'personali', this)">Spalle</button>
-                    <button class="chip" onclick="filtraSchede('Addome', 'personali', this)">Addome</button>
-                    <button class="chip" onclick="filtraSchede('Glutei', 'personali', this)">Glutei</button>
-                    <button class="chip" onclick="filtraSchede('Schiena', 'personali', this)">Schiena</button>
+                    <button class="chip active" onclick="filtraSchede('tutte', 'Personali', this)">Tutte</button>
+                    <button class="chip" onclick="filtraSchede('gambe', 'personali', this)">Gambe</button>
+                    <button class="chip" onclick="filtraSchede('petto', 'personali', this)">Petto</button>
+                    <button class="chip" onclick="filtraSchede('braccia', 'personali', this)">Braccia</button>
+                    <button class="chip" onclick="filtraSchede('spalle', 'personali', this)">Spalle</button>
+                    <button class="chip" onclick="filtraSchede('addome', 'personali', this)">Addome</button>
+                    <button class="chip" onclick="filtraSchede('glutei', 'personali', this)">Glutei</button>
+                    <button class="chip" onclick="filtraSchede('schiena', 'personali', this)">Schiena</button>
                 </div>
 
                 <!-- BACKEND: riempire con creaCardScheda() e rimuovere #empty-personali se ci sono schede-->
@@ -436,7 +436,7 @@
                     style="width:100%; padding:10px 12px; background:var(--surface2); border:0.5px solid var(--border); border-radius:var(--radius); color:var(--text); font-size:0.85rem; box-sizing:border-box; outline:none; font-family:inherit;">
             </div>
             <div class="modal-footer">
-                <button class="btn-primary" onclick="creaScheda()">Crea scheda</button>
+                <button class="btn-primary" onclick="salvaSchedaNuova()">Crea scheda</button>
                 <button class="btn-ghost" onclick="closeCreateScheda()">Annulla</button>
             </div>
         </div>
@@ -725,13 +725,17 @@
             const token = localStorage.getItem('gymbros-token');
 
             try {
+                const data_create = new Date().toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' })
                 const response = await fetch('http://localhost:3000/workout-plans', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': 'Bearer ' + token
                     },
-                    body: JSON.stringify({ nome })
+                    body: JSON.stringify({ nome : nome,
+                        tipo : 'Personale',
+                        data : data_create,
+                     })
                 });
 
                 if (!response.ok) {
@@ -753,8 +757,8 @@
                     esercizi: 0,
                     giorni:   0,
                     zone:     [],
-                    data:     new Date().toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' }),
-                    tipo:     'personale',
+                    data:     data_create,
+                    tipo:     'Personale',
                     livello:  null
                 };
 
@@ -765,6 +769,37 @@
                 console.error('Errore di rete:', e);
             }
         }
+
+        async function loadSchede(){
+            const response = await fetch('http://localhost:3000/users/workout-plans', {
+                method : 'GET',
+                headers : {
+                    'Authorization' : 'Bearer ' + localStorage.getItem('gymbros-token'),
+                    'Application' : 'application/json'
+                }
+            })
+
+            const data = await response.json()
+            document.getElementById('empty-personali').remove()
+            data.forEach(scheda =>{
+                workout = {
+                    id:       scheda.id,
+                    nome:     scheda.name,
+                    esercizi: scheda._count.workout_ex,
+                    giorni:   0,
+                    zone:     scheda.zone,
+                    data:     new Date(scheda.dataCreazione).toLocaleDateString('it-IT'),
+                    tipo:     scheda.tipo,
+                    livello:  scheda.livello
+                }
+
+                document.getElementById('grid-schede-personali').append(creaCardScheda(workout))
+                console.log(workout)
+            })
+
+        }
+
+        loadSchede()
     </script>
 </body>
 </html>

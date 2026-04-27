@@ -295,15 +295,19 @@ app.get('/fullexercises', auth, async (req,res) =>{
 app.post('/workout-plans', auth,  async (req, res) =>{
     const uid = req.id
     const nome = req.body.nome
-
+    const tipo = req.body.tipo
+    const data = new Date(req.body.data)
     
     try{
         const allenamento = await prisma.workout_plan.create({
             data : {userId : uid,
-                    name : nome
+                    name : nome,
+                    tipo : tipo,
+                    dataCreazione : new Date(),
+
             }
     })
-        console.log(allenamento)
+        //console.log(allenamento)
         res.json(allenamento)
     }catch(error){
         res.status(500).json({errore : error.message })
@@ -320,9 +324,25 @@ app.get('/users/workout-plans', auth, async (req, res) =>{
             include : {
                 _count : {
                     select : {workout_ex : true}
+                },
+                workout_ex : {
+                    include : {
+                        exercise : {
+                            select  : {
+                                macroPart : true,
+                            }
+                        }
+                    }
                 }
             }
         })
+        
+        workout.forEach(single_workout =>{
+            const zone =  [...new Set(single_workout.workout_ex.map(ex => ex.exercise.macroPart))]
+            single_workout.zone = zone
+            delete single_workout.workout_ex
+        })
+            
         
         console.log(workout)
         res.json(workout)

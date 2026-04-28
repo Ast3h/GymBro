@@ -27,7 +27,7 @@ model workout_plan{
   userId Int 
   workoutId Int @id @default(autoincrement())
   name String
-  dataCreazione DateTime?
+  dataCreazione DateTime?s
   tipo String
   livello Int?
   workout_ex workout_exercise[]

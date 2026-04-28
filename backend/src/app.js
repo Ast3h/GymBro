@@ -351,3 +351,39 @@ app.get('/users/workout-plans', auth, async (req, res) =>{
         res.status(500).json({error : error.message})
     }
 })
+
+/* AGGIUNGERE ESERCIZIO A SCHEDA */
+app.post('/users/workout-plans', auth, async(req,res) =>{
+    const id = req.id
+    const workout_id = parseInt(req.body.workout_id)
+    const exercise = parseInt(req.body.exercise)
+    const set = parseInt(req.body.nset)
+
+    try {
+        const response = await prisma.workout_plan.findUnique({
+            where : {
+                userId : id,
+                workoutId : workout_id,
+            }
+        })
+        if(!response){
+            return res.status(401).json({error : 'Unauthorized'})
+        }
+        const exercise_response = await prisma.workout_exercise.create({
+            data: {workoutId : workout_id,
+                exerciseId : exercise,
+                nSet : set,
+                nRep : null
+            }
+        })
+
+        console.log(exercise_response)
+
+
+    } catch (error) {
+        if(error.code === 'P2002'){
+            return res.status(400).json({error : 'Esercizio già presente nella scheda'})
+        }
+        return res.status(500).json({error : error.message})
+    }
+})

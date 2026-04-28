@@ -424,7 +424,13 @@
         }
         .remove-btn:hover { 
             color: #e24b4a; 
-        }       
+        }  
+        
+        .form-row-inline {
+            display: flex;
+            flex-direction: row;
+            gap: 12px;
+        }
 
         @media (max-width: 600px) {
             .esercizi-grid { grid-template-columns: repeat(2, 1fr); }
@@ -607,8 +613,20 @@
                 <!--
                     BACKEND: riempire con creaRigaScheda() via fetch('/api/schede/utente')
                 -->
+                <div class="form-row-inline" style="padding-bottom: 10px; ">
+                    <div class="form-row" style="width: 100%;">
+                        <label class="form-label" for="reg-numero-serie">#Serie</label>
+                        <input class="form-input" type="number" id="reg-numero-serie" placeholder="4" min="1" max="10">
+                    </div>
+                    <div class="form-row" style="width: 100%;">
+                        <label class="form-label" for="reg-altezza">#Reps</label>
+                        <input class="form-input" type="number" id="reg-altezza" placeholder="10" min="2" max="40">
+                    </div>
+                    
+                </div>
+                <div></div>
                 <div class="sel-list" id="sel-lista-schede">
-                    <div style="font-size:0.8rem; color:var(--muted); padding:8px 0;">
+                    <div id="empty-schede" style="font-size:0.8rem; color:var(--muted); padding:8px 0;">
                         Nessuna scheda disponibile.
                     </div>
                 </div>
@@ -778,6 +796,7 @@
 
         /* CREA RIGA SCHEDE NEL SELETTORE */
         function creaRigaScheda(scheda) {
+            console.log(scheda)
             const row = document.createElement('div');
             row.className = 'sel-row';
             row.innerHTML = `
@@ -787,10 +806,36 @@
         }
 
         /* AGGIUNGE ESERCIZIO A SCHEDA */
-        function aggiungiAScheda(schedaId) {
+        async function aggiungiAScheda(schedaId) {
+            const nSet = document.getElementById('reg-numero-serie').value
+
             if (!esercizioCorrente) return;
-            chiudiSelettore();
-            mostraFeedback('Aggiunto a scheda');
+            const response = await fetch('http://localhost:3000/users/workout-plans', {
+                method : 'POST',
+                headers : {
+                    'Authorization' : 'Bearer ' + localStorage.getItem('gymbros-token'),
+                    'Content-Type' : 'application/json',
+                },
+                body : JSON.stringify({
+                    workout_id : schedaId,
+                    exercise : esercizioCorrente.id,
+                    nset : nSet ?? 4,
+                })
+            })
+
+            if(response.ok){
+                chiudiSelettore();
+                mostraFeedback('Aggiunto a scheda');
+            }else{
+                if(response.status == 400){
+                    mostraFeedback('Esercizio già presente nella scheda');
+                }else{
+                    mostraFeedback('Errore');
+                }
+                
+            }
+
+            
         }
 
         function nuovaSchedaDaEsercizio() {
@@ -991,7 +1036,36 @@
 
         loadEx()
 
+        async function loadSchede(){
+            const response = await fetch('http://localhost:3000/users/workout-plans', {
+                method : 'GET',
+                headers : {
+                    'Authorization' : 'Bearer ' + localStorage.getItem('gymbros-token'),
+                    'Application' : 'application/json'
+                }
+            })
 
+            const data = await response.json()
+            document.getElementById('empty-schede').remove()
+            data.forEach(scheda =>{
+                workout = {
+                    id:       scheda.workoutId,
+                    nome:     scheda.name,
+                    esercizi: scheda._count.workout_ex,
+                    giorni:   0,
+                    zone:     scheda.zone,
+                    data:     new Date(scheda.dataCreazione).toLocaleDateString('it-IT'),
+                    tipo:     scheda.tipo,
+                    livello:  scheda.livello
+                }
+
+                document.getElementById('sel-lista-schede').append(creaRigaScheda(workout))
+                console.log(workout)
+            })
+
+        }
+
+        loadSchede()
     </script>
 </body>
 </html>

@@ -386,7 +386,7 @@
                     <button class="chip" onclick="filtraSchede('schiena', 'personali', this)">Schiena</button>
                 </div>
 
-                <!-- BACKEND: riempire con creaCardScheda() e rimuovere #empty-personali se ci sono schede-->
+        
                 <div class="schede-grid" id="grid-schede-personali">
                     <div class="empty-state" id="empty-personali">
                         <p>Non hai ancora salvato nessuna scheda.</p>
@@ -411,33 +411,12 @@
                     <button class="chip" onclick="filtraSchede('Avanzato', 'personali', this)">Avanzato</button>
                 </div>
 
-                <!-- BACKEND: riempire e rimuovere #empty-predefinite se ci sono schede-->
+
                 <div class="schede-grid" id="grid-schede-predefinite">
                     <div class="empty-state" id="empty-predefinite">
                         <p>Nessuna scheda predefinita disponibile.</p>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!--FORM NOME SCHEDA -->
-    <div id="modal-crea-scheda" class="modal-overlay">
-        <div class="modal" style="max-width:360px;">
-            <div class="modal-header">
-                <div>
-                    <div class="modal-title">Nuova scheda</div>
-                    <div class="modal-sub">Dai un nome alla tua scheda</div>
-                </div>
-                <button class="modal-close" onclick="closeCreateScheda()">✕</button>
-            </div>
-            <div class="modal-body">
-                <input id="input-nome-scheda" type="text" placeholder="Es. Forza upper body"
-                    style="width:100%; padding:10px 12px; background:var(--surface2); border:0.5px solid var(--border); border-radius:var(--radius); color:var(--text); font-size:0.85rem; box-sizing:border-box; outline:none; font-family:inherit;">
-            </div>
-            <div class="modal-footer">
-                <button class="btn-primary" onclick="salvaSchedaNuova()">Crea scheda</button>
-                <button class="btn-ghost" onclick="closeCreateScheda()">Annulla</button>
             </div>
         </div>
     </div>
@@ -555,7 +534,7 @@
         /* creaCardScheda(scheda)*/
         function creaCardScheda(scheda){
             const card= document.createElement('div');
-            card.className= 'scheda-card' + (scheda.tipo === 'predefinita' ? 'predefinita' : '');
+            card.className= 'scheda-card' + (scheda.tipo === 'predefinita' ? ' predefinita' : '');
             card.dataset.zone= scheda.zone.join(',');
             card.dataset.id= scheda.id;
 
@@ -568,7 +547,6 @@
                     <button class="scheda-btn danger" onclick="event.stopPropagation(); eliminaScheda('${scheda.id}')">Elimina</button>
                 </div>`
                 : `<div class="scheda-actions">
-                    <button class="scheda-btn" onclick="event.stopPropagation(); salvaScheda('${scheda.id}')">Salva</button>
                 </div>`;
             card.innerHTML=
                 `<div class="scheda-name">${scheda.nome}</div>
@@ -579,7 +557,7 @@
                     ${azioni}
                 </div>`;
             card.addEventListener('click', () => {
-                window.location.href= 'scheda-dettaglio.html?id=' + scheda.id;
+                window.location.href= 'dettaglio.html?id=' + scheda.id;
             });
             return card;
         }
@@ -587,10 +565,9 @@
         /* AZIONI SCHEDE DA COLLEGARE AL BACKEND*/
         function modificaScheda(id) {/*TODO*/}
         function eliminaScheda(id) {/*TODO*/}
-        function salvaScheda(id) {/*TODO*/}
 
                 /* ── MODALE CREA SCHEDA ── */
-        let _tuttiEsercizi  = [];  /* popolato dal backend */
+        let _tuttiEsercizi  = [];  
         let _aggiunti       = [];  /* esercizi aggiunti alla scheda in costruzione */
         let _zonaFiltro     = 'tutte';
 
@@ -602,10 +579,27 @@
             document.querySelectorAll('#crea-filtri .chip').forEach((c, i) => {
                 c.classList.toggle('active', i === 0);
             });
-            aggiornaRisultati();
             aggiornaAggiunti();
             document.getElementById('modal-crea-scheda').classList.add('open');
+
+            console.log('_tuttiEsercizi length:', _tuttiEsercizi.length);
+            if (_tuttiEsercizi.length === 0) {
+                fetch('http://localhost:3000/fullexercises')
+                    .then(r => r.json())
+                    .then(data => {
+                        console.log('esercizi caricati:', data.length);
+                        _tuttiEsercizi = data.map(d => ({
+                            id:    d.id,
+                            nome:  d.nameIt,
+                            zone:  [d.macroPart, d.bodyPart].filter(Boolean),
+                        }));
+                        aggiornaRisultati();
+                    });
+            } else {
+                aggiornaRisultati();
+            }
         }
+        
         function chiudiCreaScheda() {
             document.getElementById('modal-crea-scheda').classList.remove('open');
         }
@@ -636,7 +630,7 @@
             /* filtra per zona e testo */
             const idAggiunti = new Set(_aggiunti.map(e => e.id));
             const filtrati   = _tuttiEsercizi.filter(ez => {
-                const perZona  = _zonaFiltro === 'tutte' || ez.zone.includes(_zonaFiltro);
+                const perZona  = _zonaFiltro === 'tutte' || ez.macroPart.includes(_zonaFiltro);
                 const perTesto = !query || ez.nome.toLowerCase().includes(query);
                 const nonAggiunto = !idAggiunti.has(ez.id);
                 return perZona && perTesto && nonAggiunto;
@@ -660,7 +654,7 @@
                 row.innerHTML = `
                     <div>
                         <div class="ez-result-name">${ez.nome}</div>
-                        <div class="ez-result-zona">${ez.zone.join(' · ')}</div>
+                        <div class="ez-result-zona">${ez.macroPart} · ${ez.bodyPart}</div>
                     </div>
                     <button class="ez-add-btn" onclick="aggiungiEsercizio('${ez.id}')">+ Aggiungi</button>`;
                 results.appendChild(row);
@@ -703,7 +697,7 @@
                 row.innerHTML = `
                     <div>
                         <div class="added-name">${ez.nome}</div>
-                        <div class="added-zona">${ez.zone.join(' · ')}</div>
+                        <div class="added-zona">${ez.macroPart} · ${ez.bodyPart}</div>
                     </div>
                     <button class="remove-btn" onclick="rimuoviEsercizio('${ez.id}')">✕</button>`;
                 lista.appendChild(row);
@@ -752,7 +746,7 @@
                 document.getElementById('empty-personali')?.remove();
 
                 const cardDati = {
-                    id:       nuovaScheda.id,
+                    id:       nuovaScheda.workoutId,
                     nome:     nuovaScheda.name,
                     esercizi: 0,
                     giorni:   0,
@@ -783,12 +777,12 @@
             document.getElementById('empty-personali').remove()
             data.forEach(scheda =>{
                 workout = {
-                    id:       scheda.id,
+                    id:       scheda.workoutId,
                     nome:     scheda.name,
                     esercizi: scheda._count.workout_ex,
                     giorni:   0,
-                    zone:     scheda.zone,
-                    data:     new Date(scheda.dataCreazione).toLocaleDateString('it-IT'),
+                    zone:     scheda.zone ?? [],
+                    data:     scheda.dataCreazione ? new Date(scheda.dataCreazione).toLocaleDateString('it-IT') : '',
                     tipo:     scheda.tipo,
                     livello:  scheda.livello
                 }

@@ -33,10 +33,6 @@ function applyAccent(isPink) {
     if (logo) { logo.style.color = c; }
     if (tema) { tema.textContent = isPink ? 'Rosa' : 'Verde'; }
  
-    /*
-     * Aggiorna gli hover SVG dinamici (usato solo in home.html).
-     * Nelle altre pagine il tag #dyn-accent non esiste — l'if lo gestisce.
-     */
     let dynStyle = document.getElementById('dyn-accent');
     if (dynStyle) {
         dynStyle.textContent = `

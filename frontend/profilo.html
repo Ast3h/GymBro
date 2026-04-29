@@ -181,8 +181,9 @@
         /* DATI PERSONALI */
         .saved-chips {
             display:   flex;
-            flex-wrap: wrap;
             gap:       8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
         }
 
         .saved-chip{
@@ -435,18 +436,25 @@
                 <div class="info-row">
                     <span class="info-label">Altezza</span>
                     <span class="info-val" id="dato-altezza">—</span>
-                    <!-- BACKEND: utente.altezza + ' cm' -->
                 </div>
+            </div>
+            
+            <!-- STATISTICHE -->
+            <div class="section">
+                <div style="display:flex; align-items:center; justify-content:space-between;">
+                    <div class="section-title" style="margin-bottom:0;">Statistiche</div>
+                    <a href="statistiche.html" style="display:flex; align-items:center; gap:6px; font-size:0.72rem; font-weight:500; letter-spacing:0.06em; text-transform:uppercase; color:var(--accent); border:0.5px solid rgba(237,36,155,0.3); border-radius:var(--radius); padding:5px 12px; background:var(--accent-dim); text-decoration:none; transition:background 0.18s;">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                        Vedi statistiche
+                    </a>
+                </div>
+                <div style="font-size:0.78rem; color:var(--muted); margin-top:6px;">Peso, IMC e performance allenamento</div>
             </div>
 
             <!-- SCHEDE SALVATE -->
             <div class="section">
                 <div class="section-title">Schede salvate</div>
                 <div class="saved-chips" id="schede-salvate">
-                    <!--
-                        BACKEND: per ogni scheda inserire:
-                        <a href="schede.html?id=ID" class="saved-chip">NOME</a>
-                    -->
                     <span style="font-size:0.78rem; color:var(--muted);">Nessuna scheda salvata</span>
                 </div>
             </div>
@@ -461,14 +469,12 @@
                 <div class="info-row">
                     <span class="info-label">Notifiche</span>
                     <span class="info-val" id="impost-notifiche">—</span>
-                    <!-- BACKEND: utente.notifiche_attive ? 'Attive' : 'Disattive' -->
                 </div>
             </div>
 
             <!-- FOOTER -->
             <div class="prof-footer">
                 <button class="btn-ghost btn-danger" onclick="userLogout()">Disconnetti</button>
-                <!-- TODO: collegare a logout del backend -->
                 <button class="btn-ghost" onclick="apriModaleModifica()">Modifica</button>
             </div>
 
@@ -728,6 +734,35 @@
 
 
             chiudiModaleModifica();}
+
+        async function caricaSchedeProfilo() {
+            try {
+                const res = await fetch('http://localhost:3000/users/workout-plans', {
+                    headers: { Authorization: 'Bearer ' + localStorage.getItem('gymbros-token') }
+                });
+                if (!res.ok) return;
+                const schede = await res.json();
+                const wrap   = document.getElementById('schede-salvate');
+                wrap.innerHTML = '';
+
+                if (schede.length === 0) {
+                    wrap.innerHTML = '<span style="font-size:0.78rem; color:var(--muted);">Nessuna scheda salvata</span>';
+                    return;
+                }
+
+                schede.forEach(s => {
+                    const chip = document.createElement('a');
+                    chip.href        = 'scheda-dettaglio.html?id=' + s.workoutId;
+                    chip.className   = 'saved-chip';
+                    chip.textContent = s.name;
+                    wrap.appendChild(chip);
+                });
+            } catch (e) {
+                console.error('Errore caricamento schede profilo:', e);
+            }
+        }
+
+        caricaSchedeProfilo();
         </script>
 </body>
 </html>

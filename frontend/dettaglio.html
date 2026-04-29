@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymBro - Dettaglio Scheda</title>
+
+    <link rel="icon" type="image/png" sizes="32x32" href="Favicon32x32.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="stili.css">
+    <script src="funzioni.js" defer></script>
+
+    <style>
+        .page-content { max-width: 700px; }
+
+        /*  HERO  */
+        .scheda-hero {
+            background: var(--surface);
+            border: 0.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+        }
+
+        .scheda-hero-name {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 5px;
+        }
+
+        .scheda-hero-meta {
+            font-size: 0.72rem;
+            color: var(--muted);
+            margin-bottom: 12px;
+        }
+
+        .scheda-hero-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 14px;
+        }
+
+        .scheda-note-label {
+            font-size: 0.62rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 5px;
+        }
+
+        .scheda-note {
+            font-size: 0.78rem;
+            color: var(--muted);
+            line-height: 1.6;
+            padding-top: 12px;
+            border-top: 0.5px solid var(--border);
+        }
+
+        .scheda-note.vuota {
+            font-style: italic;
+            color: var(--border);
+        }
+
+        /*  PULSANTE AVVIA  */
+        .start-btn {
+            width: 100%;
+            padding: 12px 0;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius);
+            font-family: var(--font-body);
+            font-size: 0.82rem;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: opacity 0.18s;
+        }
+
+        .start-btn:hover { opacity: 0.88; }
+
+        /*  LISTA ESERCIZI  */
+        .ez-list { display: flex; flex-direction: column; gap: 8px; }
+
+        .ez-item {
+            background: var(--surface);
+            border: 0.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: border-color 0.18s;
+            cursor: pointer;
+        }
+
+        .ez-item:hover { border-color: var(--accent); }
+
+        .ez-num {
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: var(--accent);
+            width: 20px;
+            flex-shrink: 0;
+        }
+
+        .ez-info { flex: 1; min-width: 0; }
+
+        .ez-name {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .ez-zona {
+            font-size: 0.68rem;
+            color: var(--muted);
+            margin-top: 3px;
+        }
+
+        .ez-badges { display: flex; gap: 5px; flex-shrink: 0; }
+
+        .ez-badge {
+            font-size: 0.65rem;
+            padding: 3px 9px;
+            border-radius: 4px;
+            background: var(--surface2);
+            border: 0.5px solid var(--border);
+            color: var(--muted);
+            white-space: nowrap;
+        }
+
+        .ez-badge.accent {
+            background: var(--accent-dim);
+            border-color: rgba(237,36,155,0.2);
+            color: var(--accent);
+        }
+
+        .ez-video-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--surface2);
+            border: 0.5px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: border-color 0.18s, background 0.18s;
+            text-decoration: none;
+        }
+
+        .ez-video-btn:hover {
+            border-color: var(--accent);
+            background: var(--accent-dim);
+        }
+
+        .ez-empty {
+            font-size: 0.78rem;
+            color: var(--muted);
+            text-align: center;
+            padding: 24px;
+            border: 0.5px dashed var(--border);
+            border-radius: var(--radius);
+        }
+
+        /*  AZIONI HEADER  */
+        .scheda-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .back-link {
+            font-size: 0.72rem;
+            color: var(--muted);
+            text-decoration: none;
+            border: 0.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 5px 12px;
+            transition: color 0.18s, border-color 0.18s;
+        }
+
+        .back-link:hover { color: var(--text); border-color: var(--text); }
+
+        .scheda-azioni { margin-left: auto; display: flex; gap: 8px; }
+
+        .btn-elimina {
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #e24b4a;
+            border: 0.5px solid rgba(226,75,74,0.3);
+            border-radius: var(--radius);
+            padding: 5px 12px;
+            background: none;
+            cursor: pointer;
+            transition: background 0.18s;
+        }
+
+        .btn-elimina:hover { background: rgba(226,75,74,0.08); }
+
+        /* skeleton loading */
+        .skeleton {
+            background: var(--surface2);
+            border-radius: 4px;
+            animation: pulse 1.4s ease infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.4; }
+        }
+
+        @media (max-width: 600px) {
+            .ez-badges { display: none; }
+            .scheda-azioni .btn-ghost { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!--  TOPBAR  -->
+    <header class="topbar">
+        <div class="topbar-left">
+            <button class="hamburger-btn" id="hamburger-btn" onclick="toggleSidebar()">
+                <span></span><span></span><span></span>
+            </button>
+            <a href="home.html" class="logo">
+                <img src="Favicon64x64.png" alt="" class="logo-img">
+                GYM<span>BRO</span>
+            </a>
+        </div>
+        <div class="topbar-icons">
+            <div class="color-switch pink" id="color-switch" onclick="toggleAccent()" title="Cambia colore">
+                <div class="switch-knob"></div>
+            </div>
+            <div class="notif-wrap" id="notif-wrap">
+                <button class="icon-btn" id="notif-btn" onclick="toggleNotifiche(event)" title="Notifiche" aria-label="Notifiche" aria-expanded="false">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                    <div class="notif-dot" id="notif-dot"></div>
+                </button>
+                <div class="notif-dropdown" id="notif-dropdown" role="dialog" aria-label="Notifiche">
+                    <div class="notif-dropdown-header">
+                        <span class="notif-dropdown-title">Notifiche</span>
+                        <button class="notif-mark-all" id="notif-mark-all" onclick="segnaLette()" style="display:none;">Segna tutte come lette</button>
+                    </div>
+                    <div class="notif-list" id="notif-list">
+                        <div class="notif-empty" id="notif-empty">Nessuna notifica per ora</div>
+                    </div>
+                    <div class="notif-dropdown-footer" id="notif-footer" style="display:none;">
+                        <button class="notif-see-all" onclick="vediTutte()">Vedi tutte</button>
+                    </div>
+                </div>
+            </div>
+            <a href="schede.html" class="icon-btn" title="Le mie schede">
+                <svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg>
+            </a>
+            <a href="profilo.html" class="icon-btn" title="Profilo">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            </a>
+        </div>
+    </header>
+
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <nav class="sidebar" id="sidebar">
+        <a href="esercizi.html" class="sidebar-item" style="color:var(--text); border-bottom:0.5px solid var(--border); margin-bottom:4px; padding-bottom:12px;">Esercizi</a>
+        <a href="home.html"    class="sidebar-item">Home</a>
+        <a href="schede.html"  class="sidebar-item">Schede</a>
+        <a href="profilo.html" class="sidebar-item">Profilo</a>
+    </nav>
+
+    <!--  CONTENUTO  -->
+    <div class="page-layout">
+        <div class="page-content">
+
+            <!-- header con back e azioni -->
+            <div class="scheda-header-actions">
+                <a href="schede.html" class="back-link">← Schede</a>
+                <div class="scheda-azioni">
+                    <button class="btn-ghost" onclick="apriModaleModifica()">Modifica</button>
+                    <button class="btn-elimina" onclick="eliminaScheda()">Elimina</button>
+                </div>
+            </div>
+
+            <!-- hero -->
+            <div class="section">
+                <div class="scheda-hero" id="scheda-hero">
+                    <!-- skeleton loading -->
+                    <div class="skeleton" style="height:20px; width:60%; margin-bottom:8px;"></div>
+                    <div class="skeleton" style="height:12px; width:40%; margin-bottom:14px;"></div>
+                    <div style="display:flex; gap:5px; margin-bottom:14px;">
+                        <div class="skeleton" style="height:20px; width:60px; border-radius:20px;"></div>
+                        <div class="skeleton" style="height:20px; width:60px; border-radius:20px;"></div>
+                    </div>
+                    <div class="skeleton" style="height:12px; width:100%; margin-bottom:6px;"></div>
+                    <div class="skeleton" style="height:12px; width:80%;"></div>
+                </div>
+            </div>
+
+            <!-- avvia allenamento -->
+            <button class="start-btn" onclick="avviaAllenamento()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Avvia allenamento
+            </button>
+
+            <!-- lista esercizi -->
+            <div class="section">
+                <div class="section-title">Esercizi</div>
+                <div class="ez-list" id="ez-list">
+                    <!-- skeleton -->
+                    <div class="ez-item" style="cursor:default;">
+                        <div class="skeleton" style="width:20px; height:14px;"></div>
+                        <div style="flex:1;">
+                            <div class="skeleton" style="height:14px; width:55%; margin-bottom:5px;"></div>
+                            <div class="skeleton" style="height:10px; width:35%;"></div>
+                        </div>
+                        <div class="skeleton" style="width:60px; height:20px; border-radius:4px;"></div>
+                    </div>
+                    <div class="ez-item" style="cursor:default;">
+                        <div class="skeleton" style="width:20px; height:14px;"></div>
+                        <div style="flex:1;">
+                            <div class="skeleton" style="height:14px; width:45%; margin-bottom:5px;"></div>
+                            <div class="skeleton" style="height:10px; width:30%;"></div>
+                        </div>
+                        <div class="skeleton" style="width:60px; height:20px; border-radius:4px;"></div>
+                    </div>
+                    <div class="ez-item" style="cursor:default;">
+                        <div class="skeleton" style="width:20px; height:14px;"></div>
+                        <div style="flex:1;">
+                            <div class="skeleton" style="height:14px; width:50%; margin-bottom:5px;"></div>
+                            <div class="skeleton" style="height:10px; width:40%;"></div>
+                        </div>
+                        <div class="skeleton" style="width:60px; height:20px; border-radius:4px;"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!--  BOTTOM NAV MOBILE  -->
+    <nav class="bottom-nav">
+        <a href="home.html"     class="bottom-nav-item"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>Home</span></a>
+        <a href="esercizi.html" class="bottom-nav-item"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><span>Esercizi</span></a>
+        <a href="schede.html"   class="bottom-nav-item active"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/></svg><span>Schede</span></a>
+        <a href="profilo.html"  class="bottom-nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Profilo</span></a>
+    </nav>
+
+    <!--  MODALE MODIFICA  -->
+    <div class="modal-overlay" id="modal-modifica">
+        <div class="modal">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title">Modifica scheda</div>
+                    <div class="modal-sub">Cambia nome o note della scheda</div>
+                </div>
+                <button class="modal-close" onclick="chiudiModaleModifica()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row" style="display:flex; flex-direction:column; gap:5px;">
+                    <label style="font-size:0.65rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted);">Nome scheda</label>
+                    <input style="width:100%; padding:9px 12px; border-radius:var(--radius); border:0.5px solid var(--border); background:var(--surface2); color:var(--text); font-family:var(--font-body); font-size:0.85rem; outline:none;"
+                           type="text" id="mod-nome" placeholder="Nome scheda">
+                </div>
+                <div class="form-row" style="display:flex; flex-direction:column; gap:5px; margin-top:12px;">
+                    <label style="font-size:0.65rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted);">Note (opzionale)</label>
+                    <textarea style="width:100%; padding:9px 12px; border-radius:var(--radius); border:0.5px solid var(--border); background:var(--surface2); color:var(--text); font-family:var(--font-body); font-size:0.85rem; outline:none; resize:vertical; min-height:80px;"
+                              id="mod-note" placeholder="Es. 3 giorni a settimana, riposo 90 secondi..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-ghost" onclick="chiudiModaleModifica()">Annulla</button>
+                <button class="btn-primary" onclick="salvaModifica()">Salva</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const TOKEN = () => localStorage.getItem('gymbros-token');
+        const API   = 'http://localhost:3000';
+
+        /* legge l'id dalla URL */
+        const params   = new URLSearchParams(window.location.search);
+        const schedaId = parseInt(params.get('id'));
+
+        let _scheda = null;
+
+        /*  CARICA SCHEDA  */
+        async function caricaScheda() {
+            if (!schedaId) {
+                window.location.href = 'schede.html';
+                return;
+            }
+
+            /*
+             * BACKEND — endpoint da creare (vedi nota al tuo collega):
+             * GET /users/workout-plans/:id
+             * Risposta attesa:
+             * {
+             *   workoutId: 3,
+             *   name: "Push Pull Legs",
+             *   dataCreazione: "2026-04-26T...",
+             *   tipo: "Personale",
+             *   note: "...",
+             *   workout_ex: [
+             *     {
+             *       exerciseId: 4,
+             *       nSet: 4,
+             *       nRep: null,
+             *       exercise: { id: 4, nameIt: "Panca piana", macroPart: "petto", bodyPart: "petto", videoUrl: "..." }
+             *     },
+             *     ...
+             *   ]
+             * }
+             */
+
+            try {
+                const res = await fetch(`${API}/users/workout-plans/${schedaId}`, {
+                    headers: { Authorization: 'Bearer ' + TOKEN() }
+                });
+
+                if (!res.ok) {
+                    window.location.href = 'schede.html';
+                    return;
+                }
+
+                _scheda = await res.json();
+                renderScheda();
+
+            } catch (e) {
+                console.error('Errore caricamento scheda:', e);
+            }
+        }
+
+        /*  RENDER  */
+        function renderScheda() {
+            if (!_scheda) return;
+
+            /* titolo pagina */
+            document.title = 'GymBro — ' + _scheda.name;
+
+            /* zone muscolari uniche */
+            const zone = [...new Set(
+                (_scheda.workout_ex || []).map(ex => ex.exercise?.macroPart).filter(Boolean)
+            )];
+
+            const tags = [
+                `<span class="tag accent">${_scheda.tipo || 'Personale'}</span>`,
+                ...zone.map(z => `<span class="tag" style="background:var(--green-dim,rgba(140,198,63,0.08)); color:#8cc63f; border-color:rgba(140,198,63,0.3);">${z.charAt(0).toUpperCase() + z.slice(1)}</span>`)
+            ].join('');
+
+            const data = _scheda.dataCreazione
+                ? new Date(_scheda.dataCreazione).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' })
+                : '—';
+
+            const nEx = (_scheda.workout_ex || []).length;
+
+            document.getElementById('scheda-hero').innerHTML = `
+                <div class="scheda-hero-name">${_scheda.name}</div>
+                <div class="scheda-hero-meta">${nEx} esercizi · creata il ${data}</div>
+                <div class="scheda-hero-tags">${tags}</div>
+                <div class="scheda-note-label">Note</div>
+                <div class="scheda-note ${_scheda.note ? '' : 'vuota'}">
+                    ${_scheda.note || 'Nessuna nota'}
+                </div>`;
+
+            /* lista esercizi */
+            const lista = document.getElementById('ez-list');
+            lista.innerHTML = '';
+
+            if (nEx === 0) {
+                lista.innerHTML = '<div class="ez-empty">Nessun esercizio in questa scheda. Vai su Esercizi per aggiungerne.</div>';
+                return;
+            }
+
+            _scheda.workout_ex.forEach((ex, i) => {
+                const nome  = ex.exercise?.nameIt || ex.exercise?.name || 'Esercizio';
+                const zona  = [ex.exercise?.macroPart, ex.exercise?.bodyPart].filter(Boolean).join(' · ');
+                const video = ex.exercise?.videoUrl;
+                const num   = String(i + 1).padStart(2, '0');
+
+                const item = document.createElement('div');
+                item.className = 'ez-item';
+                item.innerHTML = `
+                    <div class="ez-num">${num}</div>
+                    <div class="ez-info">
+                        <div class="ez-name">${nome}</div>
+                        <div class="ez-zona">${zona}</div>
+                    </div>
+                    <div class="ez-badges">
+                        <span class="ez-badge accent">${ex.nSet} serie</span>
+                        ${ex.nRep ? `<span class="ez-badge">${ex.nRep} reps</span>` : ''}
+                    </div>
+                    ${video
+                        ? `<a class="ez-video-btn" href="${video}" target="_blank" onclick="event.stopPropagation()" title="Guarda video">
+                               <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                           </a>`
+                        : ''}`;
+
+                lista.appendChild(item);
+            });
+        }
+
+        /*  AVVIA ALLENAMENTO  */
+        function avviaAllenamento() {
+            window.location.href = 'statistiche.html?scheda=' + schedaId;
+        }
+
+        /*  ELIMINA SCHEDA  */
+        async function eliminaScheda() {
+            if (!confirm('Sei sicuro di voler eliminare questa scheda?')) return;
+
+            /*
+             * BACKEND:
+             * await fetch(`${API}/workout-plans/${schedaId}`, {
+             *     method: 'DELETE',
+             *     headers: { Authorization: 'Bearer ' + TOKEN() }
+             * });
+             */
+
+            window.location.href = 'schede.html';
+        }
+
+        /*  MODALE MODIFICA  */
+        function apriModaleModifica() {
+            if (_scheda) {
+                document.getElementById('mod-nome').value = _scheda.name || '';
+                document.getElementById('mod-note').value = _scheda.note || '';
+            }
+            document.getElementById('modal-modifica').classList.add('open');
+        }
+
+        function chiudiModaleModifica() {
+            document.getElementById('modal-modifica').classList.remove('open');
+        }
+
+        document.getElementById('modal-modifica').addEventListener('click', function(e) {
+            if (e.target === this) chiudiModaleModifica();
+        });
+
+        async function salvaModifica() {
+            const nome = document.getElementById('mod-nome').value.trim();
+            const note = document.getElementById('mod-note').value.trim();
+
+            if (!nome) {
+                document.getElementById('mod-nome').focus();
+                return;
+            }
+
+            chiudiModaleModifica();
+
+            /*
+             * BACKEND:
+             * await fetch(`${API}/workout-plans/${schedaId}`, {
+             *     method: 'PATCH',
+             *     headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN() },
+             *     body: JSON.stringify({ nome, note })
+             * });
+             */
+
+            /* aggiorna localmente senza ricaricare */
+            if (_scheda) {
+                _scheda.name = nome;
+                _scheda.note = note;
+                renderScheda();
+            }
+        }
+
+        /*  START  */
+        caricaScheda();
+    </script>
+
+</body>
+</html>

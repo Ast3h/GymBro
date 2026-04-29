@@ -20,7 +20,7 @@
 
     <style>
         body{
-            min-width: 320px; /* evita che si rompa su zoom estremo*/
+            min-width: 320px;
             overflow-x: auto;
             overflow-y: auto;
         }
@@ -99,20 +99,21 @@
         }
 
         /* SVG responsive*/
-        .svg-container{
+        .svg-container {
             width: 100%;
-            max-height: calc(100vh -56px - 80px);
-            height: 100%;
+            flex: 1;
+            min-height: 0;
             display: flex;
             justify-content: center;
             align-items: center;
         }
-        .svg-container svg{
-            width: 75%;
-            height: auto;
-            display: block;
+
+        .svg-container svg {
+            width: auto;
+            height: 100%;
+            max-height: calc(100vh - 56px - 160px);
             max-width: 100%;
-            margin: 0 auto;
+            display: block;
         }
 
         /* ZONE FEMMINILI: base scuro */
@@ -431,7 +432,7 @@
             min-width: 190px;
             max-width: 250px;
             text-align: center;
-            z-index: 1;
+            
         }
 
         .hero-title{
@@ -538,9 +539,6 @@
 
         /* Pulsante rotazione - generale*/
         .rotate-btn{
-            position: absolute;
-            bottom: 16px;
-            left: 150px;
             display: flex;
             align-items: center;
             gap: 6px;
@@ -550,6 +548,9 @@
             padding: 5px 10px;
             cursor: pointer;
             transition: border-color 0.18s, background 0.18s;
+            flex-shrink: 0;
+            align-self: center;
+            z-index: 1;
         }
 
         .rotate-btn:hover{
@@ -582,6 +583,93 @@
             margin-top: 10px;
         }
 
+        /*Hint banner*/
+        .hint-banner {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+            border-top: 0.5px solid color-mix(in srgb, var(--accent) 20%, transparent);
+            padding: 12px 20px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            pointer-events: none;
+            z-index: 5;
+            transition: opacity 0.4s ease;
+        }
+
+        .hint-banner.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .hint-icon {
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            background: var(--accent-dim);
+            border: 0.5px solid color-mix(in srgb, var(--accent) 30%, transparent);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .hint-text {
+            font-size: 0.72rem;
+            color: var(--muted);
+            line-height: 1.45;
+        }
+
+        .hint-text strong { color: var(--text); font-weight: 500; }
+
+        .hint-dismiss {
+            margin-left: auto;
+            font-size: 0.62rem;
+            color: var(--muted);
+            border: 0.5px solid var(--border);
+            border-radius: 4px;
+            padding: 3px 8px;
+            background: none;
+            cursor: pointer;
+            pointer-events: all;
+            flex-shrink: 0;
+            transition: color 0.18s, border-color 0.18s;
+        }
+
+        .hint-dismiss:hover { color: var(--text); border-color: var(--text); }
+
+        /* mobile: hint banner dentro mobile-svg-wrap */
+        .mobile-hint-banner {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            padding: 12px 20px 14px;
+            background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+            border-top: 0.5px solid color-mix(in srgb, var(--accent) 20%, transparent);
+            border-radius: var(--radius);
+            transition: opacity 0.4s ease;
+        }
+
+        .mobile-hint-banner.hidden { display: none; }
+
+        .mobile-hint-text {
+            font-size: 0.68rem;
+            color: var(--muted);
+            flex: 1;
+            line-height: 1.4;
+        }
+
+        .mobile-hint-text strong { color: var(--text); font-weight: 500; }
+
+        .mobile-hint-dismiss {
+            font-size: 0.6rem;
+            color: var(--muted);
+            border: 0.5px solid var(--border);
+            border-radius: 4px;
+            padding: 2px 7px;
+            background: none;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
         /* Etichetta vicino al mouse quando si passa su un muscolo*/
         #muscle-etichetta{
             position:fixed;
@@ -607,7 +695,7 @@
         }
 
         /* Responsive: mobile */
-        @media (max-width: 1024px){
+        @media (max-width: 1023px){
             body{
                 overflow-y: auto;
             }
@@ -631,7 +719,7 @@
             }
 
             /* No colonne*/
-            .body-con-man{
+            .body-con-male{
                 display:none;
             }
 
@@ -723,6 +811,10 @@
                 text-transform: uppercase;
                 color: var(--muted);
             }
+
+            .hint-banner {
+                display: none;
+            }
         }
 
         /* Animazione entrata*/
@@ -743,9 +835,6 @@
     </style>
 </head>
 <body>
-    
-    <!-- Etichetta zona muscolare (usato da javascript)-->
-    <div id="muscle-etichetta"></div>
 
     <!-- Topbar con logo e icone -->
      <header class="topbar">
@@ -928,6 +1017,7 @@
                     </g>
                     </svg>
                 </div>
+
                 <!-- SVG corpo DONNA mobile-->
                  <div id="mobile-fem">
                     <svg id="svg-fem-mobile" viewBox="0 0 600 800" xmlns="http://www.w3.org/2000/svg" style="display: none;">
@@ -1013,7 +1103,7 @@
 
                 </div>
 
-                 <!-- Pulsante toggle-->
+                 <!-- Pulsante toggle e rotazione-->
                 <div class="mobile-btn-row">
                     <div class="mobile-rotate-btn" id="mobile-rotate-btn" onclick="rotateMobile()">
                         <span class="mobile-rotate-label">⟳</span>
@@ -1023,9 +1113,23 @@
                         <span class="mobile-toggle-label" id="mobile-toggle-label">Donna</span>
                     </div>
                 </div>
+                
+                <!-- HINT MOBILE -->
+                <div class="mobile-hint-banner" id="hint-banner-mobile">
+                    <div class="hint-icon" style="width:22px; height:22px;">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                    </div>
+                    <div class="mobile-hint-text"><strong>Tocca una zona</strong> per filtrare gli esercizi</div>
+                    <button class="mobile-hint-dismiss" onclick="chiudiHint()">Ok</button>
+                </div>
             </div>
          </div>
 
+         <!-- VERSIONE GRANDE -->
         <!-- Colonna sinistra: CORPO UOMO-->
          <!-- Il data-zone controlla il testo mostrato nel etichetta-->
          <div class="body-con body-con-male">
@@ -1125,18 +1229,34 @@
                     </svg>
 
             </div>
-            <div class="view-label" id="view-label-male">Anteriore</div>
 
-            <div class="rotate-btn" onclick="rotateMale()">
-                <span class="rotate-label">⟳</span>
+            <div style="display:grid; grid-template-columns:1fr auto 1fr; align-items:center; width:100%;">
+                <div class="rotate-btn" onclick="rotateMale()" style="justify-self:center;">
+                    <span class="rotate-label">⟳</span>
+                </div>
+                <div class="view-label" id="view-label-male">Anteriore</div>
+                <div></div>
             </div>
          </div>
+
+        <!-- HINT BANNER DESKTOP -->
+        <div class="hint-banner" id="hint-banner-desktop">
+            <div class="hint-icon">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+            </div>
+            <div class="hint-text"><strong>Clicca su una zona muscolare</strong> per filtrare gli esercizi</div>
+            <button class="hint-dismiss" onclick="chiudiHint()">Ok, ho capito</button>
+        </div>
 
          <!-- Colonna centrale: TITOLO E PULSANTI-->
           <div class="center-col">
 
             <div>
-                <img src="Favicon64x64.png" alt="GymBro logo" style="width:120px; height:120px; display:block; margin: 0 auto 12px;">
+                <img src="ImmLogo.png" alt="GymBro logo" style="width:200px; height:200px; display:block; margin: 0 auto 12px;">
                 <div class="hero-title">GYM<span>BRO</span></div>
                 <p class="hero-sub" style="margin-top: 14px;">
                     Il tuo allenamento,<br>
@@ -1238,12 +1358,14 @@
                     <g id="am39"><path d="M312.174,590.512 C312.124,590.193,312.08,589.875,312.042,589.555 C311.158,581.956,312.37,574.093,313.611,566.594 C313.724,565.91,314.045,565.293,314.096,564.607 C314.189,563.363,314.564,562.091,314.927,560.954 C314.971,560.815,315.044,560.67,315.069,560.578 C315.253,559.905,315.349,559.217,315.527,558.544 C316.202,556.003,316.576,553.32,317.102,550.745 C317.603,548.289,318.152,545.649,318.287,543.104 C318.323,542.433,318.165,541.743,318.047,541.074 C317.45,537.686,317.156,535.017,316.973,531.949 C316.875,530.302,317.033,528.673,317.073,527.033 C317.12,525.104,316.994,523.16,316.971,521.23 C316.969,521.033,316.986,520.834,317.009,520.634 C317.18,519.133,316.519,517.521,316.174,515.998 C315.66,513.727,315.248,511.55,314.511,509.392 C314.351,508.923,314.193,508.452,314.042,507.978 C313.543,506.412,313.183,504.804,312.73,503.225 C312.25,501.555,311.988,499.971,311.547,498.272 C310.662,494.86,310.173,491.365,310.388,487.745 C310.562,484.823,311.73,482.081,312.348,479.245 C312.765,477.331,313.464,475.45,313.392,473.51 C313.389,473.43,313.395,473.349,313.393,473.294 C313.374,472.884,313.395,472.478,313.347,472.068 C313.227,471.035,313.019,470.012,312.863,468.982 C312.647,467.557,312.153,466.174,311.802,464.761 C311.171,462.224,310.389,459.714,309.851,457.148 C309.445,455.205,309.29,453.193,308.943,451.235 C308.71,449.92,308.32,448.606,308.136,447.288 C307.387,441.916,307.344,436.416,306.053,431.151 C305.475,428.791,304.943,426.422,304.661,424.018 C304.38,421.621,304.599,419.096,304.656,416.691 C304.753,412.534,305.152,408.576,305.405,404.411 C305.44,403.847,305.529,403.277,305.568,402.741 C305.656,401.529,305.759,400.303,305.9,399.098 C306.028,398.013,306.283,396.949,306.4,395.864 C306.458,395.319,306.639,394.793,306.712,394.251 C306.945,392.53,307.246,390.826,307.602,389.126 C307.752,388.409,307.899,387.695,308.011,386.976 C308.023,386.9,308.043,386.83,308.076,386.773 C308.454,387.637,308.98,388.41,309.523,389.173 C310.581,390.661,311.841,392.053,313.409,393.011 C313.586,393.119,313.759,393.301,313.88,393.384 C314.658,393.913,315.475,394.443,316.227,395.006 C316.872,395.488,317.747,395.765,318.467,396.127 C320.446,397.121,322.44,398.415,324.584,398.705 C324.71,398.722,324.855,398.768,324.914,398.785 C325.413,398.932,325.909,399.076,326.414,399.206 C328.386,399.712,330.472,400.202,332.503,400.382 C336.286,400.716,340.108,400.207,343.897,400.559 C345.625,400.719,347.333,400.925,348.945,401.655 C350.334,402.285,351.44,403.408,352.571,404.404 C353.46,405.186,354.393,405.861,355.227,406.679 C355.962,407.4,356.718,408.176,357.419,408.99 C362.307,414.667,369.672,418.482,368.722,425.585 C368.703,425.724,368.641,425.868,368.673,426.007 C368.693,426.093,368.705,426.18,368.72,426.265 C368.797,426.02,368.894,425.788,368.943,425.534 C368.995,425.262,369.017,424.971,369.099,424.706 C369.073,424.869,369.091,425.04,369.072,425.204 C368.985,425.969,368.828,426.739,368.796,427.503 C368.751,428.558,368.487,429.602,368.404,430.674 C368.301,432.008,368.062,433.298,367.89,434.621 C367.754,435.666,367.696,436.714,367.506,437.752 C367.409,438.282,367.309,438.869,367.196,439.395 C367.067,439.995,367.03,440.424,366.939,441.031 C366.811,441.884,366.644,442.723,366.531,443.579 C365.598,450.672,362.958,458.361,362.3,464.932 C362.028,467.652,361.237,469.861,361.288,472.274 C361.299,472.78,361.19,473.245,361.152,473.744 C361.107,474.336,361.137,474.958,360.986,475.535 C360.737,476.49,360.27,477.361,359.827,478.234 C359.66,478.563,359.476,478.887,359.382,479.235 C359.331,479.421,359.276,479.607,359.214,479.789 C359.007,480.395,358.731,481.11,358.465,481.686 C358.305,482.035,358.139,482.24,358.02,482.604 C357.278,484.887,357.296,486.572,357.27,487.119 C357.104,490.59,357.244,492.582,356.799,494.892 C356.24,497.796,354.78,502.898,354.109,506.062 C353.246,510.129,352.395,511.616,351.861,515.167 C351.128,520.034,350.807,527.585,351.583,534.091 C351.863,536.437,352.121,538.813,352.488,541.149 C352.927,543.945,353.518,546.696,353.89,549.506 C354.052,550.722,354.36,551.918,354.498,553.139 C354.749,555.362,354.373,557.854,354.462,560.036 C354.511,561.243,354.511,562.561,354.447,564.036 C354.353,566.203,354.382,568.449,354.141,570.719 C353.942,572.599,353.991,574.157,353.821,576.367 C353.781,576.881,353.792,577.321,353.812,577.817 C353.869,579.216,353.801,580.569,353.775,581.966 C353.76,582.8,353.897,583.628,353.863,584.467 C353.748,587.33,353.37,590.119,352.815,592.928 C352.595,594.041,352.3,595.164,352.175,596.28 C351.511,602.198,350.673,607.908,349.596,613.087 C347.834,621.559,346.928,625.798,345.459,631.151 C344.756,633.711,343.555,636.342,342.763,640.156 C341.974,642.869,340.744,646.984,340.268,648.805 C340.017,649.762,339.575,651.033,339.38,651.974 C338.837,654.586,337.909,657.292,337.04,659.812 C336.227,662.17,335.221,664.523,334.536,666.921 C333.54,670.414,332.929,674.207,332.213,677.784 C330.968,684.006,329.141,690.764,325.157,695.932 C325.11,695.994,325.062,696.055,325.013,696.115 C323.897,697.511,321.38,699.853,319.393,699.327 C316.958,698.682,315.541,696.017,314.632,693.839 C313.663,691.516,312.525,689.486,312.319,686.897 C312.062,683.661,313.094,680.469,313.676,677.335 C316.418,662.559,317.324,648.477,317.918,633.43 C317.93,633.115,317.884,631.645,317.891,631.33 C317.924,629.953,317.844,628.244,317.786,626.859 C317.622,622.9,317.746,619.989,317.9,615.719 C317.917,615.239,317.741,614.772,317.683,614.301 C317.236,610.709,317.075,607.23,316.065,603.713 C315.887,603.094,315.695,602.473,315.494,601.852 C315.339,601.371,315.012,600.96,314.781,600.505 C314.319,599.595,313.931,598.592,313.6,597.627 C313.458,597.213,313.411,596.765,313.293,596.344 C313.088,595.612,312.845,594.898,312.676,594.155 C312.586,593.759,312.57,593.354,312.504,592.955 C312.369,592.137,312.304,591.336,312.174,590.512 z"/></g>
                 </g>
                 </svg>
-            </div>
+            </div>   
             
-            <div class="view-label" id="view-label-fem">Anteriore</div>
-            
-            <div class="rotate-btn" onclick="rotateFem()">
-                <span class="rotate-label">⟳</span>
+            <div style="display:grid; grid-template-columns:1fr auto 1fr; align-items:center; width:100%;">
+                <div class="rotate-btn" onclick="rotateFem()" style="justify-self:center;">
+                    <span class="rotate-label">⟳</span>
+                </div>
+                <div class="view-label" id="view-label-male">Anteriore</div>
+                <div></div>
             </div>
          </div>        
     </main>
@@ -1338,13 +1460,31 @@
             }
         }
 
-         /* Mostra sezione mobile svg solo sotto i 600px*/
+        /*  hint banner */
+        (function initHint() {
+            if (localStorage.getItem('gymbros-hint-corpo') === 'done') {
+                const d = document.getElementById('hint-banner-desktop');
+                const m = document.getElementById('hint-banner-mobile');
+                if (d) d.classList.add('hidden');
+                if (m) m.classList.add('hidden');
+            }
+        })();
+
+        function chiudiHint() {
+            const d = document.getElementById('hint-banner-desktop');
+            const m = document.getElementById('hint-banner-mobile');
+            if (d) d.classList.add('hidden');
+            if (m) m.classList.add('hidden');
+            localStorage.setItem('gymbros-hint-corpo', 'done');
+        }
+
+         /* Mostra sezione mobile svg */
         function handleMobileLayout(){
             const mobileSection= document.getElementById('mobile-svg-section');
             const maleCols= document.querySelectorAll('.body-con-male');
             const femaleCols= document.querySelectorAll('.body-con-fem');
 
-            if(window.innerWidth <= 600){
+            if(window.innerWidth <= 1023){
                 if(mobileSection) mobileSection.style.display= 'block';
                 maleCols.forEach(el => el.style.display= 'none');
                 femaleCols.forEach(el => el.style.display= 'none');

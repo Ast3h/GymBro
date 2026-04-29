@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 const express = require('express')
 
 const { PrismaClient } = require('@prisma/client')
@@ -104,6 +106,7 @@ app.post('/auth/register', async(req, res) =>{
             }
             
         }
+        console.error(error)
         res.status(500).json({errore : error.message})
     }
 })
@@ -279,7 +282,7 @@ app.get('/exercises' , auth, async (req, res) =>{
 })
 
 
-app.get('/fullexercises', auth, async (req,res) =>{
+app.get('/fullexercises', async (req,res) =>{
     try{
         const response = await prisma.exercise.findMany()
         res.json(response)
@@ -371,7 +374,8 @@ app.post('/users/workout-plans', auth, async(req,res) =>{
             return res.status(401).json({error : 'Unauthorized'})
         }
         const exercise_response = await prisma.workout_exercise.create({
-            data: {workoutId : workout_id,
+            data: {
+                workoutId : workout_id,
                 exerciseId : exercise,
                 nSet : set,
                 nRep : nrep,
@@ -395,6 +399,7 @@ app.post('/users/workout-plans', auth, async(req,res) =>{
 
 
     } catch (error) {
+        console.error(error)
         if(error.code === 'P2002'){
             return res.status(400).json({error : 'Esercizio già presente nella scheda'})
         }

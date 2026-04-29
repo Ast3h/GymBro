@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymBro — Statistiche</title>
+
+    <link rel="icon" type="image/png" sizes="32x32" href="Favicon32x32.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="stili.css">
+    <script src="funzioni.js" defer></script>
+
+    <style>
+        .page-content { max-width: 860px; }
+
+        /* ── KPI CARDS ── */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .kpi-card {
+            background: var(--surface);
+            border: 0.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px 16px;
+        }
+
+        .kpi-card.accent {
+            border-color: rgba(237,36,155,0.3);
+            background: var(--accent-dim);
+        }
+
+        .kpi-card.green {
+            border-color: rgba(140,198,63,0.3);
+            background: rgba(140,198,63,0.08);
+        }
+
+        .kpi-label { font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+        .kpi-value { font-size: 1.6rem; font-weight: 600; color: var(--text); line-height: 1; }
+        .kpi-value.accent { color: var(--accent); }
+        .kpi-value.green  { color: #8cc63f; }
+        .kpi-unit  { font-size: 0.7rem; color: var(--muted); margin-top: 3px; }
+        .kpi-delta { font-size: 0.68rem; margin-top: 6px; }
+        .kpi-delta.up   { color: #8cc63f; }
+        .kpi-delta.down { color: var(--accent); }
+        .kpi-delta.neutral { color: var(--muted); }
+
+        /* ── GRAFICO ── */
+        .chart-card {
+            background: var(--surface);
+            border: 0.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+        }
+
+        .chart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .chart-title { font-size: 0.82rem; font-weight: 500; color: var(--text); }
+
+        .chart-tabs { display: flex; gap: 4px; }
+
+        .chart-tab {
+            font-size: 0.65rem; padding: 3px 9px;
+            border-radius: 4px; border: 0.5px solid var(--border);
+            color: var(--muted); background: none; cursor: pointer;
+            transition: color 0.18s, border-color 0.18s, background 0.18s;
+        }
+
+        .chart-tab.active {
+            border-color: var(--accent); color: var(--accent);
+            background: var(--accent-dim);
+        }
+
+        .chart-svg-wrap { width: 100%; overflow: hidden; }
+
+        .chart-legend { display: flex; gap: 14px; margin-top: 10px; }
+
+        .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.68rem; color: var(--muted); }
+
+        .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+        /* ── STORICO ── */
+        .storico-wrap {
+            background: var(--surface);
+            border: 0.5px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .storico-head {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr 1fr 1.5fr 28px;
+            padding: 8px 14px;
+            border-bottom: 0.5px solid var(--border);
+        }
+
+        .storico-th {
+            font-size: 0.62rem; letter-spacing: 0.1em;
+            text-transform: uppercase; color: var(--muted);
+        }
+
+        .storico-row {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr 1fr 1.5fr 28px;
+            padding: 10px 14px;
+            border-bottom: 0.5px solid var(--border);
+            transition: background 0.15s;
+            align-items: center;
+        }
+
+        .storico-row:last-child { border-bottom: none; }
+        .storico-row:hover { background: var(--surface2); }
+
+        .storico-td { font-size: 0.78rem; color: var(--text); }
+        .storico-td.muted  { color: var(--muted); }
+        .storico-td.accent { color: var(--accent); }
+        .storico-td.green  { color: #8cc63f; }
+
+        .storico-del {
+            font-size: 0.8rem; color: var(--border);
+            background: none; border: none; cursor: pointer;
+            transition: color 0.18s; padding: 0;
+        }
+
+        .storico-del:hover { color: #e24b4a; }
+
+        .storico-empty {
+            padding: 24px; text-align: center;
+            font-size: 0.78rem; color: var(--muted);
+        }
+
+        /* ── PERFORMANCE ── */
+        .perf-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .perf-card {
+            background: var(--surface);
+            border: 0.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 12px 14px;
+        }
+
+        .perf-name { font-size: 0.78rem; font-weight: 500; color: var(--text); margin-bottom: 10px; }
+        .perf-zona { font-size: 0.65rem; color: var(--muted); font-weight: 400; margin-left: 4px; }
+
+        .perf-bar-wrap {
+            height: 5px; background: var(--border);
+            border-radius: 3px; margin-bottom: 6px;
+        }
+
+        .perf-bar { height: 5px; border-radius: 3px; background: var(--accent); transition: width 0.4s ease; }
+        .perf-bar.green { background: #8cc63f; }
+
+        .perf-meta { display: flex; justify-content: space-between; align-items: center; }
+        .perf-max  { font-size: 0.65rem; color: var(--muted); }
+        .perf-val  { font-size: 0.72rem; font-weight: 500; color: var(--accent); }
+        .perf-val.green { color: #8cc63f; }
+
+        .perf-empty {
+            grid-column: 1 / -1; padding: 24px;
+            text-align: center; font-size: 0.78rem; color: var(--muted);
+            border: 0.5px dashed var(--border); border-radius: var(--radius);
+        }
+
+        /* ── FAB ── */
+        .fab-wrap {
+            position: sticky; bottom: 80px;
+            display: flex; justify-content: flex-end;
+            pointer-events: none;
+        }
+
+        .fab {
+            display: flex; align-items: center; gap: 7px;
+            background: var(--accent); color: #fff;
+            border: none; border-radius: 24px;
+            padding: 10px 18px;
+            font-family: var(--font-body); font-size: 0.78rem;
+            font-weight: 500; letter-spacing: 0.06em;
+            text-transform: uppercase; cursor: pointer;
+            box-shadow: 0 4px 20px rgba(237,36,155,0.35);
+            pointer-events: all;
+            transition: transform 0.18s, box-shadow 0.18s;
+        }
+
+        .fab:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(237,36,155,0.45); }
+
+        /* ── MODALE MISURAZIONE ── */
+        .form-row-inline { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        .form-row   { display: flex; flex-direction: column; gap: 5px; }
+        .form-label { font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+        .form-input {
+            width: 100%; padding: 9px 12px;
+            border-radius: var(--radius); border: 0.5px solid var(--border);
+            background: var(--surface2); color: var(--text);
+            font-family: var(--font-body); font-size: 0.85rem;
+            outline: none; transition: border-color 0.18s;
+        }
+        .form-input:focus { border-color: var(--accent); }
+
+        @media (max-width: 600px) {
+            .kpi-grid  { grid-template-columns: 1fr 1fr; }
+            .perf-grid { grid-template-columns: 1fr; }
+            .storico-head, .storico-row { grid-template-columns: 1fr 1fr 1fr 28px; }
+            .storico-th:nth-child(4), .storico-td:nth-child(4) { display: none; }
+            .form-row-inline { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ── TOPBAR ── -->
+    <header class="topbar">
+        <div class="topbar-left">
+            <button class="hamburger-btn" id="hamburger-btn" onclick="toggleSidebar()">
+                <span></span><span></span><span></span>
+            </button>
+            <a href="home.html" class="logo">
+                <img src="Favicon64x64.png" alt="" class="logo-img">
+                GYM<span>BRO</span>
+            </a>
+        </div>
+        <div class="topbar-icons">
+            <div class="color-switch pink" id="color-switch" onclick="toggleAccent()" title="Cambia colore">
+                <div class="switch-knob"></div>
+            </div>
+            <div class="notif-wrap" id="notif-wrap">
+                <button class="icon-btn" id="notif-btn" onclick="toggleNotifiche(event)" title="Notifiche" aria-label="Notifiche" aria-expanded="false">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                    <div class="notif-dot" id="notif-dot"></div>
+                </button>
+                <div class="notif-dropdown" id="notif-dropdown" role="dialog" aria-label="Notifiche">
+                    <div class="notif-dropdown-header">
+                        <span class="notif-dropdown-title">Notifiche</span>
+                        <button class="notif-mark-all" id="notif-mark-all" onclick="segnaLette()" style="display:none;">Segna tutte come lette</button>
+                    </div>
+                    <div class="notif-list" id="notif-list">
+                        <div class="notif-empty" id="notif-empty">Nessuna notifica per ora</div>
+                    </div>
+                    <div class="notif-dropdown-footer" id="notif-footer" style="display:none;">
+                        <button class="notif-see-all" onclick="vediTutte()">Vedi tutte</button>
+                    </div>
+                </div>
+            </div>
+            <a href="schede.html" class="icon-btn" title="Le mie schede">
+                <svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg>
+            </a>
+            <a href="profilo.html" class="icon-btn" title="Profilo">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            </a>
+        </div>
+    </header>
+
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <nav class="sidebar" id="sidebar">
+        <a href="esercizi.html" class="sidebar-item" style="color:var(--text); border-bottom:0.5px solid var(--border); margin-bottom:4px; padding-bottom:12px;">Esercizi</a>
+        <a href="home.html"    class="sidebar-item">Home</a>
+        <a href="schede.html"  class="sidebar-item">Schede</a>
+        <a href="profilo.html" class="sidebar-item">Profilo</a>
+    </nav>
+
+    <!-- ── CONTENUTO ── -->
+    <div class="page-layout">
+        <div class="page-content">
+
+            <!-- header pagina con back -->
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
+                <a href="profilo.html" class="btn-ghost" style="padding:5px 12px; font-size:0.72rem; text-decoration:none;">← Profilo</a>
+                <div>
+                    <div style="font-size:1.1rem; font-weight:500; color:var(--text);">Statistiche</div>
+                    <div style="font-size:0.72rem; color:var(--muted); margin-top:2px;">Peso, IMC e performance allenamento</div>
+                </div>
+            </div>
+
+            <!-- KPI -->
+            <div class="section">
+                <div class="section-title">Riepilogo attuale</div>
+                <div class="kpi-grid">
+                    <div class="kpi-card accent">
+                        <div class="kpi-label">Peso attuale</div>
+                        <div class="kpi-value accent" id="kpi-peso">—</div>
+                        <div class="kpi-unit">kg</div>
+                        <div class="kpi-delta neutral" id="kpi-peso-delta">nessuna misurazione</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">IMC</div>
+                        <div class="kpi-value" id="kpi-imc">—</div>
+                        <div class="kpi-unit" id="kpi-imc-label">—</div>
+                        <div class="kpi-delta neutral" id="kpi-imc-delta">nessuna misurazione</div>
+                    </div>
+                    <div class="kpi-card green">
+                        <div class="kpi-label">Allenamenti</div>
+                        <div class="kpi-value green" id="kpi-allenamenti">—</div>
+                        <div class="kpi-unit">questo mese</div>
+                        <div class="kpi-delta neutral" id="kpi-allenamenti-delta">—</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GRAFICO -->
+            <div class="section">
+                <div class="section-title">Andamento peso e IMC</div>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title" id="chart-range-label">Ultimi 30 giorni</div>
+                        <div class="chart-tabs">
+                            <button class="chart-tab active" onclick="cambiaRange(30,  this)">1M</button>
+                            <button class="chart-tab"        onclick="cambiaRange(90,  this)">3M</button>
+                            <button class="chart-tab"        onclick="cambiaRange(180, this)">6M</button>
+                            <button class="chart-tab"        onclick="cambiaRange(365, this)">1A</button>
+                        </div>
+                    </div>
+                    <div class="chart-svg-wrap">
+                        <svg id="chart-svg" width="100%" height="120" viewBox="0 0 800 120" preserveAspectRatio="none">
+                            <!-- griglia -->
+                            <line x1="0" y1="20"  x2="800" y2="20"  stroke="#2a2a30" stroke-width="0.5"/>
+                            <line x1="0" y1="55"  x2="800" y2="55"  stroke="#2a2a30" stroke-width="0.5"/>
+                            <line x1="0" y1="90"  x2="800" y2="90"  stroke="#2a2a30" stroke-width="0.5"/>
+                            <!-- linee disegnate da JS -->
+                            <polyline id="chart-peso-line" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>
+                            <polygon  id="chart-peso-area" fill="rgba(237,36,155,0.07)"/>
+                            <polyline id="chart-imc-line"  fill="none" stroke="#8cc63f"        stroke-width="2" stroke-linejoin="round" stroke-dasharray="5,3"/>
+                            <!-- punti -->
+                            <g id="chart-dots"></g>
+                            <!-- testo nessun dato -->
+                            <text id="chart-empty" x="400" y="65" text-anchor="middle" font-size="12" fill="#55555f" display="none">
+                                Nessuna misurazione disponibile
+                            </text>
+                        </svg>
+                    </div>
+                    <div class="chart-legend">
+                        <div class="legend-item"><div class="legend-dot" style="background:var(--accent);"></div> Peso (kg)</div>
+                        <div class="legend-item"><div class="legend-dot" style="background:#8cc63f;"></div> IMC</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PERFORMANCE -->
+            <div class="section">
+                <div class="section-title">Massimali per esercizio</div>
+                <div class="perf-grid" id="perf-grid">
+                    <div class="perf-empty">
+                        Nessun dato di performance disponibile — aggiungi esercizi alle schede e registra i set.
+                    </div>
+                </div>
+            </div>
+
+            <!-- STORICO -->
+            <div class="section">
+                <div class="section-title">Storico misurazioni</div>
+                <div class="storico-wrap">
+                    <div class="storico-head">
+                        <div class="storico-th">Data</div>
+                        <div class="storico-th">Peso</div>
+                        <div class="storico-th">IMC</div>
+                        <div class="storico-th">Note</div>
+                        <div></div>
+                    </div>
+                    <div id="storico-list">
+                        <div class="storico-empty">Nessuna misurazione ancora. Usa il pulsante + per aggiungerne una.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAB -->
+            <div class="fab-wrap" style="gap:10px;">
+                <button class="fab" style="background:var(--surface2); border:0.5px solid var(--border); color:var(--text); box-shadow:none;" onclick="apriModaleAllenamento()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Registra allenamento
+                </button>
+                <button class="fab" onclick="apriModaleMisurazione()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Aggiungi misurazione
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ── BOTTOM NAV MOBILE ── -->
+    <nav class="bottom-nav">
+        <a href="home.html"     class="bottom-nav-item"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>Home</span></a>
+        <a href="esercizi.html" class="bottom-nav-item"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><span>Esercizi</span></a>
+        <a href="schede.html"   class="bottom-nav-item"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/></svg><span>Schede</span></a>
+        <a href="profilo.html"  class="bottom-nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Profilo</span></a>
+    </nav>
+
+    <!-- ── MODALE AGGIUNGI MISURAZIONE ── -->
+    <div class="modal-overlay" id="modal-misurazione">
+        <div class="modal">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title">Aggiungi misurazione</div>
+                    <div class="modal-sub">Registra peso e performance di oggi</div>
+                </div>
+                <button class="modal-close" onclick="chiudiModaleMisurazione()">✕</button>
+            </div>
+            <div class="modal-body">
+
+                <div class="form-row">
+                    <label class="form-label" for="mis-data">Data</label>
+                    <input class="form-input" type="date" id="mis-data">
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label" for="mis-peso">
+                        Peso (kg)
+                        <span style="font-size:0.62rem; color:var(--muted); font-weight:400; text-transform:none; letter-spacing:0; margin-left:6px;">pre-compilato dal profilo</span>
+                    </label>
+                    <input class="form-input" type="number" id="mis-peso" placeholder="78.5" step="0.1" min="30" max="300">
+                </div>
+
+                <div style="height:0.5px; background:var(--border);"></div>
+
+                <div style="font-size:0.68rem; color:var(--muted); letter-spacing:0.06em; text-transform:uppercase;">Performance (opzionale)</div>
+
+                <div class="form-row-inline">
+                    <div class="form-row">
+                        <label class="form-label" for="mis-esercizio">Esercizio</label>
+                        <input class="form-input" type="text" id="mis-esercizio" placeholder="Es. Squat">
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label" for="mis-carico">Carico (kg)</label>
+                        <input class="form-input" type="number" id="mis-carico" placeholder="80" min="0">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label" for="mis-note">Note (opzionale)</label>
+                    <input class="form-input" type="text" id="mis-note" placeholder="Es. post vacanze">
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button class="btn-ghost" onclick="chiudiModaleMisurazione()">Annulla</button>
+                <button class="btn-primary" onclick="salvaMisurazione()">Salva</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── MODALE REGISTRA ALLENAMENTO ── -->
+    <div class="modal-overlay" id="modal-allenamento">
+        <div class="modal">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title">Registra allenamento</div>
+                    <div class="modal-sub">Segna il giorno e la scheda usata</div>
+                </div>
+                <button class="modal-close" onclick="chiudiModaleAllenamento()">✕</button>
+            </div>
+            <div class="modal-body">
+
+                <div class="form-row">
+                    <label class="form-label" for="all-data">Giorno</label>
+                    <input class="form-input" type="date" id="all-data">
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label" for="all-scheda">Scheda usata (opzionale)</label>
+                    <select class="form-input" id="all-scheda">
+                        <option value="">— Nessuna scheda —</option>
+                        <!-- BACKEND: popolato da loadSchedePerAllenamento() -->
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label" for="all-note">Note (opzionale)</label>
+                    <input class="form-input" type="text" id="all-note" placeholder="Es. Buona sessione">
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button class="btn-ghost" onclick="chiudiModaleAllenamento()">Annulla</button>
+                <button class="btn-primary" onclick="salvaAllenamento()">Registra</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const TOKEN = () => localStorage.getItem('gymbros-token');
+        const API   = 'http://localhost:3000';
+
+        let _misurazioni = [];
+        let _range       = 30;
+        let _altezzaUtente = null; /* cm — presa dal profilo per calcolare IMC */
+
+        /* ── INIT ── */
+        document.getElementById('mis-data').value = new Date().toISOString().split('T')[0];
+
+        document.getElementById('modal-misurazione').addEventListener('click', function(e) {
+            if (e.target === this) chiudiModaleMisurazione();
+        });
+
+        /* ── CARICA DATI ── */
+        async function init() {
+
+            await caricaSchede();
+            await caricaMisurazioni();
+            await caricaPerformance();
+            await caricaAllenamenti();
+
+                        /* carica profilo per peso e altezza */
+            try {
+                const res  = await fetch(`${API}/users/profile`, {
+                    headers: { Authorization: 'Bearer ' + TOKEN() }
+                });
+                console.log('profilo status:', res.status);
+                if (res.ok) {
+                    const user = await res.json();
+                    
+                    _altezzaUtente = user.altezza;
+                    if (user.peso) document.getElementById('mis-peso').value = user.peso;
+
+                    /* mostra IMC nel KPI anche senza misurazioni manuali */
+                    if (user.peso && user.altezza) {
+                        const imc = calcolaImc(user.peso, user.altezza);
+                        document.getElementById('kpi-imc').textContent       = imc ?? '—';
+                        document.getElementById('kpi-imc-label').textContent = labelImc(imc);
+                        document.getElementById('kpi-peso').textContent      = user.peso;
+                        document.getElementById('kpi-peso-delta').textContent = 'dal tuo profilo';
+                        document.getElementById('kpi-imc-delta').textContent  = 'dal tuo profilo';
+                    }
+                }
+            } catch (e) {
+                console.error('Errore caricamento profilo:', e);
+            }
+        }
+
+        async function caricaSchede() {
+            try {
+                const res    = await fetch(`${API}/users/workout-plans`, {
+                    headers: { Authorization: 'Bearer ' + TOKEN() }
+                });
+                if (!res.ok) return;
+                const schede = await res.json();
+                const sel    = document.getElementById('all-scheda');
+
+                /* rimuove opzioni vecchie tranne la prima (— Nessuna scheda —) */
+                while (sel.options.length > 1) sel.remove(1);
+
+                schede.forEach(s => {
+                    const opt       = document.createElement('option');
+                    opt.value       = s.workoutId;
+                    opt.textContent = s.name;
+                    sel.appendChild(opt);
+                });
+            } catch (e) {
+                console.error('Errore caricamento schede:', e);
+            }
+        }
+
+        async function caricaMisurazioni() {
+            /*
+             * BACKEND:
+             * const res  = await fetch(`${API}/users/stats`, { headers: { Authorization: 'Bearer ' + TOKEN() } });
+             * const data = await res.json();
+             * _misurazioni = data;
+             * renderStorico();
+             * renderKpi();
+             * renderGrafico();
+             */
+
+            /* dati demo finché il backend non è pronto */
+            _misurazioni = [];
+            renderStorico();
+            renderKpi();
+            renderGrafico();
+        }
+
+        async function caricaPerformance() {
+            /*
+             * BACKEND — massimale per esercizio dai workout_set:
+             * const res  = await fetch(`${API}/users/stats/performance`, { headers: { Authorization: 'Bearer ' + TOKEN() } });
+             * const data = await res.json();
+             * renderPerformance(data);
+             */
+        }
+
+        async function caricaAllenamenti() {
+            /*
+             * BACKEND — conteggio schede usate questo mese:
+             * const res  = await fetch(`${API}/users/workout-plans`, { headers: { Authorization: 'Bearer ' + TOKEN() } });
+             * const data = await res.json();
+             * const mese = data.filter(w => {
+             *     const d = new Date(w.dataCreazione);
+             *     const ora = new Date();
+             *     return d.getMonth() === ora.getMonth() && d.getFullYear() === ora.getFullYear();
+             * }).length;
+             * document.getElementById('kpi-allenamenti').textContent = mese;
+             */
+        }
+
+        /* ── KPI ── */
+        function calcolaImc(peso, altezzaCm) {
+            if (!peso || !altezzaCm) return null;
+            const h = altezzaCm / 100;
+            return +(peso / (h * h)).toFixed(1);
+        }
+
+        function labelImc(imc) {
+            if (!imc) return '—';
+            if (imc < 18.5) return 'Sottopeso';
+            if (imc < 25)   return 'Normopeso';
+            if (imc < 30)   return 'Sovrappeso';
+            return 'Obesità';
+        }
+
+        function renderKpi() {
+            const ora = _misurazioni[0];
+
+            if (!ora) {
+                document.getElementById('kpi-peso').textContent        = '—';
+                document.getElementById('kpi-imc').textContent         = '—';
+                document.getElementById('kpi-imc-label').textContent   = '—';
+                document.getElementById('kpi-peso-delta').textContent  = 'nessuna misurazione';
+                document.getElementById('kpi-imc-delta').textContent   = 'nessuna misurazione';
+                return;
+            }
+
+            document.getElementById('kpi-peso').textContent = ora.peso ?? '—';
+
+            const imc = calcolaImc(ora.peso, ora.altezza || _altezzaUtente);
+            document.getElementById('kpi-imc').textContent       = imc ?? '—';
+            document.getElementById('kpi-imc-label').textContent = labelImc(imc);
+
+            /* delta rispetto alla misurazione precedente */
+            const prec = _misurazioni[1];
+            if (prec && ora.peso && prec.peso) {
+                const diff    = +(ora.peso - prec.peso).toFixed(1);
+                const elDelta = document.getElementById('kpi-peso-delta');
+                elDelta.textContent = (diff > 0 ? '▲ +' : '▼ ') + diff + ' kg dalla scorsa';
+                elDelta.className   = 'kpi-delta ' + (diff <= 0 ? 'up' : 'down');
+            }
+        }
+
+        /* ── STORICO ── */
+        function renderStorico() {
+            const lista = document.getElementById('storico-list');
+            lista.innerHTML = '';
+
+            const filtrate = filtraPerRange(_misurazioni, _range);
+
+            if (filtrate.length === 0) {
+                lista.innerHTML = '<div class="storico-empty">Nessuna misurazione nel periodo selezionato.</div>';
+                return;
+            }
+
+            filtrate.forEach(m => lista.appendChild(creaRigaStorico(m)));
+        }
+
+        function creaRigaStorico(m) {
+            const imc = calcolaImc(m.peso, m.altezza || _altezzaUtente);
+            const row = document.createElement('div');
+            row.className = 'storico-row';
+            row.innerHTML = `
+                <div class="storico-td muted">${formattaData(m.data)}</div>
+                <div class="storico-td">${m.peso ? m.peso + ' kg' : '—'}</div>
+                <div class="storico-td ${imc ? (imc < 25 ? 'green' : 'accent') : ''}">${imc ?? '—'}</div>
+                <div class="storico-td muted">${m.note || '—'}</div>
+                <button class="storico-del" onclick="eliminaMisurazione(${m.id})">✕</button>`;
+            return row;
+        }
+
+        /* ── GRAFICO ── */
+        function renderGrafico() {
+            const filtrate = filtraPerRange(_misurazioni, _range).reverse();
+
+            const pesoLine = document.getElementById('chart-peso-line');
+            const pesoArea = document.getElementById('chart-peso-area');
+            const imcLine  = document.getElementById('chart-imc-line');
+            const dots     = document.getElementById('chart-dots');
+            const empty    = document.getElementById('chart-empty');
+            dots.innerHTML = '';
+
+            if (filtrate.length === 0) {
+                pesoLine.setAttribute('points', '');
+                pesoArea.setAttribute('points', '');
+                imcLine.setAttribute('points', '');
+                empty.setAttribute('display', 'block');
+                return;
+            }
+
+            empty.setAttribute('display', 'none');
+
+            const W = 800, H = 100, PAD = 10;
+            const pesi = filtrate.map(m => m.peso).filter(Boolean);
+            const imcs = filtrate.map(m => calcolaImc(m.peso, m.altezza || _altezzaUtente)).filter(Boolean);
+
+            const minP = Math.min(...pesi) - 2, maxP = Math.max(...pesi) + 2;
+            const minI = Math.min(...imcs) - 1, maxI = Math.max(...imcs) + 1;
+
+            const xScale = (i) => PAD + (i / (filtrate.length - 1 || 1)) * (W - PAD * 2);
+            const yScaleP = (v) => H - PAD - ((v - minP) / (maxP - minP || 1)) * (H - PAD * 2);
+            const yScaleI = (v) => H - PAD - ((v - minI) / (maxI - minI || 1)) * (H - PAD * 2);
+
+            const ptsPeso = filtrate.map((m, i) => m.peso ? `${xScale(i)},${yScaleP(m.peso)}` : null).filter(Boolean);
+            const ptsImc  = filtrate.map((m, i) => { const v = calcolaImc(m.peso, m.altezza || _altezzaUtente); return v ? `${xScale(i)},${yScaleI(v)}` : null; }).filter(Boolean);
+
+            pesoLine.setAttribute('points', ptsPeso.join(' '));
+            pesoArea.setAttribute('points', ptsPeso.join(' ') + ` ${xScale(filtrate.length-1)},${H} ${xScale(0)},${H}`);
+            imcLine.setAttribute('points', ptsImc.join(' '));
+
+            /* punti */
+            filtrate.forEach((m, i) => {
+                if (!m.peso) return;
+                const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                c.setAttribute('cx', xScale(i));
+                c.setAttribute('cy', yScaleP(m.peso));
+                c.setAttribute('r', '3');
+                c.setAttribute('fill', 'var(--accent)');
+                dots.appendChild(c);
+            });
+        }
+
+        /* ── PERFORMANCE ── */
+        function renderPerformance(data) {
+            const grid = document.getElementById('perf-grid');
+            grid.innerHTML = '';
+
+            if (!data || data.length === 0) {
+                grid.innerHTML = '<div class="perf-empty">Nessun dato di performance disponibile — aggiungi esercizi alle schede e registra i set.</div>';
+                return;
+            }
+
+            const max = Math.max(...data.map(d => d.massimale));
+
+            data.forEach((d, i) => {
+                const perc = Math.round((d.massimale / max) * 100);
+                const verde = i % 2 === 1;
+                const card = document.createElement('div');
+                card.className = 'perf-card';
+                card.innerHTML = `
+                    <div class="perf-name">${d.nome} <span class="perf-zona">${d.zona}</span></div>
+                    <div class="perf-bar-wrap">
+                        <div class="perf-bar ${verde ? 'green' : ''}" style="width:${perc}%;"></div>
+                    </div>
+                    <div class="perf-meta">
+                        <span class="perf-max">Max registrato</span>
+                        <span class="perf-val ${verde ? 'green' : ''}">${d.massimale} kg</span>
+                    </div>`;
+                grid.appendChild(card);
+            });
+        }
+
+        /* ── RANGE GRAFICO ── */
+        function cambiaRange(giorni, btn) {
+            _range = giorni;
+            document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            const labels = { 30: 'Ultimi 30 giorni', 90: 'Ultimi 3 mesi', 180: 'Ultimi 6 mesi', 365: 'Ultimo anno' };
+            document.getElementById('chart-range-label').textContent = labels[giorni];
+            renderGrafico();
+            renderStorico();
+        }
+
+        /* ── MODALE MISURAZIONE ── */
+        function apriModaleMisurazione() {
+            document.getElementById('modal-misurazione').classList.add('open');
+        }
+
+        function chiudiModaleMisurazione() {
+            document.getElementById('modal-misurazione').classList.remove('open');
+        }
+
+        async function salvaMisurazione() {
+            const peso = parseFloat(document.getElementById('mis-peso').value);
+            const data = document.getElementById('mis-data').value;
+            const note = document.getElementById('mis-note').value.trim();
+
+            if (!data) {
+                document.getElementById('mis-data').focus();
+                return;
+            }
+
+            const payload = { data, peso: peso || null, altezza: _altezzaUtente || null, note: note || null };
+
+            /*
+             * BACKEND:
+             * const res = await fetch(`${API}/users/stats`, {
+             *     method: 'POST',
+             *     headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN() },
+             *     body: JSON.stringify(payload)
+             * });
+             * if (res.ok) {
+             *     const nuova = await res.json();
+             *     _misurazioni.unshift(nuova);
+             *     renderStorico(); renderKpi(); renderGrafico();
+             *     chiudiModaleMisurazione();
+             * }
+             */
+
+            /* demo locale finché il backend non è pronto */
+            const nuova = { id: Date.now(), ...payload };
+            _misurazioni.unshift(nuova);
+            renderStorico();
+            renderKpi();
+            renderGrafico();
+            chiudiModaleMisurazione();
+        }
+
+        async function eliminaMisurazione(id) {
+            _misurazioni = _misurazioni.filter(m => m.id !== id);
+            renderStorico();
+            renderKpi();
+            renderGrafico();
+
+            /*
+             * BACKEND:
+             * fetch(`${API}/users/stats/${id}`, {
+             *     method: 'DELETE',
+             *     headers: { Authorization: 'Bearer ' + TOKEN() }
+             * });
+             */
+        }
+
+        /* ── UTILITY ── */
+        function filtraPerRange(arr, giorni) {
+            const cutoff = new Date();
+            cutoff.setDate(cutoff.getDate() - giorni);
+            return arr.filter(m => new Date(m.data) >= cutoff);
+        }
+
+        function formattaData(str) {
+            if (!str) return '—';
+            return new Date(str).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        /* ── MODALE ALLENAMENTO ── */
+        document.getElementById('all-data').value = new Date().toISOString().split('T')[0];
+
+        document.getElementById('modal-allenamento').addEventListener('click', function(e) {
+            if (e.target === this) chiudiModaleAllenamento();
+        });
+
+        function apriModaleAllenamento() {
+            document.getElementById('modal-allenamento').classList.add('open');
+        }
+
+        function chiudiModaleAllenamento() {
+            document.getElementById('modal-allenamento').classList.remove('open');
+        }
+
+        async function salvaAllenamento() {
+            const data   = document.getElementById('all-data').value;
+            const scheda = document.getElementById('all-scheda').value;
+            const note   = document.getElementById('all-note').value.trim();
+
+            if (!data) {
+                document.getElementById('all-data').focus();
+                return;
+            }
+
+            chiudiModaleAllenamento();
+
+            /*
+             * BACKEND — endpoint da creare:
+             * POST /users/allenamenti
+             * body: { data, workoutId: scheda || null, note }
+             *
+             * Schema da aggiungere a schema.prisma:
+             * model allenamento {
+             *   id        Int      @id @default(autoincrement())
+             *   userId    Int
+             *   workoutId Int?
+             *   data      DateTime
+             *   note      String?
+             *   user      User         @relation(fields: [userId], references: [id])
+             *   workout   workout_plan? @relation(fields: [workoutId], references: [workoutId])
+             * }
+             *
+             * const res = await fetch(`${API}/users/allenamenti`, {
+             *     method: 'POST',
+             *     headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN() },
+             *     body: JSON.stringify({ data, workoutId: scheda ? parseInt(scheda) : null, note })
+             * });
+             * if (res.ok) caricaAllenamenti();
+             */
+        }
+
+        /* ── START ── */
+        init();
+    </script>
+
+</body>
+</html>

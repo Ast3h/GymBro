@@ -866,9 +866,24 @@
             document.querySelectorAll('#crea-filtri .chip').forEach((c, i) => {
                 c.classList.toggle('active', i === 0);
             });
-            aggiornaRisultati();
             aggiornaAggiunti();
             document.getElementById('modal-crea-scheda').classList.add('open');
+
+            /* usa gli esercizi già caricati nella pagina */
+            if (_tuttiEsercizi.length === 0) {
+                fetch('http://localhost:3000/fullexercises')
+                    .then(r => r.json())
+                    .then(data => {
+                        _tuttiEsercizi = data.map(d => ({
+                            id:   d.id,
+                            nome: d.nameIt,
+                            zone: [d.macroPart, d.bodyPart].filter(Boolean),
+                        }));
+                        aggiornaRisultati();
+                    });
+            } else {
+                aggiornaRisultati();
+            }
         }
            
         function chiudiCreaScheda() {
@@ -966,7 +981,7 @@
             });
         }
 
-        function salvaSchedaNuova() {
+        async function salvaSchedaNuova() {
             const nome = document.getElementById('input-nome-scheda').value.trim();
             if (!nome) {
                 document.getElementById('input-nome-scheda').focus();
@@ -974,8 +989,37 @@
                 return;
             }
             document.getElementById('input-nome-scheda').style.borderColor = '';
-            chiudiCreaScheda();
-            mostraFeedback('Scheda "' + nome + '" creata!');
+
+            try {
+                const res = await fetch('http://localhost:3000/workout-plans', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('gymbros-token')
+                    },
+                    body: JSON.stringify({ nome, tipo: 'Personale', data: new Date().toISOString() })
+                });
+
+                if (!res.ok) {
+                    mostraFeedback('Errore nella creazione della scheda');
+                    return;
+                }
+
+                const nuova = await res.json();
+                chiudiCreaScheda();
+                mostraFeedback('Scheda "' + nome + '" creata!');
+
+                /* aggiunge la nuova scheda al selettore senza ricaricare */
+                const sel = document.getElementById('sel-lista-schede');
+                sel.appendChild(creaRigaScheda({
+                    id:   nuova.workoutId,
+                    nome: nuova.name,
+                }));
+
+            } catch (e) {
+                console.error('Errore creazione scheda:', e);
+                mostraFeedback('Errore di rete');
+            }
         }
 
         /* LEGGE ?zona= DALL'URL */
@@ -1004,9 +1048,6 @@
         async function loadEx(){
             const response = await fetch('http://localhost:3000/fullexercises', {
                 method : 'GET',
-                headers : {
-                    'Authorization' : 'Bearer ' + localStorage.getItem('gymbros-token')
-                }
             })
             const divex = document.getElementById('grid-esercizi')
             const data = await response.json()

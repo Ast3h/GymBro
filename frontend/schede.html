@@ -421,27 +421,6 @@
         </div>
     </div>
 
-    <!--FORM NOME SCHEDA -->
-    <div id="modal-crea-scheda" class="modal-overlay">
-        <div class="modal" style="max-width:360px;">
-            <div class="modal-header">
-                <div>
-                    <div class="modal-title">Nuova scheda</div>
-                    <div class="modal-sub">Dai un nome alla tua scheda</div>
-                </div>
-                <button class="modal-close" onclick="closeCreateScheda()">✕</button>
-            </div>
-            <div class="modal-body">
-                <input id="input-nome-scheda" type="text" placeholder="Es. Forza upper body"
-                    style="width:100%; padding:10px 12px; background:var(--surface2); border:0.5px solid var(--border); border-radius:var(--radius); color:var(--text); font-size:0.85rem; box-sizing:border-box; outline:none; font-family:inherit;">
-            </div>
-            <div class="modal-footer">
-                <button class="btn-primary" onclick="salvaSchedaNuova()">Crea scheda</button>
-                <button class="btn-ghost" onclick="closeCreateScheda()">Annulla</button>
-            </div>
-        </div>
-    </div>
-
     <!-- BOTTOM NAV MOBILE -->
     <nav class="bottom-nav">
         <a href="home.html" class="bottom-nav-item"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>Home</span></a>
@@ -578,7 +557,7 @@
                     ${azioni}
                 </div>`;
             card.addEventListener('click', () => {
-                window.location.href= 'scheda-dettaglio.html?id=' + scheda.id;
+                window.location.href= 'dettaglio.html?id=' + scheda.id;
             });
             return card;
         }
@@ -586,10 +565,9 @@
         /* AZIONI SCHEDE DA COLLEGARE AL BACKEND*/
         function modificaScheda(id) {/*TODO*/}
         function eliminaScheda(id) {/*TODO*/}
-        function salvaScheda(id) {/*TODO*/}
 
                 /* ── MODALE CREA SCHEDA ── */
-        let _tuttiEsercizi  = [];  /* popolato dal backend */
+        let _tuttiEsercizi  = [];  
         let _aggiunti       = [];  /* esercizi aggiunti alla scheda in costruzione */
         let _zonaFiltro     = 'tutte';
 
@@ -601,10 +579,27 @@
             document.querySelectorAll('#crea-filtri .chip').forEach((c, i) => {
                 c.classList.toggle('active', i === 0);
             });
-            aggiornaRisultati();
             aggiornaAggiunti();
             document.getElementById('modal-crea-scheda').classList.add('open');
+
+            console.log('_tuttiEsercizi length:', _tuttiEsercizi.length);
+            if (_tuttiEsercizi.length === 0) {
+                fetch('http://localhost:3000/fullexercises')
+                    .then(r => r.json())
+                    .then(data => {
+                        console.log('esercizi caricati:', data.length);
+                        _tuttiEsercizi = data.map(d => ({
+                            id:    d.id,
+                            nome:  d.nameIt,
+                            zone:  [d.macroPart, d.bodyPart].filter(Boolean),
+                        }));
+                        aggiornaRisultati();
+                    });
+            } else {
+                aggiornaRisultati();
+            }
         }
+        
         function chiudiCreaScheda() {
             document.getElementById('modal-crea-scheda').classList.remove('open');
         }
@@ -635,7 +630,7 @@
             /* filtra per zona e testo */
             const idAggiunti = new Set(_aggiunti.map(e => e.id));
             const filtrati   = _tuttiEsercizi.filter(ez => {
-                const perZona  = _zonaFiltro === 'tutte' || ez.zone.includes(_zonaFiltro);
+                const perZona  = _zonaFiltro === 'tutte' || ez.macroPart.includes(_zonaFiltro);
                 const perTesto = !query || ez.nome.toLowerCase().includes(query);
                 const nonAggiunto = !idAggiunti.has(ez.id);
                 return perZona && perTesto && nonAggiunto;
@@ -659,7 +654,7 @@
                 row.innerHTML = `
                     <div>
                         <div class="ez-result-name">${ez.nome}</div>
-                        <div class="ez-result-zona">${ez.zone.join(' · ')}</div>
+                        <div class="ez-result-zona">${ez.macroPart} · ${ez.bodyPart}</div>
                     </div>
                     <button class="ez-add-btn" onclick="aggiungiEsercizio('${ez.id}')">+ Aggiungi</button>`;
                 results.appendChild(row);
@@ -702,7 +697,7 @@
                 row.innerHTML = `
                     <div>
                         <div class="added-name">${ez.nome}</div>
-                        <div class="added-zona">${ez.zone.join(' · ')}</div>
+                        <div class="added-zona">${ez.macroPart} · ${ez.bodyPart}</div>
                     </div>
                     <button class="remove-btn" onclick="rimuoviEsercizio('${ez.id}')">✕</button>`;
                 lista.appendChild(row);
@@ -751,7 +746,7 @@
                 document.getElementById('empty-personali')?.remove();
 
                 const cardDati = {
-                    id:       nuovaScheda.id,
+                    id:       nuovaScheda.workoutId,
                     nome:     nuovaScheda.name,
                     esercizi: 0,
                     giorni:   0,

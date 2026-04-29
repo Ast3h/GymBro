@@ -386,7 +386,7 @@
                     <button class="chip" onclick="filtraSchede('schiena', 'personali', this)">Schiena</button>
                 </div>
 
-                <!-- BACKEND: riempire con creaCardScheda() e rimuovere #empty-personali se ci sono schede-->
+        
                 <div class="schede-grid" id="grid-schede-personali">
                     <div class="empty-state" id="empty-personali">
                         <p>Non hai ancora salvato nessuna scheda.</p>
@@ -411,7 +411,7 @@
                     <button class="chip" onclick="filtraSchede('Avanzato', 'personali', this)">Avanzato</button>
                 </div>
 
-                <!-- BACKEND: riempire e rimuovere #empty-predefinite se ci sono schede-->
+
                 <div class="schede-grid" id="grid-schede-predefinite">
                     <div class="empty-state" id="empty-predefinite">
                         <p>Nessuna scheda predefinita disponibile.</p>
@@ -555,7 +555,7 @@
         /* creaCardScheda(scheda)*/
         function creaCardScheda(scheda){
             const card= document.createElement('div');
-            card.className= 'scheda-card' + (scheda.tipo === 'predefinita' ? 'predefinita' : '');
+            card.className= 'scheda-card' + (scheda.tipo === 'predefinita' ? ' predefinita' : '');
             card.dataset.zone= scheda.zone.join(',');
             card.dataset.id= scheda.id;
 
@@ -568,7 +568,6 @@
                     <button class="scheda-btn danger" onclick="event.stopPropagation(); eliminaScheda('${scheda.id}')">Elimina</button>
                 </div>`
                 : `<div class="scheda-actions">
-                    <button class="scheda-btn" onclick="event.stopPropagation(); salvaScheda('${scheda.id}')">Salva</button>
                 </div>`;
             card.innerHTML=
                 `<div class="scheda-name">${scheda.nome}</div>
@@ -783,12 +782,12 @@
             document.getElementById('empty-personali').remove()
             data.forEach(scheda =>{
                 workout = {
-                    id:       scheda.id,
+                    id:       scheda.workoutId,
                     nome:     scheda.name,
                     esercizi: scheda._count.workout_ex,
                     giorni:   0,
-                    zone:     scheda.zone,
-                    data:     new Date(scheda.dataCreazione).toLocaleDateString('it-IT'),
+                    zone:     scheda.zone ?? [],
+                    data:     scheda.dataCreazione ? new Date(scheda.dataCreazione).toLocaleDateString('it-IT') : '',
                     tipo:     scheda.tipo,
                     livello:  scheda.livello
                 }

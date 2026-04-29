@@ -819,7 +819,7 @@
                 body : JSON.stringify({
                     workout_id : schedaId,
                     exercise : esercizioCorrente.id,
-                    nset : nSet ?? 4,
+                    nset : parseInt(nSet) || 4,
                 })
             })
 
@@ -1002,9 +1002,6 @@
         async function loadEx(){
             const response = await fetch('http://localhost:3000/fullexercises', {
                 method : 'GET',
-                headers : {
-                    'Authorization' : 'Bearer ' + localStorage.getItem('gymbros-token')
-                }
             })
             const divex = document.getElementById('grid-esercizi')
             const data = await response.json()

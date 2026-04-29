@@ -22,7 +22,7 @@ const auth = (req, res, next) => {
     const token = req.headers.authorization?.split(' ')[1]
 
     if(!token){
-        console.log("IL TOKEN NON C'È")
+        //console.log("IL TOKEN NON C'È")
         return res.status(401).json({error : "Unauthorized"})
         
     }
@@ -32,7 +32,7 @@ const auth = (req, res, next) => {
         req.id = plain.user_id
         next()
     }catch {
-        console.log("IL TOKEN È SBAGLIATO")
+        //console.log("IL TOKEN È SBAGLIATO")
         return res.status(401).json({error : "Unauthorized"})
        
     }
@@ -55,7 +55,7 @@ app.post('/auth/register', async(req, res) =>{
 
     const checkObiettivo = ['Forza', 'Dimagrire', 'Resistenza', 'Benessere', 'Massa muscolare']
 
-    console.log("livello : " + livello + " obiettivo : " + obiettivo)
+    //console.log("livello : " + livello + " obiettivo : " + obiettivo)
 
     //CONTROLLO EMAIL PASSWORD E USERNAME SIANO PRESENTI E VALIDI
     const reg_email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -90,7 +90,7 @@ app.post('/auth/register', async(req, res) =>{
                 obiettivo : obiettivo,
             }
         })
-        console.log(user)
+        //console.log(user)
         res.json(user)
     }catch(error){
         if(error.code === 'P2002'){
@@ -121,10 +121,10 @@ app.post('/auth/login', async (req,res) =>{
     if(!user){
         return res.status(401).json({error : "Credenziali errate"})
     }
-    console.log(user.password)
+   // console.log(user.password)
     
     if(await bcrypt.compare(password, user.password)){
-        console.log("COMPARE FUNZIONA BENE")
+        //console.log("COMPARE FUNZIONA BENE")
     }else{
         return res.status(401).json({error : "Credenziali errate"})
     }
@@ -143,13 +143,13 @@ app.post('/auth/login', async (req,res) =>{
 
 app.get('/users/profile', auth, async(req, res) =>{
     const id  = req.id
-    console.log("l'user id:" + id)
+    //console.log("l'user id:" + id)
     let user = 10
     try{
         user = await prisma.user.findUnique({
             where : {id: id}
         })
-        console.log(user)
+        //console.log(user)
     } catch(error){
         return res.status(400).json({error : error.message})
     }
@@ -190,7 +190,7 @@ app.patch('/users/avatar', auth, async(req,res)=>{
                 avatarUrl : url
             }
         })
-        console.log(avatar)
+        //console.log(avatar)
     }catch(error){
         return res.status(500).json({error : error.message})
     }
@@ -234,7 +234,7 @@ app.patch('/users/profile', auth, async(req,res)=>{
 ///FILTRARE ESERCIZI CON MACRO PART
 app.get('/exercises/:macroPart' , async (req, res) =>{
     const macro = req.params.macroPart
-    console.log("macropart")
+    //console.log("macropart")
     try{
         const esercizi = await prisma.exercise.findMany({
             where : { macroPart: macro}
@@ -249,7 +249,7 @@ app.get('/exercises/:macroPart' , async (req, res) =>{
 app.get('/exercises/:macroPart/:bodyPart' , async (req, res) =>{
     const body = req.params.bodyPart
     const macro = req.params.macroPart
-    console.log("bodpart")
+    //console.log("bodpart")
     try{
         const esercizi = await prisma.exercise.findMany({
             where : { bodyPart: body,
@@ -266,7 +266,7 @@ app.get('/exercises/:macroPart/:bodyPart' , async (req, res) =>{
 ///FILTRARE CON ID
 app.get('/exercises' , auth, async (req, res) =>{
     const macro = parseInt(req.query.id)
-    console.log(macro)
+    //console.log(macro)
     try{
         const esercizi = await prisma.exercise.findMany({
             where : { id: macro}
@@ -283,7 +283,7 @@ app.get('/fullexercises', auth, async (req,res) =>{
     try{
         const response = await prisma.exercise.findMany()
         res.json(response)
-        console.log(response)
+        //console.log(response)
     }catch (error){
         return res.status(500).json({error : error.message})
     }
@@ -344,7 +344,7 @@ app.get('/users/workout-plans', auth, async (req, res) =>{
         })
             
         
-        console.log(workout)
+        //console.log(workout)
         res.json(workout)
 
     }catch(error){
@@ -358,6 +358,7 @@ app.post('/users/workout-plans', auth, async(req,res) =>{
     const workout_id = parseInt(req.body.workout_id)
     const exercise = parseInt(req.body.exercise)
     const set = parseInt(req.body.nset)
+    const nrep = parseInt(req.body.nrep)
 
     try {
         const response = await prisma.workout_plan.findUnique({
@@ -373,11 +374,24 @@ app.post('/users/workout-plans', auth, async(req,res) =>{
             data: {workoutId : workout_id,
                 exerciseId : exercise,
                 nSet : set,
-                nRep : null
+                nRep : nrep,
             }
         })
-
-        console.log(exercise_response)
+        //console.log(set)
+        for(let i = 1; i<=set; i++){
+            
+            let ex_sets = await prisma.workout_set.create({
+                data: {
+                    workoutId : workout_id,
+                    setId: i,
+                    exerciseId : exercise,
+                    rep : nrep,
+                    pesi : 0,
+                }
+            })
+            
+        }   
+        //console.log(exercise_response)
 
 
     } catch (error) {

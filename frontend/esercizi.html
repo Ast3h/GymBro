@@ -619,8 +619,8 @@
                         <input class="form-input" type="number" id="reg-numero-serie" placeholder="4" min="1" max="10">
                     </div>
                     <div class="form-row" style="width: 100%;">
-                        <label class="form-label" for="reg-altezza">#Reps</label>
-                        <input class="form-input" type="number" id="reg-altezza" placeholder="10" min="2" max="40">
+                        <label class="form-label" for="reg-numero-reps">#Reps</label>
+                        <input class="form-input" type="number" id="reg-numero-reps" placeholder="10" min="2" max="40">
                     </div>
                     
                 </div>
@@ -808,6 +808,7 @@
         /* AGGIUNGE ESERCIZIO A SCHEDA */
         async function aggiungiAScheda(schedaId) {
             const nSet = document.getElementById('reg-numero-serie').value
+            const nRep = document.getElementById('reg-numero-reps').value
 
             if (!esercizioCorrente) return;
             const response = await fetch('http://localhost:3000/users/workout-plans', {
@@ -820,6 +821,7 @@
                     workout_id : schedaId,
                     exercise : esercizioCorrente.id,
                     nset : nSet ?? 4,
+                    nrep : nRep ?? null,
                 })
             })
 

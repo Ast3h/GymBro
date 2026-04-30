@@ -324,10 +324,10 @@
 
             <!-- lista esercizi -->
             <div class="section">
-                <div class="section-title">Esercizi</div>
+                <div class="section-title" style="padding-top: 10px;">Esercizi</div>
                 <div class="ez-list" id="ez-list">
                     <!-- skeleton -->
-                    <div class="ez-item" style="cursor:default;">
+                    <div class="ez-item"  style="cursor:default;">
                         <div class="skeleton" style="width:20px; height:14px;"></div>
                         <div style="flex:1;">
                             <div class="skeleton" style="height:14px; width:55%; margin-bottom:5px;"></div>
@@ -435,7 +435,8 @@
 
             try {
                 const res = await fetch(`${API}/users/workout-plans/${schedaId}`, {
-                    headers: { Authorization: 'Bearer ' + TOKEN() }
+                    method : 'GET',
+                    headers: { 'Authorization' : 'Bearer ' + TOKEN() }
                 });
 
                 if (!res.ok) {
@@ -444,6 +445,7 @@
                 }
 
                 _scheda = await res.json();
+                console.log(_scheda)
                 renderScheda();
 
             } catch (e) {
@@ -453,6 +455,7 @@
 
         /*  RENDER  */
         function renderScheda() {
+            console.log(_scheda)
             if (!_scheda) return;
 
             /* titolo pagina */

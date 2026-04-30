@@ -406,3 +406,42 @@ app.post('/users/workout-plans', auth, async(req,res) =>{
         return res.status(500).json({error : error.message})
     }
 })
+
+
+/* CARICA SCHEDA UTENTE */
+app.get('/users/workout-plans/:id', auth, async(req, res) =>{
+    const id = req.id
+    const workout_id = parseInt(req.params.id)
+    console.log( id + ' ' +  workout_id)
+
+    try {
+        const check = await prisma.workout_plan.findUnique({
+            where : { workoutId : workout_id},
+            include : {
+                workout_ex : {
+                    include : {exercise : {
+                        select : {
+                            id : true,
+                            nameIt : true,
+                            videoUrl : true,
+                            bodyPart : true,
+                            macroPart : true,
+                        }
+                    }}
+                }
+            }
+        })
+        console.log('ARRIVA')
+        console.log(check)
+
+        if(!check){
+            return res.status(401).json({error : 'Unauthorized'})
+        }
+
+        res.json(check)
+    } catch (error) {
+        console.log(error.message)
+        return res.status(500).json({error : error.message})
+    }
+
+})

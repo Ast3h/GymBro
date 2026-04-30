@@ -417,7 +417,7 @@
 
             <!-- DATI PERSONALI -->
             <div class="section">
-                <div class="section-title">Dati personali</div>
+                <div class="section-title" style="padding-top: 8px;">Dati personali</div>
                 <div class="info-row">
                     <span class="info-label">Nome</span>
                     <span class="info-val" id="dato-nome">—</span>
@@ -555,7 +555,7 @@
 
 
         <script>
-
+            let livelloCorrente = 1; 
         /* FETCH BACKEND*/
         async function getProfilo(){
             const response = await fetch('http://localhost:3000/users/profile', {
@@ -600,7 +600,7 @@
                     seg.classList.remove('on')
                 }
             })
-
+            livelloCorrente = user.livello
             const nome_livello = ['Principiante', 'Novizio', 'Intermedio', 'Esperto', 'Avanzato']
             document.getElementById('level-name').textContent = nome_livello[user.livello-1]
 
@@ -655,7 +655,7 @@
 
         /*  LIVELLO — barra di visualizzazione  */
         const LIVELLI = ['', 'Principiante', 'Novizio', 'Intermedio', 'Esperto', 'Avanzato'];
-        let livelloCorrente = 1; 
+        
 
         function renderLivelloDisplay(valore) {
             const bar = document.getElementById('level-bar-display');
@@ -670,6 +670,19 @@
         }
 
         renderLivelloDisplay(livelloCorrente);
+
+        function renderLivelloModale(valore) {
+            const bar = document.getElementById('modal-level-bar');
+            bar.innerHTML = '';
+            for (let i = 1; i <= 5; i++) {
+                const seg = document.createElement('div');
+                seg.className = 'level-seg' + (i <= valore ? ' on' : '');
+                bar.appendChild(seg);
+            }
+            document.getElementById('level-name').textContent =
+                valore > 0 ? LIVELLI[valore] : '—';
+        }
+        
 
         /*  LIVELLO — barra della modale (cliccabile)  */
         function setLivello(valore) {
@@ -689,6 +702,7 @@
             document.getElementById('input-altezza').value = document.getElementById('dato-altezza').textContent.replace(' cm', '').replace('—', '');
             /* sincronizza barra livello modale */
             setLivello(livelloCorrente);
+            renderLivelloDisplay(livelloCorrente);
             document.getElementById('modal-modifica').classList.add('open');
         }
 

@@ -29,6 +29,7 @@ model workout_plan{
   name String
   dataCreazione DateTime?
   tipo String
+  note String?
   livello Int?
   workout_ex workout_exercise[]
   workout_set workout_set[]
@@ -72,4 +73,14 @@ model User{
   obiettivo String
   livello Int
   workout_plan workout_plan[]
+  storico_forma storico_forma[]
+}
+
+
+model storico_forma{
+  Id Int @id @default(autoincrement())
+  peso Float?
+  userId Int
+  data DateTime
+  user User @relation( fields : [userId], references : [id])
 }

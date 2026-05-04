@@ -430,21 +430,7 @@
 
                 <div style="font-size:0.68rem; color:var(--muted); letter-spacing:0.06em; text-transform:uppercase;">Performance (opzionale)</div>
 
-                <div class="form-row-inline">
-                    <div class="form-row">
-                        <label class="form-label" for="mis-esercizio">Esercizio</label>
-                        <input class="form-input" type="text" id="mis-esercizio" placeholder="Es. Squat">
-                    </div>
-                    <div class="form-row">
-                        <label class="form-label" for="mis-carico">Carico (kg)</label>
-                        <input class="form-input" type="number" id="mis-carico" placeholder="80" min="0">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <label class="form-label" for="mis-note">Note (opzionale)</label>
-                    <input class="form-input" type="text" id="mis-note" placeholder="Es. post vacanze">
-                </div>
+                
 
             </div>
             <div class="modal-footer">
@@ -566,18 +552,19 @@
         }
 
         async function caricaMisurazioni() {
-            /*
-             * BACKEND:
-             * const res  = await fetch(`${API}/users/stats`, { headers: { Authorization: 'Bearer ' + TOKEN() } });
-             * const data = await res.json();
-             * _misurazioni = data;
-             * renderStorico();
-             * renderKpi();
-             * renderGrafico();
-             */
+            /* NON FUNZIONA
+            const res = await fetch(`${API}/users/stats`, {
+                method : 'GET',
+                headers : {
+                    'Authorization' : 'Bearer ' + TOKEN(),
+                    'Content-Type' : 'application/json'
+                }
 
-            /* dati demo finché il backend non è pronto */
-            _misurazioni = [];
+            })
+            const data = await res.json()
+            _misurazioni = data
+            */
+            _misurazioni = []
             renderStorico();
             renderKpi();
             renderGrafico();
@@ -804,6 +791,24 @@
              *     chiudiModaleMisurazione();
              * }
              */
+
+            const res = await fetch(`${API}/users/misurazione`, {
+                method : 'POST',
+                headers : {
+                    'Authorization' : 'Bearer ' + TOKEN(),
+                    'Content-Type' : 'application/json'
+                },
+                body : JSON.stringify({
+                    peso : peso, 
+                    data : data
+                })
+            })
+            if(res.ok){
+                const nuova = await res.json();
+                _misurazioni.unshift(nuova);
+                renderStorico(); renderKpi(); renderGrafico();
+                chiudiModaleMisurazione();
+            }
 
             /* demo locale finché il backend non è pronto */
             const nuova = { id: Date.now(), ...payload };

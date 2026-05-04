@@ -532,6 +532,17 @@
         async function eliminaScheda() {
             if (!confirm('Sei sicuro di voler eliminare questa scheda?')) return;
 
+            const response = await fetch(`${API}/users/workout-plans/${schedaId}`, {
+                method : 'DELETE',
+                headers : {
+                    'Authorization' : 'Bearer ' + localStorage.getItem('gymbros-token'),
+                    'Content-Type' : 'application/json'
+                }
+            })
+
+            
+
+            console.log(response)
             /*
              * BACKEND:
              * await fetch(`${API}/workout-plans/${schedaId}`, {
@@ -579,7 +590,17 @@
              *     body: JSON.stringify({ nome, note })
              * });
              */
-
+            const request = await fetch(`${API}/users/workout-plans/${schedaId}`, {
+                method : 'PATCH',
+                headers : {
+                    'Authorization' : 'Bearer ' + localStorage.getItem('gymbros-token'),
+                    'Content-Type' : 'application/json'
+                },
+                body : JSON.stringify({
+                    nome : nome,
+                    note : note
+                })
+            })
             /* aggiorna localmente senza ricaricare */
             if (_scheda) {
                 _scheda.name = nome;

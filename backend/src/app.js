@@ -93,6 +93,13 @@ app.post('/auth/register', async(req, res) =>{
             }
         })
         //console.log(user)
+         const storico = await prisma.storico_forma.create({
+                data : {
+                    peso : peso,
+                    userId : user.id,
+                    data : new Date()
+                }
+            })
         res.json(user)
     }catch(error){
         if(error.code === 'P2002'){
@@ -222,6 +229,16 @@ app.patch('/users/profile', auth, async(req,res)=>{
                 livello : livello ?? user.livello,
             }
         })
+
+        if(peso != user.peso){
+            const storico = await prisma.storico_forma.create({
+                data : {
+                    peso : peso,
+                    userId : id,
+                    data : new Date()
+                }
+            })
+        }
     } catch (error) {
         return res.status(500).json({error : error.message})
     }
@@ -444,4 +461,118 @@ app.get('/users/workout-plans/:id', auth, async(req, res) =>{
         return res.status(500).json({error : error.message})
     }
 
+})
+
+
+/* ELIMINARE SCHEDA */
+app.delete('/users/workout-plans/:id', auth, async (req,res) =>{
+    const id = req.id
+    const workout_id = parseInt(req.params.id)
+
+    try {
+        let check = await prisma.workout_plan.findUnique({
+            where : {
+                userId : id,
+                workoutId : workout_id,
+            }
+        })   
+        
+        if(!check){
+            return res.status(401).json({error : 'Unauthorized'})
+        }
+
+        check = await prisma.workout_set.deleteMany({
+            where : { workoutId : workout_id}
+        })
+        check = await prisma.workout_exercise.deleteMany({
+            where : { workoutId : workout_id}
+        })
+        check = await prisma.workout_plan.deleteMany({
+            where : { workoutId : workout_id}
+        })
+        console.log('DELET FUNCTION')
+        res.json({messaggio : 'Scheda eliminata'})
+    } catch (error) {
+        res.status(500).json({error : error.message})
+    }
+
+
+})
+
+
+app.patch('/users/workout-plans/:id', auth, async (req, res) =>{
+    const id = req.id
+    const workout_id = parseInt(req.params.id)
+    const nome = req.body.name
+    const note = req.body.note
+
+    try {
+        const check = await prisma.workout_plan.findUnique({
+            where : {userId : id,
+                workoutId : workout_id
+            }
+        })
+
+        if(!check){
+            return res.status(401).json({error : 'Unauthorized'})
+        }
+        const scheda = await prisma.workout_plan.update({
+            where : {
+                userId : id,
+                workoutId : workout_id
+            },
+            data : {
+                name : nome ?? check.name,
+                note : note ?? check.note
+            }
+        }
+        )
+        console.log(note)
+        
+    } catch (error) {
+        return res.status(500).json({error : error.message})
+    }
+})
+
+/* AGGIUNGERE MISURAZIONE UTENTE */
+app.post('/users/misurazione', auth, async (req, res) =>{
+    const id = req.id
+    const peso = parseInt(req.body.peso)
+    const data = new Date(req.body.data)
+
+    try {
+        const nuova = await prisma.storico_forma.create({
+            data: {
+                userId : id,
+                peso : peso,
+                data : data,
+            }
+        })
+
+        const profilo = await prisma.user.update({
+            where : {id : id},
+            data : {
+                peso : peso
+            }
+        })
+        console.log(nuova)
+
+    } catch (error) {
+        return res.status(500).json({error : error.message})
+    }
+})
+
+
+/* PRENDERE TUTTE LE MISURAZIONI DELL'UTENTE */
+app.get('/users/misurazione', auth, async (req, res)=>{
+    const id = req.id
+
+    try {
+        const data = await prisma.storico_forma.findMany({
+            where : {userId : id}
+        })
+        res.json(data)
+    } catch (error) {
+        return res.status(500).json({error : error.message})
+    }
 })

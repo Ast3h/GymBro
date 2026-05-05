@@ -425,10 +425,17 @@
                     </label>
                     <input class="form-input" type="number" id="mis-peso" placeholder="78.5" step="0.1" min="30" max="300">
                 </div>
+                <div class="form-row">
+                    <label class="form-label" for="mis-note">
+                        Note
+                        <span style="font-size:0.62rem; color:var(--muted); font-weight:400; text-transform:none; letter-spacing:0; margin-left:6px;">pre-compilato dal profilo</span>
+                    </label>
+                    <input class="form-input" type="text" id="mis-note" placeholder="es. Misurazione post palestra" >
+                </div>
 
-                <div style="height:0.5px; background:var(--border);"></div>
+                <div style="height:0.5px; background:var(--border); "></div>
 
-                <div style="font-size:0.68rem; color:var(--muted); letter-spacing:0.06em; text-transform:uppercase;">Performance (opzionale)</div>
+                
 
                 
 
@@ -552,8 +559,8 @@
         }
 
         async function caricaMisurazioni() {
-            /* NON FUNZIONA
-            const res = await fetch(`${API}/users/stats`, {
+            
+            const res = await fetch(`${API}/users/misurazione`, {
                 method : 'GET',
                 headers : {
                     'Authorization' : 'Bearer ' + TOKEN(),
@@ -562,9 +569,9 @@
 
             })
             const data = await res.json()
+            
+            
             _misurazioni = data
-            */
-            _misurazioni = []
             renderStorico();
             renderKpi();
             renderGrafico();
@@ -660,7 +667,7 @@
                 <div class="storico-td">${m.peso ? m.peso + ' kg' : '—'}</div>
                 <div class="storico-td ${imc ? (imc < 25 ? 'green' : 'accent') : ''}">${imc ?? '—'}</div>
                 <div class="storico-td muted">${m.note || '—'}</div>
-                <button class="storico-del" onclick="eliminaMisurazione(${m.id})">✕</button>`;
+                <button class="storico-del" onclick="eliminaMisurazione(${m.Id})">✕</button>`;
             return row;
         }
 
@@ -800,7 +807,8 @@
                 },
                 body : JSON.stringify({
                     peso : peso, 
-                    data : data
+                    data : data,
+                    note : note,
                 })
             })
             if(res.ok){
@@ -827,11 +835,19 @@
 
             /*
              * BACKEND:
-             * fetch(`${API}/users/stats/${id}`, {
+             * fetch(, {
              *     method: 'DELETE',
              *     headers: { Authorization: 'Bearer ' + TOKEN() }
              * });
              */
+
+            const res = await fetch(`${API}/users/misurazione/${id}`, {
+                method : 'DELETE',
+                headers : {
+                    'Authorization' : 'Bearer ' + TOKEN(),
+                    'Content-Type' : 'application/json'
+                }
+            })
         }
 
         /* ── UTILITY ── */

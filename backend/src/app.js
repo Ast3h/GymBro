@@ -539,6 +539,7 @@ app.post('/users/misurazione', auth, async (req, res) =>{
     const id = req.id
     const peso = parseInt(req.body.peso)
     const data = new Date(req.body.data)
+    const note = req.body.note
 
     try {
         const nuova = await prisma.storico_forma.create({
@@ -546,6 +547,7 @@ app.post('/users/misurazione', auth, async (req, res) =>{
                 userId : id,
                 peso : peso,
                 data : data,
+                note : note,
             }
         })
 
@@ -571,7 +573,45 @@ app.get('/users/misurazione', auth, async (req, res)=>{
         const data = await prisma.storico_forma.findMany({
             where : {userId : id}
         })
+        
+        console.log(data)
         res.json(data)
+    } catch (error) {
+        return res.status(500).json({error : error.message})
+    }
+})
+
+app.delete('/users/misurazione/:id', auth, async(req, res) =>{
+    const id = req.id
+    const mis_id = parseInt(req.params.id)
+
+    try {
+        const deleted = await prisma.storico_forma.deleteMany({
+            where : { Id : mis_id,
+                userId : id 
+            }
+        })
+
+        const last = await prisma.storico_forma.findFirst({
+            where : {userId : id},
+            orderBy : [{data : 'desc'},
+           {Id : 'desc'} ]
+        })
+        
+        const set_last = await prisma.user.update({
+            where : {
+                id : id
+            },
+            data : { peso : last.peso }
+        })
+        
+        if(deleted.count === 0){
+            return res.status(400).json({error : 'Errore del server'})
+        }
+        
+        console.log('ECCO LA COSA DA ELIMINARE')
+        console.log(deleted)
+        return res.json({success : true})
     } catch (error) {
         return res.status(500).json({error : error.message})
     }

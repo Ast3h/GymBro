@@ -81,6 +81,7 @@ model storico_forma{
   Id Int @id @default(autoincrement())
   peso Float?
   userId Int
+  note String?
   data DateTime
   user User @relation( fields : [userId], references : [id])
 }

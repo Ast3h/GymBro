@@ -577,7 +577,7 @@ body {
     border-radius: 20px;
     background: var(--accent-dim);
     color: var(--accent);
-    border: 0.5px solid rgba(237, 36, 155, 0.3);
+    border: 0.5px solid var(--accent-dim);
 }
 
 /* CARD GENERICA ESERCIZIO*/

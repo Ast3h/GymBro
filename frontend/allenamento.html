@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymBro — Allenamento</title>
+
+    <link rel="icon" type="image/png" sizes="32x32" href="Favicon32x32.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="stili.css">
+    <script src="funzioni.js" defer></script>
+
+    <style>
+
+        /* LAYOUT SPECIFICO ALLENAMENTO: NESSUNA SIDEBAR E TOPBAR SEMPLIFICATA*/
+        * { box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            font-family: var(--font-body);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /*  TOPBAR ALLENAMENTO -> NON USA gymbros.js  */
+        .all-topbar {
+            height: 52px;
+            background: var(--surface);
+            border-bottom: 0.5px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .all-back-btn {
+            font-size: 0.72rem;
+            color: var(--muted);
+            border: 0.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 5px 10px;
+            background: none;
+            cursor: pointer;
+            text-decoration: none;
+            transition: color 0.18s;
+        }
+
+        .all-back-btn:hover { color: var(--text); }
+
+        .all-title {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text);
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .all-timer-display {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--accent);
+            letter-spacing: 0.06em;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .all-done-btn {
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #fff;
+            background: #8cc63f;
+            border: none;
+            border-radius: var(--radius);
+            padding: 7px 16px;
+            cursor: pointer;
+            transition: opacity 0.18s;
+        }
+
+        .all-done-btn:hover { opacity: 0.88; }
+
+        /*  STATS ROW  */
+        .stats-row {
+            display: flex;
+            border-bottom: 0.5px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .stat-item {
+            flex: 1;
+            padding: 8px 14px;
+            border-right: 0.5px solid var(--border);
+        }
+
+        .stat-item:last-child { border-right: none; }
+
+        .stat-label {
+            font-size: 0.6rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 3px;
+        }
+
+        .stat-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .stat-value.green { color: #8cc63f; }
+
+        /*  SCROLL CONTENT  */
+        .all-scroll {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /*  CARD ESERCIZIO  */
+        .ez-all-card {
+            background: var(--surface);
+            border: 0.5px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .ez-all-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-bottom: 0.5px solid var(--border);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .ez-all-header:hover { background: var(--surface2); }
+
+        .ez-thumb {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            background: var(--surface2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .ez-thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .ez-thumb-ph { font-size: 1.1rem; opacity: 0.15; color: var(--text); }
+
+        .ez-all-info { flex: 1; min-width: 0; }
+
+        .ez-all-name {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--accent);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .ez-all-zona {
+            font-size: 0.68rem;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .ez-menu-btn {
+            font-size: 1.1rem;
+            color: var(--muted);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0 4px;
+        }
+
+        /* riposo */
+        .riposo-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 14px;
+            border-bottom: 0.5px solid var(--border);
+        }
+
+        .riposo-label {
+            font-size: 0.68rem;
+            color: var(--muted);
+        }
+
+        .riposo-time-btn {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--accent);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            text-decoration: underline;
+        }
+
+        /* note esercizio */
+        .note-row {
+            padding: 7px 14px;
+            border-bottom: 0.5px solid var(--border);
+        }
+
+        .note-input {
+            width: 100%;
+            background: none;
+            border: none;
+            outline: none;
+            font-family: var(--font-body);
+            font-size: 0.75rem;
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        .note-input::placeholder { color: var(--border); }
+
+        /* tabella serie */
+        .serie-head {
+            display: grid;
+            grid-template-columns: 28px 1fr 58px 58px 32px;
+            padding: 6px 14px;
+            gap: 6px;
+        }
+
+        .serie-th {
+            font-size: 0.6rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        .serie-th:first-child { text-align: left; }
+
+        .serie-row {
+            display: grid;
+            grid-template-columns: 28px 1fr 58px 58px 32px;
+            padding: 8px 14px;
+            gap: 6px;
+            align-items: center;
+            border-top: 0.5px solid var(--border);
+            transition: background 0.15s;
+        }
+
+        .serie-row.done { background: rgba(140,198,63,0.07); }
+
+        .serie-num {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--muted);
+        }
+
+        .serie-prec {
+            font-size: 0.68rem;
+            color: var(--muted);
+        }
+
+        .serie-input {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text);
+            background: var(--surface2);
+            border: 0.5px solid var(--border);
+            border-radius: 4px;
+            padding: 4px 6px;
+            text-align: center;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.18s;
+        }
+
+        .serie-input:focus { border-color: var(--accent); }
+        .serie-input.done  { background: transparent; border-color: transparent; color: #8cc63f; }
+
+        .serie-check-btn {
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            border: 1.5px solid var(--border);
+            background: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+        }
+
+        .serie-check-btn.done {
+            background: #8cc63f;
+            border-color: #8cc63f;
+        }
+
+        .add-serie-btn {
+            width: 100%;
+            padding: 9px 0;
+            background: none;
+            border: none;
+            border-top: 0.5px solid var(--border);
+            color: var(--muted);
+            font-family: var(--font-body);
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: color 0.18s;
+        }
+
+        .add-serie-btn:hover { color: var(--text); }
+
+        /*  BOTTOM BAR  */
+        .all-bottom {
+            padding: 10px 14px 18px;
+            border-top: 0.5px solid var(--border);
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+            background: var(--surface);
+        }
+
+        .btn-annulla {
+            flex: 1;
+            padding: 10px 0;
+            background: none;
+            border: 0.5px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--muted);
+            font-family: var(--font-body);
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        .btn-salva-stat {
+            flex: 2;
+            padding: 10px 0;
+            background: var(--accent);
+            border: none;
+            border-radius: var(--radius);
+            color: #fff;
+            font-family: var(--font-body);
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: opacity 0.18s;
+        }
+
+        .btn-salva-stat:hover { opacity: 0.88; }
+
+        /*  TIMER RIPOSO OVERLAY -> BLOCCA L'INTERAZIONE DURANTE IL RIPOSO */
+        .riposo-overlay {
+            position: fixed;
+            inset: 52px 0 0 0;
+            background: rgba(14,14,16,0.94);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            z-index: 50;
+            display: none;
+        }
+
+        .riposo-overlay.show { display: flex; }
+
+        .riposo-prossimo {
+            font-size: 0.68rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .riposo-ring {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .riposo-count {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .riposo-set-label {
+            font-size: 0.75rem;
+            color: var(--text);
+            text-align: center;
+        }
+
+        .riposo-set-sub {
+            font-size: 0.68rem;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        .riposo-skip-btn {
+            font-size: 0.72rem;
+            color: var(--muted);
+            border: 0.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 6px 16px;
+            background: none;
+            cursor: pointer;
+            transition: color 0.18s;
+        }
+
+        .riposo-skip-btn:hover { color: var(--text); }
+
+        /* INPUT TIMER: APPARE QUANDO L'UTENTE CLICCA SUL TEMPO RIPOSO */
+        .riposo-edit-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .riposo-edit-input {
+            width: 52px;
+            padding: 3px 6px;
+            background: var(--surface2);
+            border: 0.5px solid var(--accent);
+            border-radius: 4px;
+            color: var(--accent);
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-align: center;
+            outline: none;
+        }
+
+        /*  MODALE DETTAGLIO ESERCIZIO  */
+        .ez-detail-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.72);
+            display: flex;
+            align-items: flex-end;
+            z-index: 60;
+            display: none;
+        }
+
+        .ez-detail-overlay.show { display: flex; }
+
+        .ez-detail-sheet {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--surface);
+            border-radius: 14px 14px 0 0;
+            border-top: 0.5px solid var(--border);
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ez-detail-handle {
+            width: 32px;
+            height: 3px;
+            border-radius: 3px;
+            background: var(--border);
+            margin: 10px auto 0;
+            flex-shrink: 0;
+        }
+
+        /* INPUT VIDEO: APPARE QUANDO L'UTENTE CLICCA SUL VIDEO */
+        .ez-video-wrap {
+            width: 100%;
+            background: #000;
+            aspect-ratio: 16/9;
+            max-height: 30vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .ez-video-wrap iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .ez-video-ph {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: var(--muted);
+        }
+
+        .ez-video-ph-icon { font-size: 2.5rem; opacity: 0.15; }
+        .ez-video-ph-label { font-size: 0.72rem; }
+
+        .ez-detail-body {
+            padding: 14px 16px;
+            overflow-y: auto;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .ez-detail-name {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .ez-detail-zona {
+            font-size: 0.72rem;
+            color: var(--muted);
+            margin-bottom: 12px;
+        }
+
+        .ez-detail-desc {
+            font-size: 0.78rem;
+            color: var(--muted);
+            line-height: 1.65;
+        }
+
+        .ez-detail-footer {
+            padding: 10px 16px 20px;
+            border-top: 0.5px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .ez-detail-close {
+            width: 100%;
+            padding: 10px 0;
+            background: none;
+            border: 0.5px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--muted);
+            font-family: var(--font-body);
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: color 0.18s, border-color 0.18s;
+        }
+
+        .ez-detail-close:hover { color: var(--text); border-color: var(--text); }
+
+        /*  MODALE TIMER EDIT  */
+        .timer-edit-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 70;
+            display: none;
+        }
+
+        .timer-edit-overlay.show { display: flex; }
+
+        .timer-edit-box {
+            background: var(--surface);
+            border: 0.5px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            width: 280px;
+        }
+
+        .timer-edit-title {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 14px;
+            text-align: center;
+        }
+
+        .timer-presets {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 14px;
+        }
+
+        .timer-preset {
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 0.5px solid var(--border);
+            background: none;
+            color: var(--muted);
+            font-size: 0.72rem;
+            cursor: pointer;
+            transition: color 0.18s, border-color 0.18s, background 0.18s;
+        }
+
+        .timer-preset:hover,
+        .timer-preset.active {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-dim);
+        }
+
+        .timer-edit-footer { display: flex; gap: 8px; }
+
+        .timer-edit-cancel {
+            flex: 1; padding: 8px 0; background: none; border: 0.5px solid var(--border);
+            border-radius: var(--radius); color: var(--muted); font-family: var(--font-body);
+            font-size: 0.75rem; cursor: pointer;
+        }
+
+        .timer-edit-ok {
+            flex: 1; padding: 8px 0; background: var(--accent); border: none;
+            border-radius: var(--radius); color: #fff; font-family: var(--font-body);
+            font-size: 0.75rem; font-weight: 500; cursor: pointer;
+        }
+
+        @media (max-width: 600px) {
+            .stats-row .stat-item:last-child { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!--  TOPBAR ALLENAMENTO  -->
+    <header class="all-topbar">
+        <a class="all-back-btn" id="back-btn" href="dettaglio.html">← Scheda</a>
+        <div class="all-title" id="all-title">Caricamento...</div>
+        <div class="all-timer-display" id="all-timer">00:00</div>
+        <button class="all-done-btn" onclick="fineAllenamento()">Finito</button>
+    </header>
+
+    <!--  STATS ROW  -->
+    <div class="stats-row">
+        <div class="stat-item">
+            <div class="stat-label">Durata</div>
+            <div class="stat-value" id="stat-durata">00:00</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label">Volume</div>
+            <div class="stat-value green" id="stat-volume">0 kg</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label">Serie</div>
+            <div class="stat-value" id="stat-serie">0</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label">Esercizi</div>
+            <div class="stat-value" id="stat-esercizi">0</div>
+        </div>
+    </div>
+
+    <!--  SCROLL CONTENT  -->
+    <div class="all-scroll" id="all-scroll">
+        <!-- popolato da JS -->
+        <div style="text-align:center; padding:40px 0; font-size:0.82rem; color:var(--muted);">
+            Caricamento scheda...
+        </div>
+    </div>
+
+    <!--  BOTTOM BAR  -->
+    <div class="all-bottom">
+        <button class="btn-annulla" onclick="annullaAllenamento()">Annulla</button>
+        <button class="btn-salva-stat" onclick="salvaInStatistiche()">
+            Salva in statistiche
+        </button>
+    </div>
+
+    <!--  OVERLAY TIMER RIPOSO -> APPARE DOPO CHE L'UTENTE SPUNTA UNA SERIE -->
+    <div class="riposo-overlay" id="riposo-overlay">
+        <div class="riposo-prossimo">Riposo</div>
+        <div class="riposo-ring">
+            <div class="riposo-count" id="riposo-count">1:30</div>
+        </div>
+        <div class="riposo-set-label" id="riposo-set-label">Prossima: Serie 2</div>
+        <div class="riposo-set-sub" id="riposo-set-sub"></div>
+        <button class="riposo-skip-btn" onclick="saltaRiposo()">Salta riposo →</button>
+    </div>
+
+    <!--  MODALE DETTAGLIO ESERCIZIO -> APERTO CLICCANDO IL NOME DELL'ESERCIZIO -->
+    <div class="ez-detail-overlay" id="ez-detail-overlay" onclick="chiudiDettaglioEz(event)">
+        <div class="ez-detail-sheet">
+            <div class="ez-detail-handle"></div>
+            <div class="ez-video-wrap" id="ez-video-wrap">
+                <div class="ez-video-ph">
+                    <div class="ez-video-ph-icon">▶</div>
+                    <div class="ez-video-ph-label">Nessun video disponibile</div>
+                </div>
+            </div>
+            <div class="ez-detail-body">
+                <div class="ez-detail-name" id="ez-detail-name"></div>
+                <div class="ez-detail-zona" id="ez-detail-zona"></div>
+                <div class="ez-detail-desc" id="ez-detail-desc">
+                    Descrizione non disponibile.
+                </div>
+            </div>
+            <div class="ez-detail-footer">
+                <button class="ez-detail-close" onclick="chiudiDettaglioEz()">✕ Chiudi</button>
+            </div>
+        </div>
+    </div>
+
+    <!--  MODALE MODIFICA TIMER -> APPARE QUANDO L'UTENTE CLICCA SUL TEMPO DI RIPOSO DI UN ESERCIZIO -->
+    <div class="timer-edit-overlay" id="timer-edit-overlay">
+        <div class="timer-edit-box">
+            <div class="timer-edit-title">Imposta tempo di riposo</div>
+            <div class="timer-presets">
+                <button class="timer-preset" onclick="setTimerPreset(30)">30s</button>
+                <button class="timer-preset" onclick="setTimerPreset(60)">1 min</button>
+                <button class="timer-preset active" onclick="setTimerPreset(90)">1:30</button>
+                <button class="timer-preset" onclick="setTimerPreset(120)">2 min</button>
+                <button class="timer-preset" onclick="setTimerPreset(180)">3 min</button>
+            </div>
+            <div class="timer-edit-footer">
+                <button class="timer-edit-cancel" onclick="chiudiTimerEdit()">Annulla</button>
+                <button class="timer-edit-ok" onclick="confermaTimerEdit()">Ok</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const TOKEN = () => localStorage.getItem('gymbros-token');
+        const API   = 'http://localhost:3000';
+
+        /*  LEGGE L'ID DELLA SCHEDA DALL'URL  */
+        const params   = new URLSearchParams(window.location.search);
+        const schedaId = parseInt(params.get('id'));
+
+        /* aggiorna il link back con l'id corretto */
+        document.getElementById('back-btn').href = 'dettaglio.html?id=' + schedaId;
+
+        let _scheda        = null;
+        let _serieState    = {}; /* { exerciseId: [{ kg, reps, done }] } */
+        let _riposi        = {}; /* { exerciseId: secondi } default 90 */
+        let _timerEditTarget = null; /* exerciseId in modifica */
+        let _timerPresetVal  = 90;
+
+        /* timer allenamento */
+        let _startTime    = Date.now();
+        let _timerInterval = null;
+        let _serieCount   = 0;
+
+        /* timer riposo */
+        let _ripososeconds = 0;
+        let _riposoInterval = null;
+
+        /*  CAMPANELLA  */
+        /* NOTA: SUONO CAMPANELLA GENERATO CON WEB AUDIO API */
+        function suonaCampanella() {
+            try {
+                const ctx  = new (window.AudioContext || window.webkitAudioContext)();
+                const gain = ctx.createGain();
+                gain.connect(ctx.destination);
+
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                    const osc = ctx.createOscillator();
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    osc.connect(gain);
+                    osc.start(ctx.currentTime + i * 0.12);
+                    osc.stop(ctx.currentTime + i * 0.12 + 0.3);
+                });
+
+                gain.gain.setValueAtTime(0.4, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+            } catch(e) {
+                console.warn('Audio non disponibile:', e);
+            }
+        }
+
+        /*  TIMER ALLENAMENTO  */
+        function formattaTempo(sec) {
+            const m = Math.floor(sec / 60).toString().padStart(2, '0');
+            const s = (sec % 60).toString().padStart(2, '0');
+            return m + ':' + s;
+        }
+
+        function avviaTimerAllenamento() {
+            _timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - _startTime) / 1000);
+                const fmt = formattaTempo(elapsed);
+                document.getElementById('all-timer').textContent  = fmt;
+                document.getElementById('stat-durata').textContent = fmt;
+            }, 1000);
+        }
+
+        /*  CARICA SCHEDA  */
+        async function caricaScheda() {
+            if (!schedaId) { window.location.href = 'schede.html'; return; }
+
+            try {
+                const res = await fetch(`${API}/users/workout-plans/${schedaId}`, {
+                    headers: { Authorization: 'Bearer ' + TOKEN() }
+                });
+
+                if (!res.ok) { window.location.href = 'schede.html'; return; }
+
+                _scheda = await res.json();
+                document.getElementById('all-title').textContent = _scheda.name || 'Allenamento';
+
+                /* inizializza stato serie */
+                (_scheda.workout_ex || []).forEach(ex => {
+                    const id = ex.exerciseId;
+                    _riposi[id] = 90; /* default 90 secondi */
+
+                    const sets = ex.workout_set || [];
+                    _serieState[id] = sets.map(s => ({
+                        setId: s.setId,
+                        kg:    s.pesi || 0,
+                        reps:  s.rep  || 0,
+                        done:  false,
+                    }));
+
+                    /* se non ci sono set, crea quelli default */
+                    if (_serieState[id].length === 0) {
+                        for (let i = 1; i <= (ex.nSet || 3); i++) {
+                            _serieState[id].push({ setId: i, kg: 0, reps: ex.nRep || 0, done: false });
+                        }
+                    }
+                });
+
+                renderEsercizi();
+                aggiornaStatEsercizi();
+                avviaTimerAllenamento();
+
+            } catch (e) {
+                console.error('Errore caricamento scheda:', e);
+            }
+        }
+
+        /*  RENDER ESERCIZI  */
+        function renderEsercizi() {
+            const scroll = document.getElementById('all-scroll');
+            scroll.innerHTML = '';
+
+            if (!_scheda || !_scheda.workout_ex || _scheda.workout_ex.length === 0) {
+                scroll.innerHTML = '<div style="text-align:center;padding:40px 0;font-size:0.82rem;color:var(--muted);">Nessun esercizio nella scheda.</div>';
+                return;
+            }
+
+            _scheda.workout_ex.forEach(ex => {
+                scroll.appendChild(creaCardEsercizio(ex));
+            });
+        }
+
+        function creaCardEsercizio(ex) {
+            const id    = ex.exerciseId;
+            const nome  = ex.exercise?.nameIt || ex.exercise?.name || 'Esercizio';
+            const zona  = [ex.exercise?.macroPart, ex.exercise?.bodyPart].filter(Boolean).map(z => z.charAt(0).toUpperCase() + z.slice(1)).join(' · ');
+            const video = ex.exercise?.videoUrl;
+            const serie = _serieState[id] || [];
+            const riposoSec = _riposi[id] || 90;
+            const riposoFmt = riposoSec >= 60
+                ? Math.floor(riposoSec/60) + 'min ' + (riposoSec%60 ? (riposoSec%60)+'s' : '')
+                : riposoSec + 's';
+
+            const card = document.createElement('div');
+            card.className  = 'ez-all-card';
+            card.dataset.ezId = id;
+
+            const serieTr = serie.map((s, i) => `
+                <div class="serie-row${s.done ? ' done' : ''}" data-ez="${id}" data-idx="${i}">
+                    <div class="serie-num">${i+1}</div>
+                    <div class="serie-prec">${s.kg ? s.kg+'kg×'+s.reps : '—'}</div>
+                    <input class="serie-input${s.done ? ' done' : ''}" type="number"
+                           value="${s.kg || ''}" placeholder="kg" min="0"
+                           onchange="aggiornaKg(${id}, ${i}, this.value)"
+                           ${s.done ? 'readonly' : ''}>
+                    <input class="serie-input${s.done ? ' done' : ''}" type="number"
+                           value="${s.reps || ''}" placeholder="reps" min="0"
+                           onchange="aggiornaReps(${id}, ${i}, this.value)"
+                           ${s.done ? 'readonly' : ''}>
+                    <button class="serie-check-btn${s.done ? ' done' : ''}"
+                            onclick="spuntaSerie(${id}, ${i}, '${nome}', ${i+1})">
+                        ${s.done ? '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+                    </button>
+                </div>`).join('');
+
+            card.innerHTML = `
+                <div class="ez-all-header" onclick="apriDettaglioEz(${id}, '${nome.replace(/'/g,"\\'")}', '${zona}', '${video || ''}')">
+                    <div class="ez-thumb">
+                        ${video ? `<div class="ez-thumb-ph">▶</div>` : `<div class="ez-thumb-ph">◈</div>`}
+                    </div>
+                    <div class="ez-all-info">
+                        <div class="ez-all-name">${nome}</div>
+                        <div class="ez-all-zona">${zona}</div>
+                    </div>
+                    <button class="ez-menu-btn" onclick="event.stopPropagation()">⋮</button>
+                </div>
+                <div class="riposo-row">
+                    <span style="font-size:0.75rem;">⏱</span>
+                    <span class="riposo-label">Riposo:</span>
+                    <button class="riposo-time-btn" onclick="apriTimerEdit(${id})">${riposoFmt.trim()}</button>
+                </div>
+                <div class="note-row">
+                    <input class="note-input" type="text" placeholder="Aggiungi note per questo esercizio...">
+                </div>
+                <div class="serie-head">
+                    <div class="serie-th">N</div>
+                    <div class="serie-th" style="text-align:left;">Prec.</div>
+                    <div class="serie-th">KG</div>
+                    <div class="serie-th">Reps</div>
+                    <div></div>
+                </div>
+                ${serieTr}
+                <button class="add-serie-btn" onclick="aggiungiSerie(${id})">+ Aggiungi serie</button>`;
+
+            return card;
+        }
+
+        /*  AGGIORNA VALORI SERIE  */
+        function aggiornaKg(ezId, idx, val) {
+            if (_serieState[ezId] && _serieState[ezId][idx]) {
+                _serieState[ezId][idx].kg = parseFloat(val) || 0;
+                aggiornaVolume();
+            }
+        }
+
+        function aggiornaReps(ezId, idx, val) {
+            if (_serieState[ezId] && _serieState[ezId][idx]) {
+                _serieState[ezId][idx].reps = parseInt(val) || 0;
+            }
+        }
+
+        /*  SPUNTA SERIE -> QUANDO SI SPUNTA UNA SERIE PARTE IL TIMER RIPOSO */
+        function spuntaSerie(ezId, idx, nomeEz, numSerie) {
+            if (!_serieState[ezId] || !_serieState[ezId][idx]) return;
+
+            const s = _serieState[ezId][idx];
+            if (s.done) return; /* non si può deselezionare */
+
+            s.done = true;
+            _serieCount++;
+
+            /* rende visivamente completata senza re-render completo */
+            const rows = document.querySelectorAll(`.serie-row[data-ez="${ezId}"][data-idx="${idx}"]`);
+            rows.forEach(row => {
+                row.classList.add('done');
+                const inputs = row.querySelectorAll('.serie-input');
+                inputs.forEach(inp => { inp.classList.add('done'); inp.readOnly = true; });
+                const btn = row.querySelector('.serie-check-btn');
+                if (btn) {
+                    btn.classList.add('done');
+                    btn.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
+                }
+            });
+
+            aggiornaVolume();
+            aggiornaStatSerie();
+
+            /* avvia timer riposo */
+            const riposoSec = _riposi[ezId] || 90;
+            avviaRiposo(riposoSec, nomeEz, numSerie + 1);
+        }
+
+        /*  AGGIUNGI SERIE  */
+        function aggiungiSerie(ezId) {
+            if (!_serieState[ezId]) return;
+            const n = _serieState[ezId].length;
+            _serieState[ezId].push({ setId: n+1, kg: 0, reps: 0, done: false });
+
+            /* re-render solo la card di quell'esercizio */
+            const ex = _scheda.workout_ex.find(e => e.exerciseId === ezId);
+            if (!ex) return;
+            const oldCard = document.querySelector(`.ez-all-card[data-ez-id="${ezId}"]`);
+            if (oldCard) oldCard.replaceWith(creaCardEsercizio(ex));
+        }
+
+        /*  VOLUME  */
+        function aggiornaVolume() {
+            let tot = 0;
+            Object.values(_serieState).forEach(serie => {
+                serie.forEach(s => { if (s.done) tot += (s.kg || 0) * (s.reps || 0); });
+            });
+            document.getElementById('stat-volume').textContent = tot + ' kg';
+        }
+
+        function aggiornaStatSerie() {
+            document.getElementById('stat-serie').textContent = _serieCount;
+        }
+
+        function aggiornaStatEsercizi() {
+            const tot = (_scheda?.workout_ex || []).length;
+            document.getElementById('stat-esercizi').textContent = '0/' + tot;
+        }
+
+        /*  TIMER RIPOSO  */
+        function avviaRiposo(secondi, nomeEz, prossimaSerie) {
+            clearInterval(_riposoInterval);
+            _ripososeconds = secondi;
+
+            const overlay  = document.getElementById('riposo-overlay');
+            const count    = document.getElementById('riposo-count');
+            const setLabel = document.getElementById('riposo-set-label');
+            const setSub   = document.getElementById('riposo-set-sub');
+
+            setLabel.textContent = `Serie ${prossimaSerie} — ${nomeEz}`;
+            setSub.textContent   = '';
+            overlay.classList.add('show');
+
+            function tick() {
+                const m = Math.floor(_ripososeconds / 60);
+                const s = _ripososeconds % 60;
+                count.textContent = m + ':' + s.toString().padStart(2, '0');
+
+                if (_ripososeconds <= 0) {
+                    clearInterval(_riposoInterval);
+                    suonaCampanella();
+                    setTimeout(() => overlay.classList.remove('show'), 800);
+                    return;
+                }
+                _ripososeconds--;
+            }
+
+            tick();
+            _riposoInterval = setInterval(tick, 1000);
+        }
+
+        function saltaRiposo() {
+            clearInterval(_riposoInterval);
+            document.getElementById('riposo-overlay').classList.remove('show');
+        }
+
+        /*  MODIFICA TIMER RIPOSO  */
+        function apriTimerEdit(ezId) {
+            _timerEditTarget = ezId;
+            _timerPresetVal  = _riposi[ezId] || 90;
+
+            document.querySelectorAll('.timer-preset').forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.textContent) === _timerPresetVal ||
+                    btn.textContent === formattaPreset(_timerPresetVal));
+            });
+
+            document.getElementById('timer-edit-overlay').classList.add('show');
+        }
+
+        function formattaPreset(sec) {
+            if (sec < 60)  return sec + 's';
+            if (sec === 60) return '1 min';
+            if (sec === 90) return '1:30';
+            return Math.floor(sec/60) + ' min';
+        }
+
+        function setTimerPreset(sec) {
+            _timerPresetVal = sec;
+            document.querySelectorAll('.timer-preset').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function confermaTimerEdit() {
+            if (_timerEditTarget !== null) {
+                _riposi[_timerEditTarget] = _timerPresetVal;
+
+                /* aggiorna il testo nella card */
+                const card = document.querySelector(`.ez-all-card[data-ez-id="${_timerEditTarget}"]`);
+                if (card) {
+                    const btn = card.querySelector('.riposo-time-btn');
+                    if (btn) btn.textContent = formattaPreset(_timerPresetVal);
+                }
+            }
+            chiudiTimerEdit();
+        }
+
+        function chiudiTimerEdit() {
+            document.getElementById('timer-edit-overlay').classList.remove('show');
+            _timerEditTarget = null;
+        }
+
+        /*  MODALE DETTAGLIO ESERCIZIO  */
+        function apriDettaglioEz(id, nome, zona, videoUrl) {
+            document.getElementById('ez-detail-name').textContent = nome;
+            document.getElementById('ez-detail-zona').textContent = zona;
+
+            const videoWrap = document.getElementById('ez-video-wrap');
+            if (videoUrl && videoUrl !== 'undefined' && videoUrl !== '') {
+                videoWrap.innerHTML = `<iframe src="${videoUrl}" allowfullscreen></iframe>`;
+            } else {
+                videoWrap.innerHTML = `<div class="ez-video-ph"><div class="ez-video-ph-icon">▶</div><div class="ez-video-ph-label">Nessun video disponibile</div></div>`;
+            }
+
+            document.getElementById('ez-detail-overlay').classList.add('show');
+        }
+
+        function chiudiDettaglioEz(e) {
+            if (e && e.target !== document.getElementById('ez-detail-overlay')) return;
+            document.getElementById('ez-detail-overlay').classList.remove('show');
+            /* NOTA: FERMA IL VIDEO QUANDO SI CHIUDE IL MODALE */
+            document.getElementById('ez-video-wrap').innerHTML = '';
+        }
+
+        /*  FINE ALLENAMENTO  */
+        function fineAllenamento() {
+            if (confirm('Vuoi terminare e salvare questo allenamento?')) {
+                salvaInStatistiche();
+            }
+        }
+
+        /*  SALVA IN STATISTICHE  */
+        async function salvaInStatistiche() {
+            clearInterval(_timerInterval);
+            const durataMs  = Date.now() - _startTime;
+            const durataSec = Math.floor(durataMs / 1000);
+            const token = TOKEN();
+
+            /* aggiorna i workout_set con i pesi e rep usati */
+            for (const [ezIdStr, serie] of Object.entries(_serieState)) {
+                const ezId = parseInt(ezIdStr);
+                for (const s of serie) {
+                    if (!s.done) continue;
+                    try {
+                        await fetch(`${API}/users/workout-set`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+                            body: JSON.stringify({
+                                workoutId:  schedaId,
+                                exerciseId: ezId,
+                                setId:      s.setId,
+                                pesi:       s.kg   || 0,
+                                rep:        s.reps || 0,
+                            })
+                        });
+                    } catch(e) {
+                        console.error('Errore salvataggio serie:', e);
+                    }
+                }
+            }
+
+            /* registra l'allenamento nel calendario statistiche */
+            try {
+                await fetch(`${API}/users/allenamenti`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+                    body: JSON.stringify({
+                        workoutId:  schedaId,
+                        data:       new Date().toISOString(),
+                        durataSec,
+                    })
+                });
+            } catch(e) {
+                console.error('Errore salvataggio allenamento:', e);
+            }
+
+            window.location.href = 'statistiche.html';
+        }
+
+        function annullaAllenamento() {
+            if (confirm('Sei sicuro? I dati non salvati andranno persi.')) {
+                clearInterval(_timerInterval);
+                clearInterval(_riposoInterval);
+                window.location.href = 'dettaglio.html?id=' + schedaId;
+            }
+        }
+
+        /*  START  */
+        caricaScheda();
+    </script>
+
+</body>
+</html>

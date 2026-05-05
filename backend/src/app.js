@@ -528,6 +528,7 @@ app.patch('/users/workout-plans/:id', auth, async (req, res) =>{
         }
         )
         console.log(note)
+        res.json({ success: true })
         
     } catch (error) {
         return res.status(500).json({error : error.message})
@@ -614,5 +615,152 @@ app.delete('/users/misurazione/:id', auth, async(req, res) =>{
         return res.json({success : true})
     } catch (error) {
         return res.status(500).json({error : error.message})
+    }
+})
+
+/* AGGIORNA SERIE CON PESI E REP DELL'ALLENAMENTO */
+app.patch('/users/workout-set', auth, async (req, res) => {
+    const id         = req.id
+    const workoutId  = parseInt(req.body.workoutId)
+    const exerciseId = parseInt(req.body.exerciseId)
+    const setId      = parseInt(req.body.setId)
+    const pesi       = parseFloat(req.body.pesi)
+    const rep        = parseInt(req.body.rep)
+
+    try {
+        /* verifica che la scheda appartenga all'utente */
+        const check = await prisma.workout_plan.findUnique({
+            where: { workoutId, userId: id }
+        })
+        if (!check) return res.status(401).json({ error: 'Unauthorized' })
+
+        const updated = await prisma.workout_set.updateMany({
+            where: { workoutId, exerciseId, setId },
+            data:  { pesi, rep }
+        })
+        res.json(updated)
+    } catch (error) {
+        res.status(500).json({ error: error.message })
+    }
+})
+
+
+/* REGISTRA ALLENAMENTO IN STATISTICHE */
+app.post('/users/allenamenti', auth, async (req, res) => {
+    const id        = req.id
+    const workoutId = parseInt(req.body.workoutId)
+    const data      = new Date(req.body.data)
+    const durataSec = parseInt(req.body.durataSec)
+
+    try {
+        const nuovo = await prisma.allenamento.create({
+            data: {
+                userId:    id,
+                workoutId: workoutId || null,
+                data,
+                durataSec,
+            }
+        })
+        res.json(nuovo)
+    } catch (error) {
+        res.status(500).json({ error: error.message })
+    }
+})
+
+/* CARICA ALLENAMENTI UTENTE */
+app.get('/users/allenamenti', auth, async (req, res) => {
+    const id = req.id
+
+    try {
+        const allenamenti = await prisma.allenamento.findMany({
+            where:   { userId: id },
+            orderBy: { data: 'desc' },
+            include: { workout: { select: { name: true } } }
+        })
+        res.json(allenamenti)
+    } catch (error) {
+        res.status(500).json({ error: error.message })
+    }
+})
+
+/* AGGIORNA ESERCIZI DI UNA SCHEDA CON NSET E NREP */
+app.patch('/users/workout-plans/:id/exercises', auth, async (req, res) => {
+    console.log('[PATCH exercises] body ricevuto:', JSON.stringify(req.body))
+    const uid       = req.id
+    const workoutId = parseInt(req.params.id)
+    const esercizi  = req.body.esercizi /* array [{ exerciseId, nSet, nRep }] */
+
+    try {
+        /* verifica che la scheda appartenga all'utente */
+        const check = await prisma.workout_plan.findUnique({
+            where: { workoutId, userId: uid }
+        })
+        if (!check) return res.status(401).json({ error: 'Unauthorized' })
+
+        /* esercizi attualmente nel db per questa scheda */
+        const esistenti   = await prisma.workout_exercise.findMany({ where: { workoutId } })
+        const idEsistenti = new Set(esistenti.map(e => e.exerciseId))
+        const idNuovi     = new Set(esercizi.map(e => e.exerciseId))
+
+        /* 1. ELIMINA quelli rimossi dal frontend (workout_set prima, poi workout_exercise) */
+        for (const ez of esistenti) {
+            if (!idNuovi.has(ez.exerciseId)) {
+                await prisma.workout_set.deleteMany({ where: { workoutId, exerciseId: ez.exerciseId } })
+                await prisma.workout_exercise.delete({
+                    where: { workoutId_exerciseId: { workoutId, exerciseId: ez.exerciseId } }
+                })
+            }
+        }
+
+        /* 2. AGGIORNA esistenti / INSERISCE nuovi */
+        for (const ez of esercizi) {
+            const nSet = ez.nSet ?? 1
+            const nRep = ez.nRep ?? 0
+
+            if (idEsistenti.has(ez.exerciseId)) {
+                /* aggiorna serie e reps */
+                await prisma.workout_exercise.updateMany({
+                    where: { workoutId, exerciseId: ez.exerciseId },
+                    data:  { nSet, nRep }
+                })
+            } else {
+                /* crea workout_exercise */
+                await prisma.workout_exercise.create({
+                    data: { workoutId, exerciseId: ez.exerciseId, nSet, nRep }
+                })
+                /* crea i workout_set corrispondenti */
+                for (let i = 1; i <= nSet; i++) {
+                    await prisma.workout_set.create({
+                        data: { workoutId, exerciseId: ez.exerciseId, setId: i, rep: nRep, pesi: 0 }
+                    })
+                }
+            }
+        }
+
+        res.json({ success: true })
+    } catch (error) {
+        res.status(500).json({ error: error.message })
+    }
+})
+
+/* RIMUOVI ESERCIZIO DA SCHEDA */
+app.delete('/users/workout-plans/:workoutId/exercises/:exerciseId', auth, async (req, res) => {
+    const uid        = req.id
+    const workoutId  = parseInt(req.params.workoutId)
+    const exerciseId = parseInt(req.params.exerciseId)
+
+    try {
+        const check = await prisma.workout_plan.findUnique({
+            where: { workoutId, userId: uid }
+        })
+        if (!check) return res.status(401).json({ error: 'Unauthorized' })
+
+        await prisma.workout_exercise.delete({
+            where: { workoutId_exerciseId: { workoutId, exerciseId } }
+        })
+
+        res.json({ success: true })
+    } catch (error) {
+        res.status(500).json({ error: error.message })
     }
 })

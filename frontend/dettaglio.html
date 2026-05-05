@@ -143,7 +143,7 @@
 
         .ez-badge.accent {
             background: var(--accent-dim);
-            border-color: rgba(237,36,155,0.2);
+            border-color: var(--accent-dim);
             color: var(--accent);
         }
 
@@ -166,6 +166,20 @@
             border-color: var(--accent);
             background: var(--accent-dim);
         }
+
+        .ez-remove-btn {
+            font-size: 0.75rem;
+            color: var(--muted);
+            background: none;
+            border: 0.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 3px 8px;
+            cursor: pointer;
+            transition: color 0.18s, border-color 0.18s;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .ez-remove-btn:hover { color: #e24b4a; border-color: #e24b4a; }
 
         .ez-empty {
             font-size: 0.78rem;
@@ -228,7 +242,180 @@
 
         @media (max-width: 600px) {
             .ez-badges { display: none; }
-            .scheda-azioni .btn-ghost { display: none; }
+        }
+
+        /*  MODALE: visibile solo quando overlay ha classe .open  */
+        .modal-overlay.open .modal { display: flex; }
+
+        /*  MOBILE: modali si aprono come bottom sheet dal basso  */
+        @media (max-width: 600px) {
+            #modal-modifica,
+            #modal-aggiungi-ez {
+                align-items: flex-end;
+                padding: 0;
+            }
+
+            #modal-modifica .modal,
+            #modal-aggiungi-ez .modal {
+                max-width: 100% !important;
+                max-height: 90vh !important;
+                border-bottom-left-radius: 0;
+                border-bottom-right-radius: 0;
+                margin-top: auto;
+            }
+        }
+
+        /*  STEPPER SERIE/REPS no input  */
+        .ez-stepper {
+            display: flex;
+            align-items: center;
+            border: 0.5px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            background: var(--bg);
+            flex-shrink: 0;
+        }
+
+        .ez-stepper button {
+            width: 26px;
+            height: 26px;
+            background: var(--surface2);
+            border: none;
+            color: var(--text);
+            font-size: 1rem;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .ez-stepper button:hover  { background: var(--accent-dim); color: var(--accent); }
+        .ez-stepper button:active { background: var(--accent); color: #fff; }
+
+        .ez-stepper span {
+            min-width: 26px;
+            text-align: center;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--text);
+            font-family: var(--font-body);
+            user-select: none;
+        }
+
+        /*  PULSANTE AGGIUNGI ESERCIZIO (dentro modale modifica)  */
+        .btn-aggiungi-ez {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: var(--radius);
+            border: 0.5px dashed var(--border);
+            background: none;
+            color: var(--muted);
+            font-family: var(--font-body);
+            font-size: 0.78rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            transition: border-color 0.18s, color 0.18s;
+        }
+        .btn-aggiungi-ez:hover { border-color: var(--accent); color: var(--accent); }
+
+        /*  BOTTOM SHEET: filtri gruppi muscolari  */
+        .sheet-cats {
+            display: flex;
+            gap: 6px;
+            padding: 10px 20px;
+            overflow-x: auto;
+            border-bottom: 0.5px solid var(--border);
+            flex-shrink: 0;
+            scrollbar-width: none;
+        }
+        .sheet-cats::-webkit-scrollbar { display: none; }
+
+        .sheet-cat {
+            font-size: 0.68rem;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 0.5px solid var(--border);
+            background: none;
+            color: var(--muted);
+            white-space: nowrap;
+            cursor: pointer;
+            font-family: var(--font-body);
+            transition: all 0.18s;
+        }
+        .sheet-cat.active {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-dim);
+        }
+
+        /*  BOTTOM SHEET: lista risultati  */
+        .sheet-ez-list {
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .sheet-ez-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 20px;
+            border-bottom: 0.5px solid var(--border);
+            transition: background 0.15s;
+        }
+        .sheet-ez-item:last-child { border-bottom: none; }
+
+        .sheet-ez-info { flex: 1; min-width: 0; }
+
+        .sheet-ez-nm {
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sheet-ez-zone {
+            font-size: 0.68rem;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .sheet-add-btn {
+            font-size: 0.68rem;
+            color: var(--accent);
+            border: 0.5px solid rgba(237,36,155,0.35);
+            border-radius: 4px;
+            padding: 4px 10px;
+            background: none;
+            cursor: pointer;
+            font-family: var(--font-body);
+            white-space: nowrap;
+            flex-shrink: 0;
+            transition: background 0.15s;
+        }
+        .sheet-add-btn:hover { background: var(--accent-dim); }
+        .sheet-add-btn.aggiunto {
+            color: var(--muted);
+            border-color: var(--border);
+            cursor: default;
+        }
+
+        .sheet-empty {
+            font-size: 0.78rem;
+            color: var(--muted);
+            text-align: center;
+            padding: 32px 20px;
         }
     </style>
 </head>
@@ -304,7 +491,6 @@
             <!-- hero -->
             <div class="section">
                 <div class="scheda-hero" id="scheda-hero">
-                    <!-- skeleton loading -->
                     <div class="skeleton" style="height:20px; width:60%; margin-bottom:8px;"></div>
                     <div class="skeleton" style="height:12px; width:40%; margin-bottom:14px;"></div>
                     <div style="display:flex; gap:5px; margin-bottom:14px;">
@@ -325,9 +511,9 @@
             <!-- lista esercizi -->
             <div class="section">
                 <div class="section-title" style="padding-top: 10px;">Esercizi</div>
+                <div class="modifica-panel" id="modifica-panel"></div>
                 <div class="ez-list" id="ez-list">
-                    <!-- skeleton -->
-                    <div class="ez-item"  style="cursor:default;">
+                    <div class="ez-item" style="cursor:default;">
                         <div class="skeleton" style="width:20px; height:14px;"></div>
                         <div style="flex:1;">
                             <div class="skeleton" style="height:14px; width:55%; margin-bottom:5px;"></div>
@@ -365,32 +551,91 @@
         <a href="profilo.html"  class="bottom-nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Profilo</span></a>
     </nav>
 
-    <!--  MODALE MODIFICA  -->
+    <!--  MODALE MODIFICA SCHEDA  -->
     <div class="modal-overlay" id="modal-modifica">
-        <div class="modal">
-            <div class="modal-header">
+        <div class="modal" style="max-width:520px; max-height:85vh; flex-direction:column;">
+            <div class="modal-header" style="flex-shrink:0;">
                 <div>
                     <div class="modal-title">Modifica scheda</div>
-                    <div class="modal-sub">Cambia nome o note della scheda</div>
+                    <div class="modal-sub">Modifica nome, note ed esercizi</div>
                 </div>
                 <button class="modal-close" onclick="chiudiModaleModifica()">✕</button>
             </div>
-            <div class="modal-body">
-                <div class="form-row" style="display:flex; flex-direction:column; gap:5px;">
+            <div class="modal-body" style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:14px;">
+
+                <!-- nome -->
+                <div style="display:flex; flex-direction:column; gap:5px;">
                     <label style="font-size:0.65rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted);">Nome scheda</label>
                     <input style="width:100%; padding:9px 12px; border-radius:var(--radius); border:0.5px solid var(--border); background:var(--surface2); color:var(--text); font-family:var(--font-body); font-size:0.85rem; outline:none;"
                            type="text" id="mod-nome" placeholder="Nome scheda">
                 </div>
-                <div class="form-row" style="display:flex; flex-direction:column; gap:5px; margin-top:12px;">
+
+                <!-- note -->
+                <div style="display:flex; flex-direction:column; gap:5px;">
                     <label style="font-size:0.65rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted);">Note (opzionale)</label>
-                    <textarea style="width:100%; padding:9px 12px; border-radius:var(--radius); border:0.5px solid var(--border); background:var(--surface2); color:var(--text); font-family:var(--font-body); font-size:0.85rem; outline:none; resize:vertical; min-height:80px;"
-                              id="mod-note" placeholder="Es. 3 giorni a settimana, riposo 90 secondi..."></textarea>
+                    <input style="width:100%; padding:9px 12px; border-radius:var(--radius); border:0.5px solid var(--border); background:var(--surface2); color:var(--text); font-family:var(--font-body); font-size:0.85rem; outline:none;"
+                           type="text" id="mod-note" placeholder="Es. 3 giorni a settimana...">
                 </div>
+
+                <!-- esercizi nella scheda con stepper pill -->
+                <div style="display:flex; flex-direction:column; gap:5px;">
+                    <label style="font-size:0.65rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted);">Esercizi nella scheda</label>
+                    <div id="mod-ez-list" style="display:flex; flex-direction:column; gap:6px;"></div>
+                </div>
+
+                <!-- pulsante apri bottom sheet esercizi -->
+                <button class="btn-aggiungi-ez" onclick="apriSheetEsercizi()">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Aggiungi esercizio
+                </button>
+
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer" style="flex-shrink:0;">
                 <button class="btn-ghost" onclick="chiudiModaleModifica()">Annulla</button>
-                <button class="btn-primary" onclick="salvaModifica()">Salva</button>
+                <button class="btn-primary" onclick="salvaModifica()">Salva modifiche</button>
             </div>
+        </div>
+    </div>
+
+    <!--  BOTTOM SHEET: SELEZIONE ESERCIZI  -->
+    <div class="modal-overlay" id="modal-aggiungi-ez">
+        <div class="modal" style="max-width:520px; max-height:85vh; flex-direction:column;">
+            <div class="modal-header" style="flex-shrink:0;">
+                <div>
+                    <div class="modal-title">Aggiungi esercizi</div>
+                    <div class="modal-sub">Cerca e seleziona uno o più esercizi</div>
+                </div>
+                <button class="modal-close" onclick="chiudiSheetEsercizi()">✕</button>
+            </div>
+
+            <!-- search -->
+            <div style="padding:12px 20px; border-bottom:0.5px solid var(--border); flex-shrink:0;">
+                <input style="width:100%; padding:8px 12px; border-radius:var(--radius); border:0.5px solid var(--border); background:var(--surface2); color:var(--text); font-family:var(--font-body); font-size:0.85rem; outline:none;"
+                       type="text" id="sheet-search" placeholder="🔍 Cerca per nome..." oninput="filtroSheetEz()">
+            </div>
+
+            <!-- filtri gruppi muscolari -->
+            <div class="sheet-cats" id="sheet-cats"></div>
+
+            <!-- lista risultati -->
+            <div class="sheet-ez-list" id="sheet-ez-list"></div>
+
+            <div class="modal-footer" style="flex-shrink:0;">
+                <button class="btn-ghost" onclick="chiudiSheetEsercizi()">Annulla</button>
+                <button class="btn-primary" onclick="confermaSheetEsercizi()">Conferma selezione</button>
+            </div>
+        </div>
+    </div>
+
+    <!--  MODALE VIDEO  -->
+    <div class="modal-overlay" id="modal-video">
+        <div class="modal" style="max-width:640px; flex-direction:column;">
+            <div class="modal-header" style="flex-shrink:0;">
+                <div class="modal-title">Video esercizio</div>
+                <button class="modal-close" onclick="chiudiVideo()">✕</button>
+            </div>
+            <div style="padding:0 20px 20px;">
+            <video id="video-player" controls style="width:100%; border-radius:var(--radius); background:#000;"></video>            </div>
         </div>
     </div>
 
@@ -398,7 +643,6 @@
         const TOKEN = () => localStorage.getItem('gymbros-token');
         const API   = 'http://localhost:3000';
 
-        /* legge l'id dalla URL */
         const params   = new URLSearchParams(window.location.search);
         const schedaId = parseInt(params.get('id'));
 
@@ -410,28 +654,6 @@
                 window.location.href = 'schede.html';
                 return;
             }
-
-            /*
-             * BACKEND — endpoint da creare (vedi nota al tuo collega):
-             * GET /users/workout-plans/:id
-             * Risposta attesa:
-             * {
-             *   workoutId: 3,
-             *   name: "Push Pull Legs",
-             *   dataCreazione: "2026-04-26T...",
-             *   tipo: "Personale",
-             *   note: "...",
-             *   workout_ex: [
-             *     {
-             *       exerciseId: 4,
-             *       nSet: 4,
-             *       nRep: null,
-             *       exercise: { id: 4, nameIt: "Panca piana", macroPart: "petto", bodyPart: "petto", videoUrl: "..." }
-             *     },
-             *     ...
-             *   ]
-             * }
-             */
 
             try {
                 const res = await fetch(`${API}/users/workout-plans/${schedaId}`, {
@@ -445,7 +667,7 @@
                 }
 
                 _scheda = await res.json();
-                console.log(_scheda)
+                console.log(_scheda);
                 renderScheda();
 
             } catch (e) {
@@ -455,13 +677,10 @@
 
         /*  RENDER  */
         function renderScheda() {
-            console.log(_scheda)
             if (!_scheda) return;
 
-            /* titolo pagina */
             document.title = 'GymBro — ' + _scheda.name;
 
-            /* zone muscolari uniche */
             const zone = [...new Set(
                 (_scheda.workout_ex || []).map(ex => ex.exercise?.macroPart).filter(Boolean)
             )];
@@ -486,7 +705,6 @@
                     ${_scheda.note || 'Nessuna nota'}
                 </div>`;
 
-            /* lista esercizi */
             const lista = document.getElementById('ez-list');
             lista.innerHTML = '';
 
@@ -514,100 +732,299 @@
                         ${ex.nRep ? `<span class="ez-badge">${ex.nRep} reps</span>` : ''}
                     </div>
                     ${video
-                        ? `<a class="ez-video-btn" href="${video}" target="_blank" onclick="event.stopPropagation()" title="Guarda video">
-                               <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                           </a>`
-                        : ''}`;
+                        ? `<button class="ez-video-btn" onclick="event.stopPropagation(); apriVideo('${video}')" title="Guarda video">
+                            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        </button>`
+                        : ''}
+                    <button class="ez-remove-btn" onclick="event.stopPropagation(); rimuoviEsercizioDaScheda(${ex.exerciseId})">Rimuovi</button>`;
 
                 lista.appendChild(item);
             });
         }
 
+        /*  RIMUOVI ESERCIZIO DALLA SCHEDA  */
+        async function rimuoviEsercizioDaScheda(exerciseId) {
+            if (!confirm('Rimuovere questo esercizio dalla scheda?')) return;
+            try {
+                const res = await fetch(`${API}/users/workout-plans/${schedaId}/exercises/${exerciseId}`, {
+                    method: 'DELETE',
+                    headers: { Authorization: 'Bearer ' + TOKEN() }
+                });
+                if (res.ok) caricaScheda();
+            } catch(e) {
+                console.error('Errore rimozione esercizio:', e);
+            }
+        }
+
         /*  AVVIA ALLENAMENTO  */
         function avviaAllenamento() {
-            window.location.href = 'statistiche.html?scheda=' + schedaId;
+            window.location.href = 'allenamento.html?id=' + schedaId;
         }
 
         /*  ELIMINA SCHEDA  */
         async function eliminaScheda() {
             if (!confirm('Sei sicuro di voler eliminare questa scheda?')) return;
-
-            const response = await fetch(`${API}/users/workout-plans/${schedaId}`, {
-                method : 'DELETE',
-                headers : {
-                    'Authorization' : 'Bearer ' + localStorage.getItem('gymbros-token'),
-                    'Content-Type' : 'application/json'
-                }
-            })
-
-            
-
-            console.log(response)
-            /*
-             * BACKEND:
-             * await fetch(`${API}/workout-plans/${schedaId}`, {
-             *     method: 'DELETE',
-             *     headers: { Authorization: 'Bearer ' + TOKEN() }
-             * });
-             */
-
+            try {
+                await fetch(`${API}/users/workout-plans/${schedaId}`, {
+                    method: 'DELETE',
+                    headers: { Authorization: 'Bearer ' + TOKEN() }
+                });
+            } catch(e) {
+                console.error('Errore eliminazione:', e);
+            }
             window.location.href = 'schede.html';
         }
 
-        /*  MODALE MODIFICA  */
-        function apriModaleModifica() {
-            if (_scheda) {
-                document.getElementById('mod-nome').value = _scheda.name || '';
-                document.getElementById('mod-note').value = _scheda.note || '';
-            }
+
+        /* MODALE MODIFICA SCHEDA */
+
+        let _editEsercizi  = [];
+        let _tuttiEsercizi = [];
+
+        async function apriModaleModifica() {
+            _editEsercizi = (_scheda?.workout_ex || []).map(ex => ({
+                id:   ex.exerciseId,
+                nome: ex.exercise?.nameIt || ex.exercise?.name || 'Esercizio',
+                nSet: ex.nSet || 3,
+                nRep: ex.nRep || 0,
+            }));
+
+            document.getElementById('mod-nome').value = _scheda?.name || '';
+            document.getElementById('mod-note').value = _scheda?.note || '';
+            renderModEzList();
+
             document.getElementById('modal-modifica').classList.add('open');
+
+            /* carica tutti gli esercizi disponibili se non ancora fatto */
+            if (_tuttiEsercizi.length === 0) {
+                fetch(`${API}/fullexercises`)
+                    .then(r => r.json())
+                    .then(data => {
+                        _tuttiEsercizi = data.map(d => ({
+                            id:    d.id,
+                            nome:  d.nameIt,
+                            zone:  [d.macroPart, d.bodyPart].filter(Boolean),
+                            macro: d.macroPart || '',
+                        }));
+                    })
+                    .catch(e => console.error('Errore caricamento esercizi:', e));
+            }
         }
 
         function chiudiModaleModifica() {
             document.getElementById('modal-modifica').classList.remove('open');
         }
 
-        document.getElementById('modal-modifica').addEventListener('click', function(e) {
-            if (e.target === this) chiudiModaleModifica();
-        });
+        /*  RENDER LISTA ESERCIZI NEL MODALE con stepper pill  */
+        function renderModEzList() {
+            const lista = document.getElementById('mod-ez-list');
+            if (!lista) return;
 
-        async function salvaModifica() {
-            const nome = document.getElementById('mod-nome').value.trim();
-            const note = document.getElementById('mod-note').value.trim();
-
-            if (!nome) {
-                document.getElementById('mod-nome').focus();
+            if (_editEsercizi.length === 0) {
+                lista.innerHTML = '<div style="font-size:0.75rem; color:var(--muted); text-align:center; padding:12px 0;">Nessun esercizio aggiunto</div>';
                 return;
             }
 
-            chiudiModaleModifica();
+            lista.innerHTML = _editEsercizi.map((ez, i) =>
+                '<div style="display:flex; align-items:center; gap:8px; padding:8px 12px; background:var(--surface2); border:0.5px solid var(--border); border-radius:var(--radius);">' +
+                    '<div style="flex:1; font-size:0.82rem; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + ez.nome + '</div>' +
+                    '<span style="font-size:0.62rem; color:var(--muted); flex-shrink:0; letter-spacing:0.05em;">Serie</span>' +
+                    '<div class="ez-stepper">' +
+                        '<button onclick="stepSerie(' + i + ', -1)">−</button>' +
+                        '<span id="set-val-' + i + '">' + (ez.nSet || 1) + '</span>' +
+                        '<button onclick="stepSerie(' + i + ', 1)">+</button>' +
+                    '</div>' +
+                    '<span style="font-size:0.62rem; color:var(--muted); flex-shrink:0; letter-spacing:0.05em;">Reps</span>' +
+                    '<div class="ez-stepper">' +
+                        '<button onclick="stepRep(' + i + ', -1)">−</button>' +
+                        '<span id="rep-val-' + i + '">' + (ez.nRep || 0) + '</span>' +
+                        '<button onclick="stepRep(' + i + ', 1)">+</button>' +
+                    '</div>' +
+                    '<button style="font-size:1rem; color:var(--muted); background:none; border:none; cursor:pointer; flex-shrink:0; padding:0 2px; line-height:1; transition:color 0.15s;" ' +
+                            'onmouseenter="this.style.color=\'#e24b4a\'" onmouseleave="this.style.color=\'var(--muted)\'" ' +
+                            'onclick="rimuoviEditEz(' + i + ')">✕</button>' +
+                '</div>'
+            ).join('');
+        }
 
-            /*
-             * BACKEND:
-             * await fetch(`${API}/workout-plans/${schedaId}`, {
-             *     method: 'PATCH',
-             *     headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN() },
-             *     body: JSON.stringify({ nome, note })
-             * });
-             */
-            const request = await fetch(`${API}/users/workout-plans/${schedaId}`, {
-                method : 'PATCH',
-                headers : {
-                    'Authorization' : 'Bearer ' + localStorage.getItem('gymbros-token'),
-                    'Content-Type' : 'application/json'
-                },
-                body : JSON.stringify({
-                    nome : nome,
-                    note : note
-                })
-            })
-            /* aggiorna localmente senza ricaricare */
-            if (_scheda) {
-                _scheda.name = nome;
-                _scheda.note = note;
-                renderScheda();
+        function stepSerie(idx, delta) {
+            if (!_editEsercizi[idx]) return;
+            _editEsercizi[idx].nSet = Math.max(1, (_editEsercizi[idx].nSet || 1) + delta);
+            const el = document.getElementById('set-val-' + idx);
+            if (el) el.textContent = _editEsercizi[idx].nSet;
+        }
+
+        function stepRep(idx, delta) {
+            if (!_editEsercizi[idx]) return;
+            _editEsercizi[idx].nRep = Math.max(0, (_editEsercizi[idx].nRep || 0) + delta);
+            const el = document.getElementById('rep-val-' + idx);
+            if (el) el.textContent = _editEsercizi[idx].nRep;
+        }
+
+        function rimuoviEditEz(idx) {
+            _editEsercizi.splice(idx, 1);
+            renderModEzList();
+        }
+
+        async function salvaModifica() {
+            const nome = document.getElementById('mod-nome')?.value.trim();
+            const note = document.getElementById('mod-note')?.value.trim();
+            if (!nome) { document.getElementById('mod-nome')?.focus(); return; }
+
+            try {
+                await fetch(`${API}/users/workout-plans/${schedaId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN() },
+                    body: JSON.stringify({ name: nome, note })
+                });
+
+                await fetch(`${API}/users/workout-plans/${schedaId}/exercises`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN() },
+                    body: JSON.stringify({
+                        esercizi: _editEsercizi.map(ez => ({
+                            exerciseId: ez.id,
+                            nSet: ez.nSet,
+                            nRep: ez.nRep,
+                        }))
+                    })
+                });
+
+            } catch(e) {
+                console.error('Errore salvataggio:', e);
+            }
+
+            chiudiModaleModifica();
+            caricaScheda();
+        }
+
+
+        /* BOTTOM SHEET: AGGIUNTA ESERCIZI */
+
+        let _sheetCatAttiva = 'Tutti';
+        /* set temporaneo degli id toccati nel sheet */
+        let _sheetSelezione = new Set();
+
+        function apriSheetEsercizi() {
+            /* parte dalla selezione corrente nel modale modifica */
+            _sheetSelezione = new Set(_editEsercizi.map(e => e.id));
+            _sheetCatAttiva = 'Tutti';
+
+            document.getElementById('sheet-search').value = '';
+            renderSheetCats();
+            renderSheetEzList();
+            document.getElementById('modal-aggiungi-ez').classList.add('open');
+        }
+
+        function chiudiSheetEsercizi() {
+            document.getElementById('modal-aggiungi-ez').classList.remove('open');
+        }
+
+        function confermaSheetEsercizi() {
+            /* aggiunge i nuovi selezionati */
+            _sheetSelezione.forEach(id => {
+                if (!_editEsercizi.find(e => e.id === id)) {
+                    const ez = _tuttiEsercizi.find(e => e.id === id);
+                    if (ez) _editEsercizi.push({ id: ez.id, nome: ez.nome, nSet: 3, nRep: 0 });
+                }
+            });
+            /* rimuove quelli deselezionati */
+            _editEsercizi = _editEsercizi.filter(e => _sheetSelezione.has(e.id));
+
+            renderModEzList();
+            chiudiSheetEsercizi();
+        }
+
+        function renderSheetCats() {
+            const cats = document.getElementById('sheet-cats');
+            if (!cats) return;
+            const gruppi = ['Tutti', ...new Set(_tuttiEsercizi.map(e => e.macro).filter(Boolean))];
+            cats.innerHTML = gruppi.map(g =>
+                '<button class="sheet-cat' + (g === _sheetCatAttiva ? ' active' : '') + '" onclick="selezionaCat(\'' + g + '\')">' +
+                    g.charAt(0).toUpperCase() + g.slice(1) +
+                '</button>'
+            ).join('');
+        }
+
+        function selezionaCat(cat) {
+            _sheetCatAttiva = cat;
+            renderSheetCats();
+            renderSheetEzList();
+        }
+
+        function filtroSheetEz() {
+            renderSheetEzList();
+        }
+
+        function renderSheetEzList() {
+            const lista = document.getElementById('sheet-ez-list');
+            const query = (document.getElementById('sheet-search')?.value || '').toLowerCase().trim();
+            if (!lista) return;
+
+            const filtrati = _tuttiEsercizi.filter(ez => {
+                const corrisponde = !query || ez.nome.toLowerCase().includes(query);
+                const nelGruppo  = _sheetCatAttiva === 'Tutti' || ez.macro === _sheetCatAttiva;
+                return corrisponde && nelGruppo;
+            }).slice(0, 50);
+
+            if (filtrati.length === 0) {
+                lista.innerHTML = '<div class="sheet-empty">Nessun esercizio trovato</div>';
+                return;
+            }
+
+            lista.innerHTML = filtrati.map(ez => {
+                const sel = _sheetSelezione.has(ez.id);
+                return '<div class="sheet-ez-item">' +
+                    '<div class="sheet-ez-info">' +
+                        '<div class="sheet-ez-nm">' + ez.nome + '</div>' +
+                        '<div class="sheet-ez-zone">' + (ez.zone || []).join(' · ') + '</div>' +
+                    '</div>' +
+                    '<button class="sheet-add-btn' + (sel ? ' aggiunto' : '') + '" ' +
+                            'id="sheet-btn-' + ez.id + '" ' +
+                            'onclick="toggleSheetEz(' + ez.id + ')">' +
+                        (sel ? '✓ Aggiunto' : '+ Add') +
+                    '</button>' +
+                '</div>';
+            }).join('');
+        }
+
+        function toggleSheetEz(id) {
+            if (_sheetSelezione.has(id)) {
+                _sheetSelezione.delete(id);
+            } else {
+                _sheetSelezione.add(id);
+            }
+            /* aggiorna solo il bottone cliccato senza re-renderizzare tutta la lista */
+            const btn = document.getElementById('sheet-btn-' + id);
+            if (btn) {
+                const ora = _sheetSelezione.has(id);
+                btn.textContent = ora ? '✓ Aggiunto' : '+ Add';
+                btn.classList.toggle('aggiunto', ora);
             }
         }
+
+        function apriVideo(url) {
+            document.getElementById('video-player').src = url;
+            document.getElementById('modal-video').classList.add('open');
+        }
+
+        function chiudiVideo() {
+            const v = document.getElementById('video-player');
+            v.pause();
+            v.src = '';
+            document.getElementById('modal-video').classList.remove('open');
+        }
+
+        /* chiudi i modali cliccando sull'overlay */
+        document.getElementById('modal-modifica').addEventListener('click', function(e) {
+            if (e.target === this) chiudiModaleModifica();
+        });
+        document.getElementById('modal-aggiungi-ez').addEventListener('click', function(e) {
+            if (e.target === this) chiudiSheetEsercizi();
+        });
+        document.getElementById('modal-video').addEventListener('click', function(e) {
+            if (e.target === this) chiudiVideo();
+        });
 
         /*  START  */
         caricaScheda();

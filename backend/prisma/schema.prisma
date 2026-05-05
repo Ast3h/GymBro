@@ -34,6 +34,7 @@ model workout_plan{
   workout_ex workout_exercise[]
   workout_set workout_set[]
   user User @relation( fields : [userId], references : [id])
+  allenamento allenamento[]
 }
 // UserId deve puntare a UserId della tabella UserId
 
@@ -74,6 +75,7 @@ model User{
   livello Int
   workout_plan workout_plan[]
   storico_forma storico_forma[]
+  allenamento allenamento[]
 }
 
 
@@ -84,4 +86,14 @@ model storico_forma{
   note String?
   data DateTime
   user User @relation( fields : [userId], references : [id])
+}
+
+model allenamento {
+  id        Int           @id @default(autoincrement())
+  userId    Int
+  workoutId Int?
+  data      DateTime
+  durataSec Int?
+  user      User          @relation(fields: [userId], references: [id])
+  workout   workout_plan? @relation(fields: [workoutId], references: [workoutId])
 }

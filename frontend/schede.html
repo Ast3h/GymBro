@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GymBro — Schede</title>
+    <title>GymBro - Schede</title>
 
     <link rel="icon" type="image/png" sizes="32x32" href="Favicon32x32.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -128,6 +128,30 @@
             color: var(--accent);
         }
 
+        /* modifica inline scheda */
+        .scheda-edit-panel { display:none; flex-direction:column; gap:12px; padding:14px; border-top:0.5px solid var(--border); background:var(--surface2); }
+        .scheda-edit-panel.open { display:flex; }
+        .edit-section-title { font-size:0.62rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
+        .edit-input { width:100%; padding:8px 10px; border-radius:var(--radius); border:0.5px solid var(--border); background:var(--surface); color:var(--text); font-family:var(--font-body); font-size:0.82rem; outline:none; transition:border-color 0.18s; }
+        .edit-input:focus { border-color:var(--accent); }
+        .edit-ez-list { display:flex; flex-direction:column; gap:6px; }
+        .edit-ez-row { display:flex; align-items:center; gap:8px; padding:8px 10px; background:var(--surface); border:0.5px solid var(--border); border-radius:var(--radius); }
+        .edit-ez-name { flex:1; font-size:0.78rem; color:var(--text); min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .edit-ez-input { width:48px; padding:4px 6px; text-align:center; border-radius:4px; border:0.5px solid var(--border); background:var(--surface2); color:var(--text); font-family:var(--font-body); font-size:0.78rem; outline:none; }
+        .edit-ez-input:focus { border-color:var(--accent); }
+        .edit-ez-input-lbl { font-size:0.62rem; color:var(--muted); flex-shrink:0; }
+        .edit-ez-remove { font-size:0.85rem; color:var(--muted); background:none; border:none; cursor:pointer; flex-shrink:0; }
+        .edit-ez-remove:hover { color:#e24b4a; }
+        .edit-search-wrap { display:flex; flex-direction:column; gap:6px; }
+        .edit-search-input { width:100%; padding:7px 10px; border-radius:var(--radius); border:0.5px solid var(--border); background:var(--surface); color:var(--text); font-family:var(--font-body); font-size:0.82rem; outline:none; }
+        .edit-search-input:focus { border-color:var(--accent); }
+        .edit-search-results { display:flex; flex-direction:column; gap:4px; max-height:140px; overflow-y:auto; }
+        .edit-result-row { display:flex; align-items:center; justify-content:space-between; padding:6px 10px; background:var(--surface); border:0.5px solid var(--border); border-radius:var(--radius); }
+        .edit-result-name { font-size:0.78rem; color:var(--text); }
+        .edit-result-zona { font-size:0.65rem; color:var(--muted); margin-top:2px; }
+        .edit-add-btn { font-size:0.65rem; color:var(--accent); border:0.5px solid var(--accent-dim); border-radius:4px; padding:3px 8px; background:none; cursor:pointer; white-space:nowrap; }
+        .edit-footer { display:flex; gap:8px; }
+
         /* stato vuoto*/
         .empty-state{
             text-align: center;
@@ -143,7 +167,7 @@
             margin-bottom: 16px;
         }
 
-        /* ── MODALE CREA SCHEDA ── */
+        /*  MODALE CREA SCHEDA  */
         .crea-modal {
             max-width: 500px;
             max-height: 85vh;
@@ -216,7 +240,7 @@
 
         .ez-add-btn {
             font-size: 0.68rem; font-weight: 500; letter-spacing: 0.06em;
-            color: var(--accent); border: 0.5px solid rgba(237,36,155,0.3);
+            color: var(--accent); border: 0.5px solid var(--accent-dim);
             border-radius: var(--radius); padding: 4px 10px;
             background: none; cursor: pointer; white-space: nowrap;
             transition: background 0.18s;
@@ -257,7 +281,7 @@
         .added-row {
             display: flex; align-items: center; justify-content: space-between;
             padding: 7px 10px; background: var(--accent-dim);
-            border: 0.5px solid rgba(237,36,155,0.2); border-radius: var(--radius);
+            border: 0.5px solid var(--accent-dim); border-radius: var(--radius);
         }
 
         .added-name { font-size: 0.82rem; color: var(--text); }
@@ -506,7 +530,7 @@
 
             const azioni= scheda.tipo === 'personale' ?
                 `<div class="scheda-actions">
-                    <button class="scheda-btn" onclick="event.stopPropagation(); modificaScheda('${scheda.id}')">Modifica</button>
+                    <button class="scheda-btn" onclick="event.stopPropagation(); modificaScheda(${scheda.id})">Modifica</button>
                     <button class="scheda-btn danger" onclick="event.stopPropagation(); eliminaScheda('${scheda.id}')">Elimina</button>
                 </div>`
                 : `<div class="scheda-actions">
@@ -518,18 +542,183 @@
                 <span class="scheda-data">${scheda.data || ''}</span>
                 <div class="scheda-footer">
                     ${azioni}
-                </div>`;
+                </div>
+                <div class="scheda-edit-panel" id="edit-panel-${scheda.id}"></div>`;
             card.addEventListener('click', () => {
                 window.location.href= 'dettaglio.html?id=' + scheda.id;
             });
             return card;
         }
 
-        /* AZIONI SCHEDE DA COLLEGARE AL BACKEND*/
-        function modificaScheda(id) {/*TODO*/}
+        /* AZIONI SCHEDE*/
+        let _editEsercizi = {};
+
+        async function modificaScheda(id) {
+            const panel = document.getElementById('edit-panel-' + id);
+            if (!panel) return;
+
+            if (panel.classList.contains('open')) {
+                panel.classList.remove('open');
+                return;
+            }
+
+            try {
+                const res = await fetch('http://localhost:3000/users/workout-plans/' + id, {
+                    headers: { Authorization: 'Bearer ' + localStorage.getItem('gymbros-token') }
+                });
+                if (!res.ok) return;
+                const scheda = await res.json();
+
+                _editEsercizi[id] = (scheda.workout_ex || []).map(ex => ({
+                    id:   ex.exerciseId,
+                    nome: ex.exercise?.nameIt || ex.exercise?.name || 'Esercizio',
+                    nSet: ex.nSet || 3,
+                    nRep: ex.nRep || 0,
+                }));
+
+                renderEditPanel(id, scheda.name, scheda.note);
+                panel.classList.add('open');
+
+                /* carica esercizi per la ricerca se non già caricati */
+                if (_tuttiEsercizi.length === 0) {
+                    fetch('http://localhost:3000/fullexercises')
+                        .then(r => r.json())
+                        .then(data => {
+                            _tuttiEsercizi = data.map(d => ({
+                                id:   d.id,
+                                nome: d.nameIt,
+                                zone: [d.macroPart, d.bodyPart].filter(Boolean),
+                                macroPart: d.macroPart,
+                                bodyPart:  d.bodyPart,
+                            }));
+                        });
+                }
+
+            } catch(e) {
+                console.error('Errore caricamento scheda per modifica:', e);
+            }
+        }
+
+        function renderEditPanel(id, nome, note) {
+            const panel = document.getElementById('edit-panel-' + id);
+            if (!panel) return;
+
+            const ezRows = (_editEsercizi[id] || []).map((ez, i) => `
+                <div class="edit-ez-row">
+                    <div class="edit-ez-name">${ez.nome}</div>
+                    <span class="edit-ez-input-lbl">Serie</span>
+                    <input class="edit-ez-input" type="number" value="${ez.nSet}" min="1"
+                           onchange="aggiornaEditSerie(${id}, ${i}, this.value)">
+                    <span class="edit-ez-input-lbl">Reps</span>
+                    <input class="edit-ez-input" type="number" value="${ez.nRep || ''}" placeholder="—"
+                           onchange="aggiornaEditRep(${id}, ${i}, this.value)">
+                    <button class="edit-ez-remove" onclick="rimuoviEditEz(${id}, ${i})">✕</button>
+                </div>`).join('');
+
+            panel.innerHTML =
+                '<div>' +
+                    '<div class="edit-section-title">Nome scheda</div>' +
+                    '<input class="edit-input" type="text" id="edit-nome-' + id + '" value="' + (nome || '') + '">' +
+                '</div>' +
+                '<div>' +
+                    '<div class="edit-section-title">Note</div>' +
+                    '<input class="edit-input" type="text" id="edit-note-' + id + '" value="' + (note || '') + '" placeholder="Opzionale...">' +
+                '</div>' +
+                '<div>' +
+                    '<div class="edit-section-title">Esercizi nella scheda</div>' +
+                    '<div class="edit-ez-list" id="edit-ez-list-' + id + '">' + ezRows + '</div>' +
+                '</div>' +
+                '<div class="edit-search-wrap">' +
+                    '<div class="edit-section-title">Aggiungi esercizio</div>' +
+                    '<input class="edit-search-input" type="text" placeholder="🔍 Cerca per nome..." oninput="cercaEditEz(' + id + ', this.value)">' +
+                    '<div class="edit-search-results" id="edit-search-results-' + id + '"></div>' +
+                '</div>' +
+                '<div class="edit-footer">' +
+                    '<button class="btn-ghost" style="flex:1;" onclick="chiudiEditPanel(' + id + ')">Annulla</button>' +
+                    '<button class="btn-primary" style="flex:2;" onclick="salvaModificaScheda(' + id + ')">Salva modifiche</button>' +
+                '</div>';
+        }
+
+        function chiudiEditPanel(id) {
+            const panel = document.getElementById('edit-panel-' + id);
+            if (panel) panel.classList.remove('open');
+        }
+
+        function aggiornaEditSerie(schedaId, idx, val) {
+            if (_editEsercizi[schedaId]?.[idx]) _editEsercizi[schedaId][idx].nSet = parseInt(val) || 1;
+        }
+
+        function aggiornaEditRep(schedaId, idx, val) {
+            if (_editEsercizi[schedaId]?.[idx]) _editEsercizi[schedaId][idx].nRep = parseInt(val) || 0;
+        }
+
+        function rimuoviEditEz(schedaId, idx) {
+            if (!_editEsercizi[schedaId]) return;
+            _editEsercizi[schedaId].splice(idx, 1);
+            renderEditPanel(schedaId,
+                document.getElementById('edit-nome-' + schedaId)?.value,
+                document.getElementById('edit-note-' + schedaId)?.value);
+        }
+
+        function cercaEditEz(schedaId, query) {
+            const res = document.getElementById('edit-search-results-' + schedaId);
+            if (!res) return;
+            if (!query.trim()) { res.innerHTML = ''; return; }
+            const idUsati  = new Set((_editEsercizi[schedaId] || []).map(e => e.id));
+            const filtrati = _tuttiEsercizi.filter(ez =>
+                ez.nome.toLowerCase().includes(query.toLowerCase()) && !idUsati.has(ez.id)
+            ).slice(0, 8);
+            res.innerHTML = filtrati.map(ez =>
+                '<div class="edit-result-row">' +
+                    '<div>' +
+                        '<div class="edit-result-name">' + ez.nome + '</div>' +
+                        '<div class="edit-result-zona">' + (ez.zone || []).join(' · ') + '</div>' +
+                    '</div>' +
+                    '<button class="edit-add-btn" onclick="aggiungiEditEz(' + schedaId + ', ' + ez.id + ')">+ Add</button>' +
+                '</div>'
+            ).join('');
+        }
+
+        function aggiungiEditEz(schedaId, ezId) {
+            const ez = _tuttiEsercizi.find(e => e.id == ezId);
+            if (!ez || !_editEsercizi[schedaId]) return;
+            if (_editEsercizi[schedaId].find(e => e.id == ezId)) return;
+            _editEsercizi[schedaId].push({ id: ez.id, nome: ez.nome, nSet: 3, nRep: 0 });
+            renderEditPanel(schedaId,
+                document.getElementById('edit-nome-' + schedaId)?.value,
+                document.getElementById('edit-note-' + schedaId)?.value);
+        }
+
+        async function salvaModificaScheda(id) {
+            const nome  = document.getElementById('edit-nome-' + id)?.value.trim();
+            const note  = document.getElementById('edit-note-' + id)?.value.trim();
+            if (!nome) return;
+            const token = localStorage.getItem('gymbros-token');
+
+            try {
+                await fetch('http://localhost:3000/users/workout-plans/' + id + '/exercises', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+                    body: JSON.stringify({
+                        esercizi: _editEsercizi[id].map(ez => ({
+                            exerciseId: ez.id,
+                            nSet: ez.nSet,
+                            nRep: ez.nRep,
+                        }))
+                    })
+                });
+
+                chiudiEditPanel(id);
+                const card = document.querySelector('.scheda-card[data-id="' + id + '"]');
+                if (card) card.querySelector('.scheda-name').textContent = nome;
+
+            } catch(e) {
+                console.error('Errore salvataggio:', e);
+            }
+        }
         function eliminaScheda(id) {/*TODO*/}
 
-                /* ── MODALE CREA SCHEDA ── */
+        /*  MODALE CREA SCHEDA  */
         let _tuttiEsercizi  = [];  
         let _aggiunti       = [];  /* esercizi aggiunti alla scheda in costruzione */
         let _zonaFiltro     = 'tutte';

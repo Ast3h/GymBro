@@ -94,6 +94,8 @@ model allenamento {
   workoutId Int?
   data      DateTime
   durataSec Int?
+  volume    Int?
+  note      String?
   user      User          @relation(fields: [userId], references: [id])
   workout   workout_plan? @relation(fields: [workoutId], references: [workoutId])
 }

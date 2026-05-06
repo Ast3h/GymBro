@@ -374,6 +374,7 @@ app.get('/users/workout-plans', auth, async (req, res) =>{
 
 /* AGGIUNGERE ESERCIZIO A SCHEDA */
 app.post('/users/workout-plans', auth, async(req,res) =>{
+    console.log('body ricevuto:', req.body)
     const id = req.id
     const workout_id = parseInt(req.body.workout_id)
     const exercise = parseInt(req.body.exercise)
@@ -394,8 +395,8 @@ app.post('/users/workout-plans', auth, async(req,res) =>{
             data: {
                 workoutId : workout_id,
                 exerciseId : exercise,
-                nSet : set,
-                nRep : nrep,
+                nSet:       set  || 3,
+                nRep:       nrep || 0,
             }
         })
         //console.log(set)
@@ -406,7 +407,7 @@ app.post('/users/workout-plans', auth, async(req,res) =>{
                     workoutId : workout_id,
                     setId: i,
                     exerciseId : exercise,
-                    rep : nrep,
+                    rep:        nrep || 0,
                     pesi : 0,
                 }
             })
@@ -644,48 +645,8 @@ app.patch('/users/workout-set', auth, async (req, res) => {
     }
 })
 
-
-/* REGISTRA ALLENAMENTO IN STATISTICHE */
-app.post('/users/allenamenti', auth, async (req, res) => {
-    const id        = req.id
-    const workoutId = parseInt(req.body.workoutId)
-    const data      = new Date(req.body.data)
-    const durataSec = parseInt(req.body.durataSec)
-
-    try {
-        const nuovo = await prisma.allenamento.create({
-            data: {
-                userId:    id,
-                workoutId: workoutId || null,
-                data,
-                durataSec,
-            }
-        })
-        res.json(nuovo)
-    } catch (error) {
-        res.status(500).json({ error: error.message })
-    }
-})
-
-/* CARICA ALLENAMENTI UTENTE */
-app.get('/users/allenamenti', auth, async (req, res) => {
-    const id = req.id
-
-    try {
-        const allenamenti = await prisma.allenamento.findMany({
-            where:   { userId: id },
-            orderBy: { data: 'desc' },
-            include: { workout: { select: { name: true } } }
-        })
-        res.json(allenamenti)
-    } catch (error) {
-        res.status(500).json({ error: error.message })
-    }
-})
-
 /* AGGIORNA ESERCIZI DI UNA SCHEDA CON NSET E NREP */
 app.patch('/users/workout-plans/:id/exercises', auth, async (req, res) => {
-    console.log('[PATCH exercises] body ricevuto:', JSON.stringify(req.body))
     const uid       = req.id
     const workoutId = parseInt(req.params.id)
     const esercizi  = req.body.esercizi /* array [{ exerciseId, nSet, nRep }] */
@@ -762,5 +723,114 @@ app.delete('/users/workout-plans/:workoutId/exercises/:exerciseId', auth, async 
         res.json({ success: true })
     } catch (error) {
         res.status(500).json({ error: error.message })
+    }
+})
+
+/* GET tutti gli allenamenti dell'utente */
+app.get('/users/allenamenti', auth, async (req, res) => {
+    try {
+        const allenamenti = await prisma.allenamento.findMany({
+            where: { userId: req.id },
+            orderBy: { data: 'desc' },
+            include: { workout: { select: { name: true } } }
+        })
+        res.json(allenamenti)
+    } catch (e) {
+        res.status(500).json({ error: e.message })
+    }
+})
+
+/* POST salva un allenamento */
+app.post('/users/allenamenti', auth, async (req, res) => {
+    const { data, workoutId, durataSec, volume, note } = req.body
+    try {
+        const nuovo = await prisma.allenamento.create({
+            data: {
+                userId:    req.id,
+                workoutId: workoutId ? parseInt(workoutId) : null,
+                data:      new Date(data),
+                durataSec: durataSec ?? null,
+                volume:    volume    ?? null,
+                note:      note      ?? null,
+            },
+            include: { workout: { select: { name: true } } }
+        })
+        res.json(nuovo)
+    } catch (e) {
+        res.status(500).json({ error: e.message })
+    }
+})
+
+/* DELETE elimina un allenamento */
+app.delete('/users/allenamenti/:id', auth, async (req, res) => {
+    try {
+        const check = await prisma.allenamento.findUnique({
+            where: { id: parseInt(req.params.id) }
+        })
+        if (!check || check.userId !== req.id)
+            return res.status(401).json({ error: 'Unauthorized' })
+        await prisma.allenamento.delete({ where: { id: parseInt(req.params.id) } })
+        res.json({ success: true })
+    } catch (e) {
+        res.status(500).json({ error: e.message })
+    }
+})
+
+/* SALVA MODIFICHE CALENDARIO */
+app.patch('/users/allenamenti/:id', auth, async (req, res) => {
+    const id = parseInt(req.params.id)
+    const { workoutId, durataSec, volume } = req.body
+    try {
+        const check = await prisma.allenamento.findUnique({ where: { id } })
+        if (!check || check.userId !== req.id)
+            return res.status(401).json({ error: 'Unauthorized' })
+        const aggiornato = await prisma.allenamento.update({
+            where: { id },
+            data: {
+                workoutId: workoutId !== undefined ? (workoutId ? parseInt(workoutId) : null) : check.workoutId,
+                durataSec: durataSec ?? check.durataSec,
+                volume:    volume    ?? check.volume,
+            },
+            include: { workout: { select: { name: true } } }
+        })
+        res.json(aggiornato)
+    } catch (e) {
+        res.status(500).json({ error: e.message })
+    }
+})
+
+/* GET RECORD PERSONALI */
+app.get('/users/record', auth, async (req, res) => {
+    const uid = req.id
+    try {
+        const sets = await prisma.workout_set.findMany({
+            where: {
+                workout: { userId: uid },
+                pesi:    { gt: 0 },
+            },
+            include: {
+                exercise: { select: { id: true, nameIt: true, macroPart: true, bodyPart: true } },
+            },
+        })
+
+        const mappa = {}
+        for (const s of sets) {
+            const id = s.exerciseId
+            if (!mappa[id] || s.pesi > mappa[id].pesi) {
+                mappa[id] = {
+                    exerciseId: id,
+                    nome:       s.exercise.nameIt,
+                    macroPart:  s.exercise.macroPart,
+                    bodyPart:   s.exercise.bodyPart,
+                    pesi:       s.pesi,
+                    rep:        s.rep,
+                }
+            }
+        }
+
+        const record = Object.values(mappa).sort((a, b) => b.pesi - a.pesi)
+        res.json(record)
+    } catch (e) {
+        res.status(500).json({ error: e.message })
     }
 })

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GymBro — Esercizi</title>
+    <title>GymBro - Esercizi</title>
 
     <link rel="icon" type="image/png" sizes="32x32" href="Favicon32x32.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -200,7 +200,7 @@
             letter-spacing: 0.08em;
             text-transform: uppercase;
             color:          var(--accent);
-            border:         0.5px solid rgba(237, 36, 155, 0.3);
+            border:         0.5px var(--accent-dim);
             border-radius:  var(--radius);
             padding:        4px 10px;
             cursor:         pointer;
@@ -796,7 +796,7 @@
                     workout_id : schedaId,
                     exercise : esercizioCorrente.id,
                     nset : nSet ?? 4,
-                    nrep : nRep ?? null,
+                    nrep : nRep ?? 0,
                 })
             })
 

@@ -687,7 +687,7 @@
 
             const tags = [
                 `<span class="tag accent">${_scheda.tipo || 'Personale'}</span>`,
-                ...zone.map(z => `<span class="tag" style="background:var(--green-dim,rgba(140,198,63,0.08)); color:#8cc63f; border-color:rgba(140,198,63,0.3);">${z.charAt(0).toUpperCase() + z.slice(1)}</span>`)
+                ...zone.map(z => `<span class="tag accent">${z.charAt(0).toUpperCase() + z.slice(1)}</span>`)
             ].join('');
 
             const data = _scheda.dataCreazione

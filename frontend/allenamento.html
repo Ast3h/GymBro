@@ -21,10 +21,9 @@
             background: var(--bg);
             font-family: var(--font-body);
             margin: 0;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
         }
 
         /*  TOPBAR ALLENAMENTO -> NON USA gymbros.js  */
@@ -77,7 +76,7 @@
             letter-spacing: 0.08em;
             text-transform: uppercase;
             color: #fff;
-            background: #8cc63f;
+            background: var(--accent);
             border: none;
             border-radius: var(--radius);
             padding: 7px 16px;
@@ -117,14 +116,11 @@
             font-variant-numeric: tabular-nums;
         }
 
-        .stat-value.green { color: #8cc63f; }
 
         /*  SCROLL CONTENT  */
         .all-scroll {
-            flex: 1;
-            min-height: 0;
-            overflow-y: auto;
             padding: 14px;
+            padding-bottom: 80px; /* spazio per il bottom bar fisso */
             display: flex;
             flex-direction: column;
             gap: 12px;
@@ -182,13 +178,37 @@
             margin-top: 2px;
         }
 
-        .ez-menu-btn {
-            font-size: 1.1rem;
-            color: var(--muted);
+        /* freccetta collapse */
+        .ez-collapse-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: 0.5px solid var(--border);
             background: none;
-            border: none;
+            color: var(--muted);
             cursor: pointer;
-            padding: 0 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .ez-collapse-btn:hover { background: var(--surface2); border-color: var(--accent); color: var(--accent); }
+        .ez-collapse-btn svg { transition: transform 0.2s ease; }
+        .ez-all-card.collapsed .ez-collapse-btn svg { transform: rotate(-90deg); }
+
+        /* corpo card nascosto quando collapsed */
+        .ez-card-body { overflow: hidden; }
+        .ez-all-card.collapsed .ez-card-body { display: none; }
+
+        /* VERSIONE MOBILE*/
+        @media (max-width: 600px) {
+            .serie-head,
+            .serie-row { grid-template-columns: 22px 0.8fr 72px 68px 28px; gap: 4px; padding: 7px 10px; }
+            .ez-all-header { padding: 10px 12px; gap: 8px; }
+            .ez-thumb { width: 32px; height: 32px; }
+            .riposo-row { padding: 6px 12px; }
+            .note-row { padding: 6px 12px; }
         }
 
         /* riposo */
@@ -238,7 +258,7 @@
         /* tabella serie */
         .serie-head {
             display: grid;
-            grid-template-columns: 28px 1fr 58px 58px 32px;
+            grid-template-columns: 28px 1fr 80px 80px 32px;
             padding: 6px 14px;
             gap: 6px;
         }
@@ -255,7 +275,7 @@
 
         .serie-row {
             display: grid;
-            grid-template-columns: 28px 1fr 58px 58px 32px;
+            grid-template-columns: 28px 1fr 80px 80px 32px; 
             padding: 8px 14px;
             gap: 6px;
             align-items: center;
@@ -355,23 +375,55 @@
             cursor: pointer;
         }
 
-        .btn-salva-stat {
-            flex: 2;
+        .btn-annulla:hover { 
+            background: var(--accent-dim);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-pausa {
+            flex: 1;
             padding: 10px 0;
-            background: var(--accent);
-            border: none;
+            background: none;
+            border: 0.5px solid var(--accent);
             border-radius: var(--radius);
-            color: #fff;
+            color: var(--accent);
             font-family: var(--font-body);
             font-size: 0.75rem;
             font-weight: 500;
             letter-spacing: 0.06em;
             text-transform: uppercase;
             cursor: pointer;
-            transition: opacity 0.18s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: background 0.18s;
         }
 
-        .btn-salva-stat:hover { opacity: 0.88; }
+        .btn-pausa:hover { background: var(--accent-dim); }
+
+        /* ── MODALE RECAP ── */
+        .modal-overlay.open .modal { display: flex; }
+
+        @media (max-width: 600px) {
+            #modal-recap { align-items: flex-end; padding: 0; }
+            #modal-recap .modal { max-width: 100% !important; max-height: 90vh !important; border-bottom-left-radius: 0; border-bottom-right-radius: 0; margin-top: auto; }
+        }
+
+        .recap-stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            border-bottom: 0.5px solid var(--border);
+        }
+
+        .recap-stat:last-child { border-bottom: none; }
+        .recap-lbl { font-size: 0.82rem; color: var(--muted); }
+        .recap-val { font-size: 0.9rem; font-weight: 500; color: var(--text); }
+        .recap-val.accent { color: var(--accent); }
+        .recap-val.green  { color: #8cc63f; }
 
         /*  TIMER RIPOSO OVERLAY -> BLOCCA L'INTERAZIONE DURANTE IL RIPOSO */
         .riposo-overlay {
@@ -641,8 +693,110 @@
         }
 
         @media (max-width: 600px) {
-            .stats-row .stat-item:last-child { display: none; }
+            .stat-label { font-size: 0.55rem; }
+            .stat-value { font-size: 0.85rem; }
+            .stat-item  { padding: 6px 8px; }
         }
+
+        /* MODALE ANNULLAMENTO */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.65);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .modal-overlay.open { display: flex; }
+        .annulla-box {
+            background: var(--surface);
+            border: 0.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 22px 20px 18px;
+            max-width: 360px;
+            width: 100%;
+        }
+        .annulla-title { font-size: 0.95rem; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+        .annulla-sub { font-size: 0.78rem; color: var(--muted); line-height: 1.55; margin-bottom: 18px; }
+        .annulla-btns { display: flex; gap: 8px; }
+        .annulla-continua {
+            flex: 1; padding: 9px 0; background: none;
+            border: 0.5px solid var(--border); border-radius: var(--radius);
+            color: var(--muted); font-family: var(--font-body);
+            font-size: 0.75rem; font-weight: 500; letter-spacing: 0.06em;
+            text-transform: uppercase; cursor: pointer;
+        }
+        .annulla-continua:hover { 
+            background: var(--accent-dim); 
+            border-color: var(--accent);
+            border-radius: var(--radius); 
+            color: var(--accent);
+        }        
+        .annulla-conferma {
+            flex: 1; padding: 9px 0;
+            background: rgba(226,75,74,0.12);
+            border: 0.5px solid rgba(226,75,74,0.4);
+            border-radius: var(--radius); color: #e24b4a;
+            font-family: var(--font-body); font-size: 0.75rem;
+            font-weight: 500; letter-spacing: 0.06em;
+            text-transform: uppercase; cursor: pointer;
+            transition: background 0.18s;
+        }
+        .annulla-conferma:hover { background: rgba(226,75,74,0.22); }
+
+        /* STEPPER PILL PER REPS */
+        .reps-stepper {
+            display: flex;
+            align-items: center;
+            border: 0.5px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            background: var(--bg);
+            flex-shrink: 0;
+        }
+        .reps-stepper button {
+            width: 22px; height: 26px;
+            background: var(--surface2); border: none;
+            color: var(--text); font-size: 1rem; line-height: 1;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: background 0.15s, color 0.15s;
+        }
+        .reps-stepper button:hover  { background: var(--accent-dim); color: var(--accent); }
+        .reps-stepper button:active { background: var(--accent); color: #fff; }
+        .reps-stepper span {
+            min-width: 26px; text-align: center;
+            font-size: 0.82rem; font-weight: 500;
+            color: var(--text); user-select: none;
+        }
+        .reps-stepper.done { border-color: transparent; background: transparent; }
+        .reps-stepper.done button { display: none; }
+        .reps-stepper.done span { color: var(--accent-green); min-width: 50px; }
+
+        /* kg-wrap con bottoni +/- e step 0.5 */
+        .kg-wrap {
+            display: flex; align-items: center;
+            border: 0.5px solid var(--border);
+            border-radius: 4px; overflow: hidden;
+            background: var(--surface);
+        }
+        .kg-wrap.done { border-color: transparent; background: transparent; }
+        .kg-side-btn {
+            width: 18px; min-height: 28px;
+            background: var(--surface2); border: none;
+            color: var(--text); font-size: 14px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; transition: background 0.15s;
+        }
+        .kg-side-btn:hover { background: var(--accent-dim); color: var(--accent); }
+        .kg-input-inner {
+            flex: 1; min-width: 0; padding: 5px 2px;
+            text-align: center; border: none;
+            background: var(--bg); color: var(--text);
+            font-family: var(--font-body); font-size: 0.82rem; outline: none;
+        }
+        .kg-wrap.done .kg-input-inner { background: transparent; color: var(--accent-green); }
     </style>
 </head>
 <body>
@@ -663,7 +817,7 @@
         </div>
         <div class="stat-item">
             <div class="stat-label">Volume</div>
-            <div class="stat-value green" id="stat-volume">0 kg</div>
+            <div class="stat-value" id="stat-volume">0 kg</div>
         </div>
         <div class="stat-item">
             <div class="stat-label">Serie</div>
@@ -686,8 +840,9 @@
     <!--  BOTTOM BAR  -->
     <div class="all-bottom">
         <button class="btn-annulla" onclick="annullaAllenamento()">Annulla</button>
-        <button class="btn-salva-stat" onclick="salvaInStatistiche()">
-            Salva in statistiche
+        <button class="btn-pausa" id="btn-pausa" onclick="togglePausa()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+            Pausa
         </button>
     </div>
 
@@ -825,22 +980,20 @@
 
                 /* inizializza stato serie */
                 (_scheda.workout_ex || []).forEach(ex => {
-                    const id = ex.exerciseId;
-                    _riposi[id] = 90; /* default 90 secondi */
-
+                    const id   = ex.exerciseId;
+                    const nSet = ex.nSet || 3;
                     const sets = ex.workout_set || [];
-                    _serieState[id] = sets.map(s => ({
-                        setId: s.setId,
-                        kg:    s.pesi || 0,
-                        reps:  s.rep  || 0,
-                        done:  false,
-                    }));
+                    _riposi[id] = 90;
 
-                    /* se non ci sono set, crea quelli default */
-                    if (_serieState[id].length === 0) {
-                        for (let i = 1; i <= (ex.nSet || 3); i++) {
-                            _serieState[id].push({ setId: i, kg: 0, reps: ex.nRep || 0, done: false });
-                        }
+                    _serieState[id] = [];
+                    for (let i = 1; i <= nSet; i++) {
+                        const dbSet = sets.find(s => s.setId === i);
+                        _serieState[id].push({
+                            setId: i,
+                            kg:    dbSet?.pesi ?? 0,
+                            reps:  dbSet?.rep  ?? (ex.nRep || 0),
+                            done:  false,
+                        });
                     }
                 });
 
@@ -869,68 +1022,202 @@
         }
 
         function creaCardEsercizio(ex) {
-            const id    = ex.exerciseId;
-            const nome  = ex.exercise?.nameIt || ex.exercise?.name || 'Esercizio';
-            const zona  = [ex.exercise?.macroPart, ex.exercise?.bodyPart].filter(Boolean).map(z => z.charAt(0).toUpperCase() + z.slice(1)).join(' · ');
-            const video = ex.exercise?.videoUrl;
-            const serie = _serieState[id] || [];
+            const id        = ex.exerciseId;
+            const nome      = ex.exercise?.nameIt || ex.exercise?.name || 'Esercizio';
+            const zona      = [ex.exercise?.macroPart, ex.exercise?.bodyPart]
+                                .filter(Boolean)
+                                .map(z => z.charAt(0).toUpperCase() + z.slice(1))
+                                .join(' · ');
+            const video     = ex.exercise?.videoUrl || '';
+            const serie     = _serieState[id] || [];
             const riposoSec = _riposi[id] || 90;
             const riposoFmt = riposoSec >= 60
-                ? Math.floor(riposoSec/60) + 'min ' + (riposoSec%60 ? (riposoSec%60)+'s' : '')
+                ? Math.floor(riposoSec / 60) + 'min ' + (riposoSec % 60 ? (riposoSec % 60) + 's' : '')
                 : riposoSec + 's';
 
             const card = document.createElement('div');
-            card.className  = 'ez-all-card';
+            card.className    = 'ez-all-card';
             card.dataset.ezId = id;
 
-            const serieTr = serie.map((s, i) => `
-                <div class="serie-row${s.done ? ' done' : ''}" data-ez="${id}" data-idx="${i}">
-                    <div class="serie-num">${i+1}</div>
-                    <div class="serie-prec">${s.kg ? s.kg+'kg×'+s.reps : '—'}</div>
-                    <input class="serie-input${s.done ? ' done' : ''}" type="number"
-                           value="${s.kg || ''}" placeholder="kg" min="0"
-                           onchange="aggiornaKg(${id}, ${i}, this.value)"
-                           ${s.done ? 'readonly' : ''}>
-                    <input class="serie-input${s.done ? ' done' : ''}" type="number"
-                           value="${s.reps || ''}" placeholder="reps" min="0"
-                           onchange="aggiornaReps(${id}, ${i}, this.value)"
-                           ${s.done ? 'readonly' : ''}>
-                    <button class="serie-check-btn${s.done ? ' done' : ''}"
-                            onclick="spuntaSerie(${id}, ${i}, '${nome}', ${i+1})">
-                        ${s.done ? '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
-                    </button>
-                </div>`).join('');
+            /* ── HEADER ── */
+            const hdr = document.createElement('div');
+            hdr.className = 'ez-all-header';
+            hdr.onclick = () => apriDettaglioEz(id, nome, zona, video);
 
-            card.innerHTML = `
-                <div class="ez-all-header" onclick="apriDettaglioEz(${id}, '${nome.replace(/'/g,"\\'")}', '${zona}', '${video || ''}')">
-                    <div class="ez-thumb">
-                        ${video ? `<div class="ez-thumb-ph">▶</div>` : `<div class="ez-thumb-ph">◈</div>`}
-                    </div>
-                    <div class="ez-all-info">
-                        <div class="ez-all-name">${nome}</div>
-                        <div class="ez-all-zona">${zona}</div>
-                    </div>
-                    <button class="ez-menu-btn" onclick="event.stopPropagation()">⋮</button>
-                </div>
-                <div class="riposo-row">
-                    <span style="font-size:0.75rem;">⏱</span>
-                    <span class="riposo-label">Riposo:</span>
-                    <button class="riposo-time-btn" onclick="apriTimerEdit(${id})">${riposoFmt.trim()}</button>
-                </div>
-                <div class="note-row">
-                    <input class="note-input" type="text" placeholder="Aggiungi note per questo esercizio...">
-                </div>
-                <div class="serie-head">
-                    <div class="serie-th">N</div>
-                    <div class="serie-th" style="text-align:left;">Prec.</div>
-                    <div class="serie-th">KG</div>
-                    <div class="serie-th">Reps</div>
-                    <div></div>
-                </div>
-                ${serieTr}
-                <button class="add-serie-btn" onclick="aggiungiSerie(${id})">+ Aggiungi serie</button>`;
+            const thumb = document.createElement('div');
+            thumb.className = 'ez-thumb';
+            const thumbPh = document.createElement('div');
+            thumbPh.className = 'ez-thumb-ph';
+            thumbPh.textContent = video ? '▶' : '◈';
+            thumb.appendChild(thumbPh);
 
+            const info = document.createElement('div');
+            info.className = 'ez-all-info';
+            const nameEl = document.createElement('div');
+            nameEl.className = 'ez-all-name';
+            nameEl.textContent = nome;
+            const zonaEl = document.createElement('div');
+            zonaEl.className = 'ez-all-zona';
+            zonaEl.textContent = zona;
+            info.appendChild(nameEl);
+            info.appendChild(zonaEl);
+
+            /* freccetta collapse */
+            const colBtn = document.createElement('button');
+            colBtn.className = 'ez-collapse-btn';
+            colBtn.title = 'Comprimi/espandi';
+            colBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>';
+            colBtn.onclick = function(e) {
+                e.stopPropagation();
+                card.classList.toggle('collapsed');
+            };
+
+            hdr.appendChild(thumb);
+            hdr.appendChild(info);
+            hdr.appendChild(colBtn);
+            card.appendChild(hdr);
+
+            /* ── CORPO (collassabile) ── */
+            const body = document.createElement('div');
+            body.className = 'ez-card-body';
+
+            /* riposo row */
+            const ripRow = document.createElement('div');
+            ripRow.className = 'riposo-row';
+            const ripIcon = document.createElement('span');
+            ripIcon.style.fontSize = '0.75rem';
+            ripIcon.textContent = '⏱';
+            const ripLbl = document.createElement('span');
+            ripLbl.className = 'riposo-label';
+            ripLbl.textContent = 'Riposo:';
+            const ripBtn = document.createElement('button');
+            ripBtn.className = 'riposo-time-btn';
+            ripBtn.textContent = riposoFmt.trim();
+            ripBtn.onclick = () => apriTimerEdit(id);
+            ripRow.appendChild(ripIcon);
+            ripRow.appendChild(ripLbl);
+            ripRow.appendChild(ripBtn);
+            body.appendChild(ripRow);
+
+            /* note row */
+            const noteRow = document.createElement('div');
+            noteRow.className = 'note-row';
+            const noteInp = document.createElement('input');
+            noteInp.className = 'note-input';
+            noteInp.type = 'text';
+            noteInp.placeholder = 'Aggiungi note per questo esercizio...';
+            noteRow.appendChild(noteInp);
+            body.appendChild(noteRow);
+
+            /* serie head */
+            const head = document.createElement('div');
+            head.className = 'serie-head';
+            ['N', 'Prec.', 'KG', 'Reps', ''].forEach((t, i) => {
+                const th = document.createElement('div');
+                th.className = 'serie-th';
+                th.textContent = t;
+                if (i === 1) th.style.textAlign = 'left';
+                head.appendChild(th);
+            });
+            body.appendChild(head);
+
+            /* serie rows */
+            serie.forEach((s, i) => body.appendChild(creaSerieRow(id, i, s, nome)));
+
+            /* aggiungi serie btn */
+            const addBtn = document.createElement('button');
+            addBtn.className = 'add-serie-btn';
+            addBtn.textContent = '+ Aggiungi serie';
+            addBtn.onclick = () => aggiungiSerie(id);
+            body.appendChild(addBtn);
+
+            card.appendChild(body);
             return card;
+        }
+
+        function creaSerieRow(id, i, s, nome) {
+            const row = document.createElement('div');
+            row.className      = 'serie-row' + (s.done ? ' done' : '');
+            row.dataset.ez     = id;
+            row.dataset.idx    = i;
+
+            /* numero */
+            const num = document.createElement('div');
+            num.className   = 'serie-num';
+            num.textContent = i + 1;
+
+            /* precedente */
+            const prec = document.createElement('div');
+            prec.className   = 'serie-prec';
+            prec.textContent = s.kg ? s.kg + 'kg×' + s.reps : '—';
+
+            /* kg wrap */
+            const kgWrap = document.createElement('div');
+            kgWrap.className = 'kg-wrap' + (s.done ? ' done' : '');
+            if (s.done) {
+                const sp = document.createElement('span');
+                sp.style.cssText = 'flex:1;text-align:center;font-size:0.82rem;color:var(--accent-green);padding:5px 2px;';
+                sp.textContent = (s.kg || 0) + ' kg';
+                kgWrap.appendChild(sp);
+            } else {
+                const kgM = document.createElement('button');
+                kgM.className   = 'kg-side-btn';
+                kgM.textContent = '−';
+                kgM.onclick     = () => stepKg(id, i, -0.5);
+                const kgI = document.createElement('input');
+                kgI.className = 'kg-input-inner';
+                kgI.type      = 'number';
+                kgI.value     = s.kg || 0;
+                kgI.min       = '0';
+                kgI.step      = '0.5';
+                kgI.id        = 'kg-' + id + '-' + i;
+                kgI.onchange  = function() { aggiornaKg(id, i, this.value); };
+                const kgP = document.createElement('button');
+                kgP.className   = 'kg-side-btn';
+                kgP.textContent = '+';
+                kgP.onclick     = () => stepKg(id, i, 0.5);
+                kgWrap.appendChild(kgM);
+                kgWrap.appendChild(kgI);
+                kgWrap.appendChild(kgP);
+            }
+
+            /* reps stepper */
+            const repsSt = document.createElement('div');
+            repsSt.className = 'reps-stepper' + (s.done ? ' done' : '');
+            if (s.done) {
+                const sp = document.createElement('span');
+                sp.style.cssText = 'min-width:26px;text-align:center;font-size:0.82rem;color:var(--accent-green);';
+                sp.textContent = s.reps || 0;
+                repsSt.appendChild(sp);
+            } else {
+                const rM = document.createElement('button');
+                rM.textContent = '−';
+                rM.onclick     = () => stepReps(id, i, -1);
+                const rSp = document.createElement('span');
+                rSp.id          = 'reps-' + id + '-' + i;
+                rSp.textContent = s.reps || 0;
+                const rP = document.createElement('button');
+                rP.textContent = '+';
+                rP.onclick     = () => stepReps(id, i, 1);
+                repsSt.appendChild(rM);
+                repsSt.appendChild(rSp);
+                repsSt.appendChild(rP);
+            }
+
+            /* check btn */
+            const chk = document.createElement('button');
+            chk.className = 'serie-check-btn' + (s.done ? ' done' : '');
+            if (s.done) {
+                chk.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
+            }
+            chk.onclick = () => spuntaSerie(id, i, nome, i + 1);
+
+            row.appendChild(num);
+            row.appendChild(prec);
+            row.appendChild(kgWrap);
+            row.appendChild(repsSt);
+            row.appendChild(chk);
+            return row;
         }
 
         /*  AGGIORNA VALORI SERIE  */
@@ -945,6 +1232,29 @@
             if (_serieState[ezId] && _serieState[ezId][idx]) {
                 _serieState[ezId][idx].reps = parseInt(val) || 0;
             }
+        }
+
+        /* AGGIORNA IL VALORE KG CON STEP 0.5*/
+        function stepKg(ezId, idx, delta) {
+            if (!_serieState[ezId] || !_serieState[ezId][idx]) return;
+            const nuovoKg = Math.max(0, Math.round((_serieState[ezId][idx].kg + delta) * 10) / 10);
+            _serieState[ezId][idx].kg = nuovoKg;
+            aggiornaVolume();
+            /* aggiorna il valore nell'input senza re-render */
+            const row = document.querySelector(`.serie-row[data-ez="${ezId}"][data-idx="${idx}"]`);
+            if (row) {
+                const inp = row.querySelector('.kg-input-inner');
+                if (inp) inp.value = nuovoKg;
+            }
+        }
+
+        /* AGGIORNA LE REPS CON STEPPER PILL*/
+        function stepReps(ezId, idx, delta) {
+            if (!_serieState[ezId] || !_serieState[ezId][idx]) return;
+            const nuove = Math.max(0, (_serieState[ezId][idx].reps || 0) + delta);
+            _serieState[ezId][idx].reps = nuove;
+            const el = document.getElementById('reps-' + ezId + '-' + idx);
+            if (el) el.textContent = nuove;
         }
 
         /*  SPUNTA SERIE -> QUANDO SI SPUNTA UNA SERIE PARTE IL TIMER RIPOSO */
@@ -1113,11 +1423,60 @@
             document.getElementById('ez-video-wrap').innerHTML = '';
         }
 
-        /*  FINE ALLENAMENTO  */
-        function fineAllenamento() {
-            if (confirm('Vuoi terminare e salvare questo allenamento?')) {
-                salvaInStatistiche();
+        /*  PAUSA / RIPRENDI  */
+        let _inPausa = false;
+
+        function togglePausa() {
+            const btn = document.getElementById('btn-pausa');
+            if (_inPausa) {
+                /* riprendi */
+                _startTime = Date.now() - (_pausaElapsed || 0);
+                avviaTimerAllenamento();
+                _inPausa = false;
+                btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Pausa';
+                btn.style.borderColor = '';
+                btn.style.color = '';
+            } else {
+                /* pausa */
+                clearInterval(_timerInterval);
+                _pausaElapsed = Date.now() - _startTime;
+                _inPausa = true;
+                btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;"><polygon points="5 3 19 12 5 21 5 3"/></svg> Riprendi';
+                btn.style.borderColor = '#8cc63f';
+                btn.style.color = '#8cc63f';
             }
+        }
+
+        /*  FINE ALLENAMENTO → apre modale recap  */
+        function fineAllenamento() {
+            if (_inPausa) togglePausa(); /* riprendi il timer prima di calcolare */
+
+            const elapsed = Math.floor((Date.now() - _startTime) / 1000);
+            const nTot    = (_scheda?.workout_ex || []).length;
+            const nEzDone = Object.values(_serieState).filter(s => s.some(r => r.done)).length;
+
+            let serieTot = 0, serieOk = 0, volume = 0;
+            Object.values(_serieState).forEach(serie => {
+                serieTot += serie.length;
+                serie.forEach(s => {
+                    if (s.done) { serieOk++; volume += (s.kg || 0) * (s.reps || 0); }
+                });
+            });
+
+            document.getElementById('recap-sub').textContent =
+                (_scheda?.name || 'Allenamento') + ' · ' +
+                new Date().toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' });
+            document.getElementById('recap-durata').textContent  = formattaTempo(elapsed);
+            document.getElementById('recap-serie').textContent   = serieOk + ' / ' + serieTot;
+            document.getElementById('recap-volume').textContent  = volume + ' kg';
+            document.getElementById('recap-esercizi').textContent = nEzDone + ' / ' + nTot;
+
+            document.getElementById('modal-recap').classList.add('open');
+        }
+
+        function chiudiRecap() {
+            document.getElementById('modal-recap').classList.remove('open');
+            window.location.href = 'schede.html';
         }
 
         /*  SALVA IN STATISTICHE  */
@@ -1150,35 +1509,96 @@
                 }
             }
 
+            /* calcola volume totale (kg × reps delle serie completate) */
+            let volume = 0;
+            Object.values(_serieState).forEach(serie => {
+                serie.forEach(s => { if (s.done) volume += (s.kg || 0) * (s.reps || 0); });
+            });
+
             /* registra l'allenamento nel calendario statistiche */
             try {
                 await fetch(`${API}/users/allenamenti`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
                     body: JSON.stringify({
-                        workoutId:  schedaId,
-                        data:       new Date().toISOString(),
+                        workoutId: schedaId,
+                        data:      new Date().toISOString(),
                         durataSec,
+                        volume,
                     })
                 });
             } catch(e) {
                 console.error('Errore salvataggio allenamento:', e);
             }
 
-            window.location.href = 'statistiche.html';
+            window.location.href = 'schede.html';
         }
 
+        /*  ANNULLA ALLENAMENTO -> apre modale interno che chiede conferma */
         function annullaAllenamento() {
-            if (confirm('Sei sicuro? I dati non salvati andranno persi.')) {
-                clearInterval(_timerInterval);
-                clearInterval(_riposoInterval);
-                window.location.href = 'dettaglio.html?id=' + schedaId;
-            }
+            document.getElementById('annulla-overlay').classList.add('open');
+        }
+
+        function chiudiAnnulla() {
+            document.getElementById('annulla-overlay').classList.remove('open');
+        }
+
+        function confermaAnnulla() {
+            clearInterval(_timerInterval);
+            clearInterval(_riposoInterval);
+            window.location.href = 'dettaglio.html?id=' + schedaId;
         }
 
         /*  START  */
         caricaScheda();
     </script>
+
+    <!-- MODALE CONFERMA ANNULLAMENTO -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="annulla-box">
+            <div class="annulla-title">Annullare l'allenamento?</div>
+            <div class="annulla-sub">Stai per interrompere la sessione. I progressi non salvati andranno persi.</div>
+            <div class="annulla-btns">
+                <button class="annulla-continua" onclick="chiudiAnnulla()">Continua</button>
+                <button class="annulla-conferma" onclick="confermaAnnulla()">Annulla sessione</button>
+            </div>
+        </div>
+    </div>
+
+    <!--  MODALE RECAP FINE ALLENAMENTO  -->
+    <div class="modal-overlay" id="modal-recap">
+        <div class="modal" style="max-width:440px; flex-direction:column;">
+            <div class="modal-header" style="flex-shrink:0;">
+                <div>
+                    <div class="modal-title">Allenamento completato</div>
+                    <div class="modal-sub" id="recap-sub">—</div>
+                </div>
+                <button class="modal-close" onclick="chiudiRecap()">✕</button>
+            </div>
+            <div class="modal-body" style="padding:0; flex:1; overflow-y:auto;">
+                <div class="recap-stat">
+                    <span class="recap-lbl">Durata</span>
+                    <span class="recap-val accent" id="recap-durata">—</span>
+                </div>
+                <div class="recap-stat">
+                    <span class="recap-lbl">Serie completate</span>
+                    <span class="recap-val" id="recap-serie">—</span>
+                </div>
+                <div class="recap-stat">
+                    <span class="recap-lbl">Volume totale</span>
+                    <span class="recap-val green" id="recap-volume">—</span>
+                </div>
+                <div class="recap-stat">
+                    <span class="recap-lbl">Esercizi</span>
+                    <span class="recap-val" id="recap-esercizi">—</span>
+                </div>
+            </div>
+            <div class="modal-footer" style="flex-shrink:0;">
+                <button class="btn-ghost" onclick="chiudiRecap()">Annulla</button>
+                <button class="btn-primary" onclick="salvaInStatistiche()">Salva in statistiche</button>
+            </div>
+        </div>
+    </div>
 
 </body>
 </html>

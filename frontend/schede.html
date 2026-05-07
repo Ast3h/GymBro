@@ -14,7 +14,10 @@
 
     <style>
         /* Stili specifici pagina schede*/
-        .page-content { max-width: 1200px;}
+        .page-content { max-width: 1200px;
+        margin: 0 auto;
+        }
+        
 
         /* griglia schede*/
         .schede-grid{
@@ -434,9 +437,9 @@
                 <!-- filtri livello -->
                 <div class="chips-row" id="filtri-predefinite" style="margin-bottom: 16px;">
                     <button class="chip active" onclick="filtraSchede('tutte', 'predefinite', this)">Tutte</button>
-                    <button class="chip" onclick="filtraSchede('Principiante', 'personali', this)">Principiante</button>
-                    <button class="chip" onclick="filtraSchede('Intermedio', 'personali', this)">Intermedio</button>
-                    <button class="chip" onclick="filtraSchede('Avanzato', 'personali', this)">Avanzato</button>
+                    <button class="chip" onclick="filtraSchede('Principiante', 'predefinite', this)">Principiante</button>
+                    <button class="chip" onclick="filtraSchede('Intermedio', 'predefinite', this)">Intermedio</button>
+                    <button class="chip" onclick="filtraSchede('Avanzato', 'predefinite', this)">Avanzato</button>
                 </div>
 
 
@@ -494,6 +497,8 @@
         </div>
     </div>
 
+
+
     <script>
 
         /* FILTRI */
@@ -540,16 +545,16 @@
                 : `<div class="scheda-actions">
                 </div>`;
             card.innerHTML=
-                `<div class="scheda-name">${scheda.nome}</div>
+                `<div class="scheda-name">${scheda.nome} ${livelloBadge}</div>
                 <div class="scheda-meta">${scheda.esercizi} esercizi </div>
-                <div class="scheda-tags">${tags}${livelloBadge}</div>
+                <div class="scheda-tags">${tags}</div>
                 <span class="scheda-data">${scheda.data || ''}</span>
                 <div class="scheda-footer">
                     ${azioni}
                 </div>
                 <div class="scheda-edit-panel" id="edit-panel-${scheda.id}"></div>`;
             card.addEventListener('click', () => {
-                window.location.href= 'dettaglio.html?id=' + scheda.id;
+                window.location.href= 'dettaglio.html?id=' + scheda.id + '&tipo=' + scheda.tipo;
             });
             return card;
         }
@@ -924,6 +929,33 @@
                 }
 
                 document.getElementById('grid-schede-personali').append(creaCardScheda(workout))
+                console.log(workout)
+            })
+
+            //CARICA SCHEDE PREDEFINITE
+            const res = await fetch('http://localhost:3000/users/workout-template', {
+                method : 'GET',
+                headers : {
+                    'Authorization' : 'Bearer ' + localStorage.getItem('gymbros-token'),
+                    'Application' : 'application/json'
+                }
+            })
+
+            const predef = await res.json()
+            document.getElementById('empty-predefinite').remove()
+            predef.forEach(scheda =>{
+                workout = {
+                    id:       scheda.templateId,
+                    nome:     scheda.name,
+                    esercizi: scheda._count.template_ex,
+                    giorni:   0,
+                    zone:     scheda.zone ?? [],
+                    data:     scheda.dataCreazione ? new Date(scheda.dataCreazione).toLocaleDateString('it-IT') : '',
+                    tipo:     scheda.tipo,
+                    livello:  scheda.livello
+                }
+
+                document.getElementById('grid-schede-predefinite').append(creaCardScheda(workout))
                 console.log(workout)
             })
 

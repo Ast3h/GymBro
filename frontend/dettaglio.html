@@ -13,7 +13,9 @@
     <script src="funzioni.js" defer></script>
 
     <style>
-        .page-content { max-width: 700px; }
+        .page-content { max-width: 700px; 
+        margin: 0 auto;
+        }
 
         /*  HERO  */
         .scheda-hero {
@@ -482,7 +484,7 @@
             <!-- header con back e azioni -->
             <div class="scheda-header-actions">
                 <a href="schede.html" class="back-link">← Schede</a>
-                <div class="scheda-azioni">
+                <div class="scheda-azioni" id="scheda-azioni">
                     <button class="btn-ghost" onclick="apriModaleModifica()">Modifica</button>
                     <button class="btn-elimina" onclick="eliminaScheda()">Elimina</button>
                 </div>
@@ -503,9 +505,14 @@
             </div>
 
             <!-- avvia allenamento -->
-            <button class="start-btn" onclick="avviaAllenamento()">
+            <button class="start-btn" id="start-btn" onclick="avviaAllenamento()">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                 Avvia allenamento
+            </button>
+
+            <button class="start-btn" id="start-btn-predefinito" onclick="salvaAllenamento()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Salva allenamento
             </button>
 
             <!-- lista esercizi -->
@@ -645,6 +652,7 @@
 
         const params   = new URLSearchParams(window.location.search);
         const schedaId = parseInt(params.get('id'));
+        const tipo = params.get('tipo');
 
         let _scheda = null;
 
@@ -653,9 +661,8 @@
             if (!schedaId) {
                 window.location.href = 'schede.html';
                 return;
-            }
-
-            try {
+            }else if(tipo === 'Personale'){
+                try {
                 const res = await fetch(`${API}/users/workout-plans/${schedaId}`, {
                     method : 'GET',
                     headers: { 'Authorization' : 'Bearer ' + TOKEN() }
@@ -670,9 +677,31 @@
                 console.log(_scheda);
                 renderScheda();
 
-            } catch (e) {
-                console.error('Errore caricamento scheda:', e);
+                } catch (e) {
+                    console.error('Errore caricamento scheda:', e);
+                }
+            }else if(tipo === 'predefinita'){
+                try {
+                const res = await fetch(`${API}/users/workout-template/${schedaId}`, {
+                    method : 'GET',
+                    headers: { 'Authorization' : 'Bearer ' + TOKEN() }
+                });
+
+                if (!res.ok) {
+                    window.location.href = 'schede.html';
+                    return;
+                }
+
+                _scheda = await res.json();
+                console.log(_scheda);
+                renderScheda();
+
+                } catch (e) {
+                    console.error('Errore caricamento scheda:', e);
+                }
             }
+
+            
         }
 
         /*  RENDER  */
@@ -695,6 +724,12 @@
                 : '—';
 
             const nEx = (_scheda.workout_ex || []).length;
+            if(_scheda.tipo === 'predefinita'){
+                document.getElementById('scheda-azioni').style.display = 'none'
+                document.getElementById('start-btn').style.display = 'none'
+            }else{
+                document.getElementById('start-btn-predefinito').style.display = 'none'
+            }
 
             document.getElementById('scheda-hero').innerHTML = `
                 <div class="scheda-hero-name">${_scheda.name}</div>
@@ -736,8 +771,10 @@
                             <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                         </button>`
                         : ''}
-                    <button class="ez-remove-btn" onclick="event.stopPropagation(); rimuoviEsercizioDaScheda(${ex.exerciseId})">Rimuovi</button>`;
-
+                    ${_scheda.tipo !== 'predefinita'
+                        ? `<button class="ez-remove-btn" onclick="event.stopPropagation(); rimuoviEsercizioDaScheda(${ex.exerciseId})">Rimuovi</button>`
+                        : ''}
+                    `;
                 lista.appendChild(item);
             });
         }
@@ -1025,6 +1062,23 @@
         document.getElementById('modal-video').addEventListener('click', function(e) {
             if (e.target === this) chiudiVideo();
         });
+
+        async function salvaAllenamento(){
+            const id_scheda = parseInt(params.get('id'))
+
+            const res = await fetch(`${API}/users/workout-template/${schedaId}`, {
+                method : 'POST',
+                headers : {
+                    'Content-Type' : 'application/json',
+                    'Authorization' : 'Bearer ' + TOKEN()
+                }
+            })
+
+            const data = res.json()
+            if(res) {
+                window.location.href = 'schede.html'
+            }
+        }
 
         /*  START  */
         caricaScheda();

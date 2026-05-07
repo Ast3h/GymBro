@@ -452,7 +452,7 @@ app.get('/users/workout-plans/:id', auth, async(req, res) =>{
         console.log('ARRIVA')
         console.log(check)
 
-        if(!check){
+        if(check.userId !== id){
             return res.status(401).json({error : 'Unauthorized'})
         }
 
@@ -832,5 +832,150 @@ app.get('/users/record', auth, async (req, res) => {
         res.json(record)
     } catch (e) {
         res.status(500).json({ error: e.message })
+    }
+})
+
+//CARICA SCHEDE PREDEFINITE
+app.get('/users/workout-template', auth, async (req, res) =>{
+    
+    try{
+        const workout = await prisma.workout_template.findMany({
+            where : {tipo : 'predefinita'},
+            include : {
+                _count : {
+                    select : {template_ex : true}
+                },
+                template_ex : {
+                    include : {
+                        exercise : {
+                            select  : {
+                                macroPart : true,
+                            }
+                        }
+                    }
+                }
+            }
+        })
+        
+        workout.forEach(single_workout =>{
+            const zone =  [...new Set(single_workout.template_ex.map(ex => ex.exercise.macroPart))]
+            single_workout.zone = zone
+            delete single_workout.template_ex
+        })
+            
+        
+        console.log(workout)
+        res.json(workout)
+
+    }catch(error){
+        res.status(500).json({error : error.message})
+    }
+})
+
+
+//CARICA SCHEDA PREDEFINITA
+app.get('/users/workout-template/:id', auth, async(req, res) =>{
+    const id = req.id
+    const workout_id = parseInt(req.params.id)
+    console.log( id + ' ' +  workout_id)
+
+    try {
+        const check = await prisma.workout_template.findUnique({
+            where : { templateId : workout_id},
+            include : {
+                template_ex : {
+                    include : {exercise : {
+                        select : {
+                            id : true,
+                            nameIt : true,
+                            videoUrl : true,
+                            bodyPart : true,
+                            macroPart : true,
+                        }
+                    }}
+                }
+            }
+        })
+
+        
+        
+        console.log('ARRIVA')
+        console.log(check)
+
+        if(!check){
+            return res.status(401).json({error : 'Unauthorized'})
+        }
+
+        const {template_ex, ...rest} = check
+        res.json({ ...rest , 'workout_ex' : template_ex})
+    } catch (error) {
+        console.log(error.message)
+        return res.status(500).json({error : error.message})
+    }
+
+})
+
+
+//SALVA SCHEDA TEMPLATE IN PROFILO UTENTE
+/* SALVA UN TEMPLATE COME SCHEDA PERSONALE */
+app.post('/users/workout-template/:id', auth, async (req, res) => {
+    const userId     = req.id
+    const templateId = parseInt(req.params.id)
+
+    try {
+        // 1. Carica il template con i suoi esercizi
+        const template = await prisma.workout_template.findUnique({
+            where: { templateId },
+            include: { template_ex: true }
+        })
+
+        if (!template) {
+            return res.status(404).json({ error: 'Template non trovato' })
+        }
+
+        // 2. Crea la nuova scheda personale
+        const plan = await prisma.workout_plan.create({
+            data: {
+                userId,
+                name:          template.name,
+                tipo:          'Personale',
+                note:          template.note,
+                dataCreazione: new Date(),
+            }
+        })
+
+        // 3. Per ogni esercizio del template crea il corrispondente
+        //    workout_exercise + i workout_set con pesi=0
+        for (const ez of template.template_ex) {
+            const nSet = ez.nSet
+            const nRep = ez.nRep
+
+            await prisma.workout_exercise.create({
+                data: {
+                    workoutId:  plan.workoutId,
+                    exerciseId: ez.exerciseId,
+                    nSet,
+                    nRep,
+                }
+            })
+
+            for (let i = 1; i <= nSet; i++) {
+                await prisma.workout_set.create({
+                    data: {
+                        workoutId:  plan.workoutId,
+                        exerciseId: ez.exerciseId,
+                        setId:      i,
+                        rep:        nRep ?? 0,
+                        pesi:       0,
+                    }
+                })
+            }
+        }
+        console.log("SCHEDA SALVATA")
+        res.json(plan)
+
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: error.message })
     }
 })

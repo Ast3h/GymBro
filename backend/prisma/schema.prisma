@@ -21,6 +21,7 @@ model Exercise{
   videoUrl String
   workout_ex workout_exercise[]
   workout_set workout_set[]
+  template_ex     workout_template_exercise[]
 }
 
 model workout_plan{
@@ -98,4 +99,25 @@ model allenamento {
   note      String?
   user      User          @relation(fields: [userId], references: [id])
   workout   workout_plan? @relation(fields: [workoutId], references: [workoutId])
+}
+
+///schede di allenamento predefinite
+
+model workout_template {
+  templateId  Int      @id @default(autoincrement())
+  name        String
+  tipo        String
+  note        String?
+  livello     String?
+  template_ex workout_template_exercise[]
+}
+
+model workout_template_exercise {
+  templateId Int
+  exerciseId Int
+  nSet       Int
+  nRep       Int?
+  template   workout_template @relation(fields: [templateId], references: [templateId], onDelete: Cascade)
+  exercise   Exercise         @relation(fields: [exerciseId], references: [id])
+  @@id([templateId, exerciseId])
 }

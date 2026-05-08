@@ -664,6 +664,7 @@
             </div>
         </div>
     </div>
+    </div>
 
     <!-- toast feedback aggiunta -->
     <div class="feedback-toast" id="feedback-toast"></div>
@@ -778,7 +779,7 @@
             row.className = 'sel-row';
             row.innerHTML = `
                 <span class="sel-row-name">${scheda.nome}</span>
-                <button class="sel-row-btn" onclick="aggiungiAScheda('${scheda.id}')">Aggiungi</button>`;
+                <button class="sel-row-btn"  onclick="aggiungiAScheda('${scheda.id}')">Aggiungi</button>`;
             return row;
         }
 
@@ -801,10 +802,11 @@
                     nrep : nRep ?? 0,
                 })
             })
-
+            console.log(response)
             if(response.ok){
-                chiudiSelettore();
+                
                 mostraFeedback('Aggiunto a scheda');
+                chiudiSelettore();
             }else{
                 if(response.status == 400){
                     mostraFeedback('Esercizio già presente nella scheda');

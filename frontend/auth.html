@@ -500,6 +500,12 @@
         </div>
     </div>
     <script>
+        
+        if(sessionStorage.getItem("conferma-reg")){
+            alert(sessionStorage.getItem("conferma-reg"))
+            sessionStorage.removeItem("conferma-reg")
+        }
+
         const LIVELLI = ['', 'Principiante', 'Novizio', 'Intermedio', 'Esperto', 'Avanzato'];
         let livelloReg   = 0;
         let obiettivoReg = '';
@@ -650,7 +656,7 @@
             })
 
             if(response.ok){
-                alert("Registrazione avvenuta con successo")
+                sessionStorage.setItem("conferma-reg", "Registrazione avvenuta con successo! Effettua il login.")
                 tornaLogin()
             }
         }

@@ -47,7 +47,7 @@ app.post('/auth/register', async(req, res) =>{
     const nome = req.body.nome
     const cognome = req.body.cognome
     const password = req.body.password
-    const eta = new Date(req.body.data)
+    const eta = req.body.data ? new Date(req.body.data) : null
     const peso = parseFloat(req.body.peso)
     const altezza = parseFloat(req.body.altezza)
     const genere = req.body.genere
@@ -419,7 +419,9 @@ app.post('/users/workout-plans', auth, async(req,res) =>{
     } catch (error) {
         console.error(error)
         if(error.code === 'P2002'){
+            console.log("esercizio presente nella scheda")
             return res.status(400).json({error : 'Esercizio già presente nella scheda'})
+            
         }
         return res.status(500).json({error : error.message})
     }

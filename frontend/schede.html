@@ -64,7 +64,7 @@
             flex-wrap: wrap;
             gap: 4px;
         }
-
+        
         .scheda-footer{
             display: flex;
             align-items: center;
@@ -407,7 +407,7 @@
 
                 <!-- filtri zona-->
                 <div class="chips-row" id="filtri-personali" style="margin-bottom: 16px;">
-                    <button class="chip active" onclick="filtraSchede('tutte', 'Personali', this)">Tutte</button>
+                    <button class="chip active" onclick="filtraSchede('tutte', 'personali', this)">Tutte</button>
                     <button class="chip" onclick="filtraSchede('gambe', 'personali', this)">Gambe</button>
                     <button class="chip" onclick="filtraSchede('petto', 'personali', this)">Petto</button>
                     <button class="chip" onclick="filtraSchede('braccia', 'personali', this)">Braccia</button>
@@ -516,15 +516,31 @@
             filtriEl.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
             btn.classList.add('active');
         }
-
-        grid.querySelectorAll('.scheda-card').forEach(card => {
+        if(tipo === 'predefinite'){
+            grid.querySelectorAll('.scheda-card').forEach(card => {
+            if (zona === 'tutte') {
+                card.style.display = 'block';
+            } else {
+                if(card.dataset.livello === zona){
+                    card.style.display = 'block';
+                }else{
+                    card.style.display = 'none';
+                }
+            }
+            });
+            
+        }else{
+            grid.querySelectorAll('.scheda-card').forEach(card => {
             if (zona === 'tutte') {
                 card.style.display = 'block';
             } else {
                 const zone = card.dataset.zone ? card.dataset.zone.split(',') : [];
                 card.style.display = zone.includes(zona) ? 'block' : 'none';
             }
-        });
+            });
+        }
+        
+        
     }
 
         /* creaCardScheda(scheda)*/
@@ -533,6 +549,7 @@
             card.className= 'scheda-card' + (scheda.tipo === 'predefinita' ? ' predefinita' : '');
             card.dataset.zone= scheda.zone.join(',');
             card.dataset.id= scheda.id;
+            card.dataset.livello = scheda.livello;
 
             const tags= scheda.zone.map(z => `<span class= "tag">${z}</span>`).join('');
             const livelloBadge= scheda.livello ? `<span class="tag">${scheda.livello}</span>`: '';
@@ -929,7 +946,7 @@
                 }
 
                 document.getElementById('grid-schede-personali').append(creaCardScheda(workout))
-                console.log(workout)
+               
             })
 
             //CARICA SCHEDE PREDEFINITE
@@ -956,7 +973,7 @@
                 }
 
                 document.getElementById('grid-schede-predefinite').append(creaCardScheda(workout))
-                console.log(workout)
+                
             })
 
         }

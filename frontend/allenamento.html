@@ -905,9 +905,10 @@
         /*  LEGGE L'ID DELLA SCHEDA DALL'URL  */
         const params   = new URLSearchParams(window.location.search);
         const schedaId = parseInt(params.get('id'));
+        const tipo = params.get('tipo')
 
         /* aggiorna il link back con l'id corretto */
-        document.getElementById('back-btn').href = 'dettaglio.html?id=' + schedaId;
+        document.getElementById('back-btn').href = 'dettaglio.html?id=' + schedaId + '&tipo=' + tipo;
 
         let _scheda        = null;
         let _serieState    = {}; /* { exerciseId: [{ kg, reps, done }] } */

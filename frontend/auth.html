@@ -335,7 +335,7 @@
                         <div class="auth-title">Accedi</div>
                         <div class="auth-sub">Bentornato su GymBro</div>
                     </div>
-                    <button class="modal-close" onclick="window.location.href='home.html'" title="Torna alla home">&#x2715;</button>
+                    <button class="modal-close" onclick="window.location.href='index.html'" title="Torna alla home">&#x2715;</button>
                 </div>
 
                 <div class="form-row">
@@ -580,7 +580,7 @@
             if(response.ok){
                 const data = await response.json()
                 localStorage.setItem('gymbros-token', data.token)
-                window.location.href = 'home.html'
+                window.location.href = 'index.html'
             }else{
                 
                 document.getElementById('login-err-cred').classList.add('show')

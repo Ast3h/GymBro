@@ -316,7 +316,7 @@
             <button class="hamburger-btn" id="hamburger-btn" onclick="toggleSidebar()">
                 <span></span><span></span><span></span> <!-- Visivamente tre linee che formano l'icona della bar-->
             </button>
-            <a href="home.html" class="logo">
+            <a href="index.html" class="logo">
             <img src="Favicon64x64.png" alt="" class="logo-img">
             GYM<span>BRO</span>
         </a>
@@ -386,7 +386,7 @@
     <!-- SIDEBAR -->
     <nav class="sidebar" id="sidebar">
         <a href="esercizi.html" class="sidebar-item" style="color:var(--text); border-bottom:0.5px solid var(--border); margin-bottom:4px; padding-bottom:12px;">Esercizi</a>
-        <a href="home.html" class="sidebar-item">Home</a>
+        <a href="index.html" class="sidebar-item">Home</a>
         <a href="schede.html" class="sidebar-item">Schede</a>
         <a href="profilo.html" class="sidebar-item">Profilo</a>
     </nav>
@@ -454,7 +454,7 @@
 
     <!-- BOTTOM NAV MOBILE -->
     <nav class="bottom-nav">
-        <a href="home.html" class="bottom-nav-item"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>Home</span></a>
+        <a href="index.html" class="bottom-nav-item"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>Home</span></a>
         <a href="esercizi.html" class="bottom-nav-item"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><span>Esercizi</span></a>
         <a href="schede.html"   class="bottom-nav-item">
             <svg viewBox="0 0 24 24">
@@ -495,9 +495,18 @@
             </div>
 
         </div>
+
+    <!-- MODALE CONFERMA ELIMINA SCHEDA -->
+    <div class="modal-overlay" id="modal-conferma-scheda">
+        <div class="annulla-box">
+            <div class="annulla-title" id="conferma-scheda-title">Eliminare questa scheda?</div>
+            <div class="annulla-sub" id="conferma-scheda-sub">Questa azione è irreversibile. La scheda e tutti i suoi esercizi verranno rimossi.</div>
+            <div class="annulla-btns">
+                <button class="annulla-continua" onclick="chiudiConfermaScheda()">Annulla</button>
+                <button class="annulla-conferma" onclick="confermaAzioneScheda()">Elimina</button>
+            </div>
+        </div>
     </div>
-
-
 
     <script>
 
@@ -742,7 +751,48 @@
                 console.error('Errore salvataggio:', e);
             }
         }
-        function eliminaScheda(id) {/*TODO*/}
+        let _callbackConferma = null;
+        function apriConfermaScheda(title, sub, callback) {
+            document.getElementById('conferma-scheda-title').textContent = title;
+            document.getElementById('conferma-scheda-sub').textContent   = sub;
+            _callbackConferma = callback;
+            document.getElementById('modal-conferma-scheda').classList.add('open');
+        }
+
+        function chiudiConfermaScheda() {
+            _callbackConferma = null;
+            document.getElementById('modal-conferma-scheda').classList.remove('open');
+        }
+
+        function confermaAzioneScheda() {
+            chiudiConfermaScheda();
+            if (_callbackConferma) _callbackConferma();
+        }
+
+        document.getElementById('modal-conferma-scheda').addEventListener('click', function(e) {
+            if (e.target === this) chiudiConfermaScheda();
+        });
+
+        /* ELIMINA SCHEDA con modale conferma */
+        function eliminaScheda(id) {
+            apriConfermaScheda(
+                'Eliminare questa scheda?',
+                'Questa azione è irreversibile. La scheda e tutti i suoi esercizi verranno rimossi.',
+                async () => {
+                    try {
+                        await fetch('http://localhost:3000/users/workout-plans/' + id, {
+                            method:  'DELETE',
+                            headers: { Authorization: 'Bearer ' + localStorage.getItem('gymbros-token') }
+                        });
+                        /* rimuovi la card dal DOM senza ricaricare */
+                        const card = document.querySelector('[data-scheda-id="' + id + '"]');
+                        if (card) card.remove();
+                    } catch(e) {
+                        console.error('Errore eliminazione scheda:', e);
+                    }
+                }
+            );
+        }
 
         /*  MODALE CREA SCHEDA  */
         let _tuttiEsercizi  = [];  

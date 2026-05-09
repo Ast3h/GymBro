@@ -610,6 +610,10 @@ body {
     pointer-events: auto;
 }
 
+.modal-overlay:not(.open) {
+    pointer-events: none;
+}
+
 .modal{
     background: var(--surface);
     border: 0.5px solid var(--border);
@@ -717,3 +721,36 @@ body {
 
     .bottom-nav{display: flex;}
 }
+
+/*  MODALE CONFERMA ELIMINA */
+.annulla-box {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 20px 18px;
+    max-width: 360px;
+    width: 100%;
+}
+.annulla-title { font-size: 0.95rem; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+.annulla-sub   { font-size: 0.78rem; color: var(--muted); line-height: 1.55; margin-bottom: 18px; }
+.annulla-btns  { display: flex; gap: 8px; }
+.annulla-continua {
+    flex: 1; padding: 9px 0; background: none;
+    border: 0.5px solid var(--border); border-radius: var(--radius);
+    color: var(--muted); font-family: var(--font-body);
+    font-size: 0.75rem; font-weight: 500; letter-spacing: 0.06em;
+    text-transform: uppercase; cursor: pointer; transition: all 0.18s;
+}
+.annulla-continua:hover {
+    background: var(--accent-dim); border-color: var(--accent); color: var(--accent);
+}
+.annulla-conferma {
+    flex: 1; padding: 9px 0;
+    background: rgba(226,75,74,0.12);
+    border: 0.5px solid rgba(226,75,74,0.4);
+    border-radius: var(--radius); color: #e24b4a;
+    font-family: var(--font-body); font-size: 0.75rem;
+    font-weight: 500; letter-spacing: 0.06em;
+    text-transform: uppercase; cursor: pointer; transition: background 0.18s;
+}
+.annulla-conferma:hover { background: rgba(226,75,74,0.22); }

@@ -429,7 +429,7 @@
             <button class="hamburger-btn" id="hamburger-btn" onclick="toggleSidebar()">
                 <span></span><span></span><span></span>
             </button>
-            <a href="home.html" class="logo">
+            <a href="index.html" class="logo">
                 <img src="Favicon64x64.png" alt="" class="logo-img">
                 GYM<span>BRO</span>
             </a>
@@ -472,7 +472,7 @@
 
     <nav class="sidebar" id="sidebar">
         <a href="esercizi.html" class="sidebar-item" style="color:var(--text); border-bottom:0.5px solid var(--border); margin-bottom:4px; padding-bottom:12px;">Esercizi</a>
-        <a href="home.html"    class="sidebar-item">Home</a>
+        <a href="index.html"    class="sidebar-item">Home</a>
         <a href="schede.html"  class="sidebar-item">Schede</a>
         <a href="profilo.html" class="sidebar-item">Profilo</a>
     </nav>
@@ -508,11 +508,6 @@
             <button class="start-btn" id="start-btn" onclick="avviaAllenamento()">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                 Avvia allenamento
-            </button>
-
-            <button class="start-btn" id="start-btn-predefinito" onclick="salvaAllenamento()">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                Salva allenamento
             </button>
 
             <!-- lista esercizi -->
@@ -552,7 +547,7 @@
 
     <!--  BOTTOM NAV MOBILE  -->
     <nav class="bottom-nav">
-        <a href="home.html"     class="bottom-nav-item"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>Home</span></a>
+        <a href="index.html"     class="bottom-nav-item"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>Home</span></a>
         <a href="esercizi.html" class="bottom-nav-item"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><span>Esercizi</span></a>
         <a href="schede.html"   class="bottom-nav-item active"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/></svg><span>Schede</span></a>
         <a href="profilo.html"  class="bottom-nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Profilo</span></a>
@@ -725,10 +720,13 @@
 
             const nEx = (_scheda.workout_ex || []).length;
             if(_scheda.tipo === 'predefinita'){
-                document.getElementById('scheda-azioni').style.display = 'none'
-                document.getElementById('start-btn').style.display = 'none'
-            }else{
-                document.getElementById('start-btn-predefinito').style.display = 'none'
+                const azioni = document.getElementById('scheda-azioni');
+                const btn    = document.getElementById('start-btn');
+                if (azioni) azioni.style.display = 'none';
+                if (btn)    btn.style.display    = 'none';
+            } else {
+                const btnPred = document.getElementById('start-btn-predefinito');
+                if (btnPred) btnPred.style.display = 'none';
             }
 
             document.getElementById('scheda-hero').innerHTML = `
@@ -781,16 +779,21 @@
 
         /*  RIMUOVI ESERCIZIO DALLA SCHEDA  */
         async function rimuoviEsercizioDaScheda(exerciseId) {
-            if (!confirm('Rimuovere questo esercizio dalla scheda?')) return;
-            try {
-                const res = await fetch(`${API}/users/workout-plans/${schedaId}/exercises/${exerciseId}`, {
-                    method: 'DELETE',
-                    headers: { Authorization: 'Bearer ' + TOKEN() }
-                });
-                if (res.ok) caricaScheda();
-            } catch(e) {
-                console.error('Errore rimozione esercizio:', e);
-            }
+            apriConfermaDettaglio(
+                'Rimuovere questo esercizio?',
+                "L'esercizio verrà rimosso dalla scheda.",
+                async () => {
+                    try {
+                        const res = await fetch(`${API}/users/workout-plans/${schedaId}/exercises/${exerciseId}`, {
+                            method: 'DELETE',
+                            headers: { Authorization: 'Bearer ' + TOKEN() }
+                        });
+                        if (res.ok) caricaScheda();
+                    } catch(e) {
+                        console.error('Errore rimozione esercizio:', e);
+                    }
+                }
+            );
         }
 
         /*  AVVIA ALLENAMENTO  */
@@ -799,17 +802,22 @@
         }
 
         /*  ELIMINA SCHEDA  */
-        async function eliminaScheda() {
-            if (!confirm('Sei sicuro di voler eliminare questa scheda?')) return;
-            try {
-                await fetch(`${API}/users/workout-plans/${schedaId}`, {
-                    method: 'DELETE',
-                    headers: { Authorization: 'Bearer ' + TOKEN() }
-                });
-            } catch(e) {
-                console.error('Errore eliminazione:', e);
-            }
-            window.location.href = 'schede.html';
+        function eliminaScheda() {
+            apriConfermaDettaglio(
+                'Eliminare questa scheda?',
+                'Questa azione è irreversibile. La scheda e tutti i suoi esercizi verranno rimossi.',
+                async () => {
+                    try {
+                        await fetch(`${API}/users/workout-plans/${schedaId}`, {
+                            method: 'DELETE',
+                            headers: { Authorization: 'Bearer ' + TOKEN() }
+                        });
+                    } catch(e) {
+                        console.error('Errore eliminazione:', e);
+                    }
+                    window.location.href = 'schede.html';
+                }
+            );
         }
 
 
@@ -1080,9 +1088,48 @@
             }
         }
 
+        /* MODALE CONFERMA DETTAGLIO */
+        let _callbackDettaglio = null;
+
+        function apriConfermaDettaglio(title, sub, callback) {
+            document.getElementById('conferma-dettaglio-title').textContent = title;
+            document.getElementById('conferma-dettaglio-sub').textContent   = sub;
+            _callbackDettaglio = callback;
+            document.getElementById('modal-conferma-dettaglio').classList.add('open');
+        }
+
+        function chiudiConfermaDettaglio() {
+            _callbackDettaglio = null;
+            document.getElementById('modal-conferma-dettaglio').classList.remove('open');
+        }
+
+        function confermaDettaglio() {
+            const cb = _callbackDettaglio;
+            chiudiConfermaDettaglio();
+            if (cb) cb();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('modal-conferma-dettaglio').addEventListener('click', function(e) {
+                if (e.target === this) chiudiConfermaDettaglio();
+            });
+        });
+
         /*  START  */
         caricaScheda();
     </script>
+
+    <!-- MODALE CONFERMA DETTAGLIO -->
+    <div class="modal-overlay" id="modal-conferma-dettaglio">
+        <div class="annulla-box">
+            <div class="annulla-title" id="conferma-dettaglio-title">Conferma</div>
+            <div class="annulla-sub" id="conferma-dettaglio-sub"></div>
+            <div class="annulla-btns">
+                <button class="annulla-continua" onclick="chiudiConfermaDettaglio()">Annulla</button>
+                <button class="annulla-conferma" onclick="confermaDettaglio()">Elimina</button>
+            </div>
+        </div>
+    </div>
 
 </body>
 </html>

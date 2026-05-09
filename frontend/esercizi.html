@@ -241,7 +241,7 @@
             padding:       10px 20px;
             font-size:     0.8rem;
             color:         var(--text);
-            z-index:       300;
+            z-index:       9999;
             opacity:       0;
             transition:    opacity 0.2s ease, transform 0.2s ease;
             white-space:   nowrap;
@@ -435,11 +435,43 @@
         }
 
         @media (max-width: 600px) {
+            .ez-modal-img { max-height: 180px; }
             .esercizi-grid { grid-template-columns: repeat(2, 1fr); }
-            .modal-overlay { align-items: flex-end; padding: 0; }
+
+            .modal-overlay:not(#modal-dettaglio) { align-items: flex-end; padding: 0; }
+            .modal { 
+                max-width: 100% !important; 
+                max-height: 90vh !important;
+                border-bottom-left-radius: 0;
+                border-bottom-right-radius: 0;
+            }
+
             .crea-modal { border-radius: 14px 14px 0 0; max-width: 100%; max-height: 92vh; }
             .crea-modal::before { content: ''; display: block; width: 32px; height: 3px; border-radius: 3px; background: var(--border); margin: 10px auto 0; flex-shrink: 0; }
         }        
+        /* barra di ricerca esercizi */
+        .search-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--surface2);
+            border: 0.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 8px 12px;
+            margin-bottom: 12px;
+            transition: border-color 0.18s;
+        }
+        .search-bar:focus-within { border-color: var(--accent); }
+        .search-bar input {
+            flex: 1;
+            background: none;
+            border: none;
+            outline: none;
+            color: var(--text);
+            font-family: var(--font-body);
+            font-size: 0.82rem;
+        }
+        .search-bar input::placeholder { color: var(--muted); }
     </style>
 </head>
 <body>
@@ -449,7 +481,7 @@
             <button class="hamburger-btn" id="hamburger-btn" onclick="toggleSidebar()">
                 <span></span><span></span><span></span> <!-- Visivamente tre linee che formano l'icona della bar-->
             </button>
-            <a href="home.html" class="logo">
+            <a href="index.html" class="logo">
             <img src="Favicon64x64.png" alt="" class="logo-img">
             GYM<span>BRO</span>
         </a>
@@ -519,7 +551,7 @@
     <!-- SIDEBAR -->
     <nav class="sidebar" id="sidebar">
         <a href="esercizi.html" class="sidebar-item" style="color:var(--text); border-bottom:0.5px solid var(--border); margin-bottom:4px; padding-bottom:12px;">Esercizi</a>
-        <a href="home.html" class="sidebar-item">Home</a>
+        <a href="index.html" class="sidebar-item">Home</a>
         <a href="schede.html" class="sidebar-item">Schede</a>
         <a href="profilo.html" class="sidebar-item">Profilo</a>
     </nav>
@@ -551,13 +583,15 @@
                 <button class="chip"     id="filtro"   onclick="filtraZona('glutei',  this), changeZonaUrl('glutei')">Glutei</button>
             </div>
 
+            <!-- barra di ricerca -->
+            <div class="search-bar">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <input type="text" id="search-input" placeholder="Cerca esercizio..." oninput="cercaEsercizio(this.value)">
+            </div>
+
             <!-- contatore risultati -->
             <div class="count-label" id="count-label">— esercizi</div>
 
-            <!--
-                BACKEND: riempire con creaCardEsercizio() via fetch('/api/esercizi?livello=X')
-                Il livello viene letto dal localStorage (salvato dal profilo).
-            -->
             <div class="esercizi-grid" id="grid-esercizi"></div>
 
         </div>
@@ -565,7 +599,7 @@
     
     <!-- BOTTOM NAV MOBILE -->
     <nav class="bottom-nav">
-        <a href="home.html" class="bottom-nav-item"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>Home</span></a>
+        <a href="index.html" class="bottom-nav-item"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>Home</span></a>
         <a href="esercizi.html" class="bottom-nav-item"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><span>Esercizi</span></a>
         <a href="schede.html"   class="bottom-nav-item">
             <svg viewBox="0 0 24 24">
@@ -659,8 +693,8 @@
                     <input class="form-input" type="text" id="input-nome-scheda" placeholder="Es. Push Pull Legs">
             </div>
             <div class="modal-footer">
-                <button class="btn-ghost"    onclick="chiudiCreaScheda()">Annulla</button>
-                <button class="btn-primary"  onclick="salvaSchedaNuova()">Salva scheda</button>
+                <button type="button" class="btn-ghost" onclick="chiudiCreaScheda()">Annulla</button>
+                <button type="button" class="btn-primary" onclick="salvaSchedaNuova()">Salva scheda</button>
             </div>
         </div>
     </div>
@@ -674,30 +708,47 @@
         /* STATO LOCALE */
         let esercizioCorrente= null;
 
+        /* ricerca testuale: filtra per nome in combinazione con il filtro zona attivo */
+        let _zonaAttiva = 'tutte';
+        let _queryRicerca = '';
+
+        function cercaEsercizio(query) {
+            _queryRicerca = query.toLowerCase().trim();
+            applicaFiltri();
+        }
+
+        function applicaFiltri() {
+            const cards = document.querySelectorAll('.ez-card');
+            console.log('_zonaAttiva:', _zonaAttiva);
+            cards[0] && console.log('prima card zone:', cards[0].dataset.zone);
+            let visibili = 0;
+            cards.forEach(card => {
+                const nome  = (card.querySelector('.ez-name')?.textContent || '').toLowerCase();
+                const zone = card.dataset.zone || '';
+                const matchZona = _zonaAttiva === 'tutte' || zone.split(',').includes(_zonaAttiva);
+                const matchNome  = !_queryRicerca || nome.includes(_queryRicerca);
+                const visibile   = matchZona && matchNome;
+                card.style.display = visibile ? '' : 'none';
+                if (visibile) visibili++;
+            });
+            document.getElementById('count-label').textContent = visibili + ' esercizi';
+        }
+
         /* FILTRO ZONA */
         function filtraZona(zona, btn) {
             const tutteBtn = document.querySelector('#filtri-zona .chip:first-child');
 
-            /* se premi il chip già attivo, torna a "Tutti" */
             if (btn && btn.classList.contains('active') && zona !== 'tutte') {
                 document.querySelectorAll('#filtri-zona .chip').forEach(c => c.classList.remove('active'));
                 tutteBtn.classList.add('active');
                 zona = 'tutte';
-            } else if (btn) {
+            } else {
                 document.querySelectorAll('#filtri-zona .chip').forEach(c => c.classList.remove('active'));
-                btn.classList.add('active');
+                if (btn) btn.classList.add('active');
             }
 
-            const cards = document.querySelectorAll('.ez-card');
-            let visibili = 0;
-            cards.forEach(card => {
-                const zone   = card.dataset.zone ? card.dataset.zone.split(',') : [];
-                const mostra = zona === 'tutte' || zone.includes(zona);
-                card.style.display = mostra ? 'block' : 'none';
-                if (mostra) visibili++;
-        });
-
-        document.getElementById('count-label').textContent = visibili + ' esercizi';
+            _zonaAttiva = zona;
+            applicaFiltri();
         }
 
         function rimuoviFiltroZona() {
@@ -779,47 +830,38 @@
             row.className = 'sel-row';
             row.innerHTML = `
                 <span class="sel-row-name">${scheda.nome}</span>
-                <button class="sel-row-btn"  onclick="aggiungiAScheda('${scheda.id}')">Aggiungi</button>`;
+                <button type="button" class="sel-row-btn" onclick="aggiungiAScheda('${scheda.id}')">Aggiungi</button>`;
             return row;
         }
 
         /* AGGIUNGE ESERCIZIO A SCHEDA */
         async function aggiungiAScheda(schedaId) {
-            const nSet = document.getElementById('reg-numero-serie').value
-            const nRep = document.getElementById('reg-numero-reps').value
-
+            const nSet = parseInt(document.getElementById('reg-numero-serie').value) || 4;
+            const nRep = parseInt(document.getElementById('reg-numero-reps').value) || 0;
             if (!esercizioCorrente) return;
-            const response = await fetch('http://localhost:3000/users/workout-plans', {
-                method : 'POST',
-                headers : {
-                    'Authorization' : 'Bearer ' + localStorage.getItem('gymbros-token'),
-                    'Content-Type' : 'application/json',
-                },
-                body : JSON.stringify({
-                    workout_id : schedaId,
-                    exercise : esercizioCorrente.id,
-                    nset : nSet ?? 4,
-                    nrep : nRep ?? 0,
-                })
-            })
-            console.log(response)
-            if(response.ok){
-                
-                mostraFeedback('Aggiunto a scheda');
-                chiudiSelettore();
-            }else{
-                if(response.status == 400){
-                    mostraFeedback('Esercizio già presente nella scheda');
-                }else{
-                    mostraFeedback('Errore');
-                }
-                
-            }
 
-            
+            const response = await fetch('http://localhost:3000/users/workout-plans', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem('gymbros-token'),
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    workout_id: schedaId,
+                    exercise:   esercizioCorrente.id,
+                    nset:       nSet,
+                    nrep:       nRep,
+                })
+            });
+
+            if (response.status === 400) {
+                mostraFeedback('Esercizio già presente nella scheda');
+            } else if (!response.ok) {
+                mostraFeedback('Errore');
+            }
         }
 
-        function nuovaSchedaDaEsercizio() {
+                function nuovaSchedaDaEsercizio() {
             chiudiSelettore();
             apriCreaScheda();
         }       

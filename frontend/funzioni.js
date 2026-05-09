@@ -28,7 +28,6 @@ function applyAccent(isPink) {
     root.style.setProperty('--accent-glow', glow);
  
     if (sw)   { sw.classList.toggle('pink', isPink); sw.classList.toggle('green', !isPink); }
-    if (dot)  { dot.style.background = c; }
     if (logo) { logo.style.color = c; }
     if (tema) { tema.textContent = isPink ? 'Rosa' : 'Verde'; }
  
@@ -62,23 +61,5 @@ function toggleAccent() {
     applyAccent(accentIsPink);
 })();
  
- 
-/*  NOTIFICHE  */
-const NOTIF_ICONS = {
-    scheda: `<svg viewBox="0 0 24 24">
-                <rect x="4" y="3" width="16" height="18" rx="2"/>
-                <line x1="8" y1="8" x2="16" y2="8"/>
-                <line x1="8" y1="12" x2="16" y2="12"/>
-                <line x1="8" y1="16" x2="12" y2="16"/>
-             </svg>`,
-    esercizio: `<svg viewBox="0 0 24 24">
-                    <circle cx="11" cy="11" r="8"/>
-                    <path d="m21 21-4.35-4.35"/>
-                </svg>`,
-    sistema: `<svg viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10"/>
-                  <line x1="12" y1="8" x2="12" y2="12"/>
-                  <line x1="12" y1="16" x2="12.01" y2="16"/>
-              </svg>`,
-};
+
  

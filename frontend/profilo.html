@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GymBro - Profilo</title>
     <!-- Favicon-->
-     <link rel="icon" type="image/svg+xml" sizes="32x32" href="Favicon32x32.png">
+     <link rel="icon" type="image/png" sizes="32x32" href="favicon/Favicon32x32.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
 
@@ -277,7 +277,68 @@
         #schede-salvate{
             padding-left: 38px;
         }
-     </style>
+
+        .slider-wrap { display:flex; flex-direction:column; gap:8px; }
+        .slider-display { font-size:1.3rem; font-weight:600; color:var(--accent); text-align:center; }
+        .slider-display span { font-size:0.75rem; font-weight:400; color:var(--muted); margin-left:3px; }
+        .slider-input {
+            -webkit-appearance: none;
+            width: 100%; height: 5px;
+            border-radius: 3px;
+            background: var(--surface2);
+            outline: none;
+            border: 0.5px solid var(--border);
+        }
+        .slider-input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 2px solid var(--bg);
+            box-shadow: 0 0 0 1px var(--accent);
+            cursor: pointer;
+        }
+        .slider-input::-moz-range-thumb {
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 2px solid var(--bg);
+            cursor: pointer;
+        }
+        .slider-labels { display:flex; justify-content:space-between; }
+        .slider-label  { font-size:0.62rem; color:var(--muted); }
+
+
+        .peso-stepper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .peso-stepper-ctrl {
+            display: flex;
+            align-items: center;
+            border: 0.5px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            background: var(--bg);
+            flex: 1;
+        }
+        .peso-stepper-btn {
+            width: 36px; height: 36px;
+            background: var(--surface2); border: none;
+            color: var(--text); font-size: 1.1rem;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: background 0.15s, color 0.15s;
+        }
+        .peso-stepper-btn:hover  { background: var(--accent-dim); color: var(--accent); }
+        .peso-stepper-btn:active { background: var(--accent); color: #fff; }
+        .peso-stepper-val {
+            flex: 1; text-align: center;
+            font-size: 1rem; font-weight: 500;
+            color: var(--text); user-select: none;
+        }
+        .peso-stepper-unit { font-size: 0.75rem; color: var(--muted); flex-shrink: 0; }
+    </style>
 </head>
 <body>
     
@@ -288,51 +349,13 @@
                 <span></span><span></span><span></span> <!-- Visivamente tre linee che formano l'icona della bar-->
             </button>
             <a href="index.html" class="logo">
-            <img src="Favicon64x64.png" alt="" class="logo-img">
+            <img src="favicon/Favicon64x64.png" alt="" class="logo-img">
             GYM<span>BRO</span>
         </a>
         </div>
         <div class="topbar-icons">
             <div class="color-switch pink" id="color-switch" onclick="toggleAccent()" title="Cambia colore">
                 <div class="switch-knob"></div>
-            </div>
-                <!-- icona campanella -->
-                <div class="notif-wrap" id="notif-wrap">
-                <button class="icon-btn" id="notif-btn"
-                        onclick="toggleNotifiche(event)"
-                        title="Notifiche"
-                        aria-label="Notifiche"
-                        aria-expanded="false">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
-                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                    </svg>
-                    <div class="notif-dot" id="notif-dot"></div>
-                </button>
-
-                <!-- dropdown -->
-                <div class="notif-dropdown" id="notif-dropdown" role="dialog" aria-label="Notifiche">
-
-                    <div class="notif-dropdown-header">
-                        <span class="notif-dropdown-title">Notifiche</span>
-                        <button class="notif-mark-all" id="notif-mark-all"
-                                onclick="segnaLette()" style="display:none;">
-                            Segna tutte come lette
-                        </button>
-                    </div>
-
-                    <!-- lista — popolata da JS -->
-                    <div class="notif-list" id="notif-list">
-                        <div class="notif-empty" id="notif-empty">
-                            Nessuna notifica per ora
-                        </div>
-                    </div>
-
-                    <div class="notif-dropdown-footer" id="notif-footer" style="display:none;">
-                        <button class="notif-see-all" onclick="vediTutte()">Vedi tutte</button>
-                    </div>
-
-                </div>
             </div>
 
             <a href="schede.html" class="icon-btn" title="Le mie schede">
@@ -467,10 +490,6 @@
                     <span class="info-label">Tema colore</span>
                     <span class="info-val accent" id="impost-tema">Rosa</span>
                 </div>
-                <div class="info-row">
-                    <span class="info-label">Notifiche</span>
-                    <span class="info-val" id="impost-notifiche">—</span>
-                </div>
             </div>
 
             <!-- FOOTER -->
@@ -521,12 +540,29 @@
 
                         <div class="form-row">
                             <label class="form-label">Peso (kg)</label>
-                            <input class="form-input" type="number" id="input-peso" placeholder="kg" min="30" max="300">
+                            <div class="peso-stepper">
+                                <div class="peso-stepper-ctrl">
+                                    <button type="button" class="peso-stepper-btn" onclick="stepPeso(-1)">−</button>
+                                    <span class="peso-stepper-val" id="peso-stepper-val">70</span>
+                                    <button type="button" class="peso-stepper-btn" onclick="stepPeso(1)">+</button>
+                                </div>
+                                <span class="peso-stepper-unit">kg</span>
+                            </div>
+                            <input type="hidden" id="input-peso" value="70">
                         </div>
 
                         <div class="form-row">
                             <label class="form-label">Altezza (cm)</label>
-                            <input class="form-input" type="number" id="input-altezza" placeholder="cm" min="100" max="250">
+                            <div class="slider-wrap">
+                                <div class="slider-display" id="altezza-display">170 <span>cm</span></div>
+                                <input type="range" class="slider-input" id="input-altezza"
+                                       min="100" max="250" value="170"
+                                       oninput="aggiornaAltezza(this.value)">
+                                <div class="slider-labels">
+                                    <span class="slider-label">100 cm</span>
+                                    <span class="slider-label">250 cm</span>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- livello cliccabile nella modale -->
@@ -556,7 +592,17 @@
 
 
         <script>
-            let livelloCorrente = 1; 
+        function stepPeso(delta) {
+            const inp = document.getElementById('input-peso');
+            const val = Math.min(300, Math.max(30, parseInt(inp.value || 70) + delta));
+            inp.value = val;
+            document.getElementById('peso-stepper-val').textContent = val;
+        }
+
+        function aggiornaAltezza(val) {
+            document.getElementById('altezza-display').innerHTML = val + ' <span>cm</span>';
+        }
+        let livelloCorrente = 1; 
         /* FETCH BACKEND*/
         async function getProfilo(){
             const response = await fetch('http://localhost:3000/users/profile', {
@@ -699,8 +745,12 @@
             /* pre-popola i campi con i valori attuali */
             document.getElementById('input-nome').value    = document.getElementById('dato-nome').textContent.replace('—', '');
             //document.getElementById('input-eta').value     = document.getElementById('dato-eta').textContent.replace(' anni', '').replace('—', '');
-            document.getElementById('input-peso').value    = document.getElementById('dato-peso').textContent.replace(' kg', '').replace('—', '');
-            document.getElementById('input-altezza').value = document.getElementById('dato-altezza').textContent.replace(' cm', '').replace('—', '');
+            const pesoVal = parseInt(document.getElementById('dato-peso').textContent.replace(' kg', '').replace('—', '')) || 70;
+            document.getElementById('input-peso').value       = pesoVal;
+            document.getElementById('peso-stepper-val').textContent = pesoVal;
+            const altVal = parseInt(document.getElementById('dato-altezza').textContent.replace(' cm', '').replace('—', '')) || 170;
+            document.getElementById('input-altezza').value    = altVal;
+            document.getElementById('altezza-display').innerHTML = altVal + ' <span>cm</span>';
             /* sincronizza barra livello modale */
             setLivello(livelloCorrente);
             renderLivelloDisplay(livelloCorrente);
@@ -718,8 +768,8 @@
         async function salvaModifiche() {
             const nome    = document.getElementById('input-nome').value.trim();
             const data = document.getElementById('input-nascita').value;
-            const peso    = document.getElementById('input-peso').value.trim();
-            const altezza = document.getElementById('input-altezza').value.trim();
+            const peso    = document.getElementById('input-peso').value;
+            const altezza = document.getElementById('input-altezza').value;
 
             /* aggiorna visualizzazione locale */
             /*

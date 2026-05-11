@@ -13,6 +13,15 @@ app.use(express.json())
 const cors = require('cors')
 app.use(cors())
 
+app.use((req, res, next) => {
+    const start = Date.now()
+    res.on('finish', () => {
+        const ms = Date.now() - start
+        console.log(`${req.method} ${req.originalUrl} --> ${res.statusCode} (${ms}ms)`)
+    })
+    next()
+})
+
 const jwt = require('jsonwebtoken')
 
 app.listen(3000, () => {
@@ -24,7 +33,7 @@ const auth = (req, res, next) => {
     const token = req.headers.authorization?.split(' ')[1]
 
     if(!token){
-        //console.log("IL TOKEN NON C'È")
+
         return res.status(401).json({error : "Unauthorized"})
         
     }
@@ -34,7 +43,7 @@ const auth = (req, res, next) => {
         req.id = plain.user_id
         next()
     }catch {
-        //console.log("IL TOKEN È SBAGLIATO")
+
         return res.status(401).json({error : "Unauthorized"})
        
     }
@@ -57,7 +66,6 @@ app.post('/auth/register', async(req, res) =>{
 
     const checkObiettivo = ['Forza', 'Dimagrire', 'Resistenza', 'Benessere', 'Massa muscolare']
 
-    //console.log("livello : " + livello + " obiettivo : " + obiettivo)
 
     //CONTROLLO EMAIL PASSWORD E USERNAME SIANO PRESENTI E VALIDI
     const reg_email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -92,7 +100,7 @@ app.post('/auth/register', async(req, res) =>{
                 obiettivo : obiettivo,
             }
         })
-        //console.log(user)
+
          const storico = await prisma.storico_forma.create({
                 data : {
                     peso : peso,
@@ -131,10 +139,9 @@ app.post('/auth/login', async (req,res) =>{
     if(!user){
         return res.status(401).json({error : "Credenziali errate"})
     }
-   // console.log(user.password)
-    
+
     if(await bcrypt.compare(password, user.password)){
-        //console.log("COMPARE FUNZIONA BENE")
+
     }else{
         return res.status(401).json({error : "Credenziali errate"})
     }
@@ -149,17 +156,22 @@ app.post('/auth/login', async (req,res) =>{
     
 })
 
+
+/* CONTROLLO AUTENTICAZIONE UTENTE */
+app.get('/auth/check', auth, async(req, res) =>{
+    res.json({valid : true})
+})
+
+
 /* INFO PROFILO */
 
 app.get('/users/profile', auth, async(req, res) =>{
     const id  = req.id
-    //console.log("l'user id:" + id)
     let user = 10
     try{
         user = await prisma.user.findUnique({
             where : {id: id}
         })
-        //console.log(user)
     } catch(error){
         return res.status(400).json({error : error.message})
     }
@@ -200,7 +212,7 @@ app.patch('/users/avatar', auth, async(req,res)=>{
                 avatarUrl : url
             }
         })
-        //console.log(avatar)
+        return res.status(201).json({message : "Modifica avvenuta con successo"})
     }catch(error){
         return res.status(500).json({error : error.message})
     }
@@ -239,6 +251,8 @@ app.patch('/users/profile', auth, async(req,res)=>{
                 }
             })
         }
+
+        return res.status(201).json({message : "Modifica avvenuta con successo"})
     } catch (error) {
         return res.status(500).json({error : error.message})
     }
@@ -254,7 +268,6 @@ app.patch('/users/profile', auth, async(req,res)=>{
 ///FILTRARE ESERCIZI CON MACRO PART
 app.get('/exercises/:macroPart' , async (req, res) =>{
     const macro = req.params.macroPart
-    //console.log("macropart")
     try{
         const esercizi = await prisma.exercise.findMany({
             where : { macroPart: macro}
@@ -269,7 +282,6 @@ app.get('/exercises/:macroPart' , async (req, res) =>{
 app.get('/exercises/:macroPart/:bodyPart' , async (req, res) =>{
     const body = req.params.bodyPart
     const macro = req.params.macroPart
-    //console.log("bodpart")
     try{
         const esercizi = await prisma.exercise.findMany({
             where : { bodyPart: body,
@@ -286,7 +298,6 @@ app.get('/exercises/:macroPart/:bodyPart' , async (req, res) =>{
 ///FILTRARE CON ID
 app.get('/exercises' , auth, async (req, res) =>{
     const macro = parseInt(req.query.id)
-    //console.log(macro)
     try{
         const esercizi = await prisma.exercise.findMany({
             where : { id: macro}
@@ -303,7 +314,6 @@ app.get('/fullexercises', async (req,res) =>{
     try{
         const response = await prisma.exercise.findMany()
         res.json(response)
-        //console.log(response)
     }catch (error){
         return res.status(500).json({error : error.message})
     }
@@ -327,7 +337,6 @@ app.post('/workout-plans', auth,  async (req, res) =>{
 
             }
     })
-        //console.log(allenamento)
         res.json(allenamento)
     }catch(error){
         res.status(500).json({errore : error.message })
@@ -364,7 +373,6 @@ app.get('/users/workout-plans', auth, async (req, res) =>{
         })
             
         
-        //console.log(workout)
         res.json(workout)
 
     }catch(error){
@@ -374,7 +382,6 @@ app.get('/users/workout-plans', auth, async (req, res) =>{
 
 /* AGGIUNGERE ESERCIZIO A SCHEDA */
 app.post('/users/workout-plans', auth, async(req,res) =>{
-    console.log('body ricevuto:', req.body)
     const id = req.id
     const workout_id = parseInt(req.body.workout_id)
     const exercise = parseInt(req.body.exercise)
@@ -399,7 +406,6 @@ app.post('/users/workout-plans', auth, async(req,res) =>{
                 nRep:       nrep || 0,
             }
         })
-        //console.log(set)
         for(let i = 1; i<=set; i++){
             
             let ex_sets = await prisma.workout_set.create({
@@ -413,13 +419,12 @@ app.post('/users/workout-plans', auth, async(req,res) =>{
             })
             
         }   
-        //console.log(exercise_response)
 
+        return res.status(201).json({message : 'Esercizio aggiunto alla scheda'})
 
     } catch (error) {
         console.error(error)
         if(error.code === 'P2002'){
-            console.log("esercizio presente nella scheda")
             return res.status(400).json({error : 'Esercizio già presente nella scheda'})
             
         }
@@ -432,7 +437,6 @@ app.post('/users/workout-plans', auth, async(req,res) =>{
 app.get('/users/workout-plans/:id', auth, async(req, res) =>{
     const id = req.id
     const workout_id = parseInt(req.params.id)
-    console.log( id + ' ' +  workout_id)
 
     try {
         const check = await prisma.workout_plan.findUnique({
@@ -451,8 +455,7 @@ app.get('/users/workout-plans/:id', auth, async(req, res) =>{
                 }
             }
         })
-        console.log('ARRIVA')
-        console.log(check)
+
 
         if(check.userId !== id){
             return res.status(401).json({error : 'Unauthorized'})
@@ -460,7 +463,6 @@ app.get('/users/workout-plans/:id', auth, async(req, res) =>{
 
         res.json(check)
     } catch (error) {
-        console.log(error.message)
         return res.status(500).json({error : error.message})
     }
 
@@ -493,7 +495,6 @@ app.delete('/users/workout-plans/:id', auth, async (req,res) =>{
         check = await prisma.workout_plan.deleteMany({
             where : { workoutId : workout_id}
         })
-        console.log('DELET FUNCTION')
         res.json({messaggio : 'Scheda eliminata'})
     } catch (error) {
         res.status(500).json({error : error.message})
@@ -530,7 +531,6 @@ app.patch('/users/workout-plans/:id', auth, async (req, res) =>{
             }
         }
         )
-        console.log(note)
         res.json({ success: true })
         
     } catch (error) {
@@ -538,88 +538,6 @@ app.patch('/users/workout-plans/:id', auth, async (req, res) =>{
     }
 })
 
-/* AGGIUNGERE MISURAZIONE UTENTE */
-app.post('/users/misurazione', auth, async (req, res) =>{
-    const id = req.id
-    const peso = parseInt(req.body.peso)
-    const data = new Date(req.body.data)
-    const note = req.body.note
-
-    try {
-        const nuova = await prisma.storico_forma.create({
-            data: {
-                userId : id,
-                peso : peso,
-                data : data,
-                note : note,
-            }
-        })
-
-        const profilo = await prisma.user.update({
-            where : {id : id},
-            data : {
-                peso : peso
-            }
-        })
-        console.log(nuova)
-
-    } catch (error) {
-        return res.status(500).json({error : error.message})
-    }
-})
-
-
-/* PRENDERE TUTTE LE MISURAZIONI DELL'UTENTE */
-app.get('/users/misurazione', auth, async (req, res)=>{
-    const id = req.id
-
-    try {
-        const data = await prisma.storico_forma.findMany({
-            where : {userId : id}
-        })
-        
-        console.log(data)
-        res.json(data)
-    } catch (error) {
-        return res.status(500).json({error : error.message})
-    }
-})
-
-app.delete('/users/misurazione/:id', auth, async(req, res) =>{
-    const id = req.id
-    const mis_id = parseInt(req.params.id)
-
-    try {
-        const deleted = await prisma.storico_forma.deleteMany({
-            where : { Id : mis_id,
-                userId : id 
-            }
-        })
-
-        const last = await prisma.storico_forma.findFirst({
-            where : {userId : id},
-            orderBy : [{data : 'desc'},
-           {Id : 'desc'} ]
-        })
-        
-        const set_last = await prisma.user.update({
-            where : {
-                id : id
-            },
-            data : { peso : last.peso }
-        })
-        
-        if(deleted.count === 0){
-            return res.status(400).json({error : 'Errore del server'})
-        }
-        
-        console.log('ECCO LA COSA DA ELIMINARE')
-        console.log(deleted)
-        return res.json({success : true})
-    } catch (error) {
-        return res.status(500).json({error : error.message})
-    }
-})
 
 /* AGGIORNA SERIE CON PESI E REP DELL'ALLENAMENTO */
 app.patch('/users/workout-set', auth, async (req, res) => {
@@ -866,7 +784,6 @@ app.get('/users/workout-template', auth, async (req, res) =>{
         })
             
         
-        console.log(workout)
         res.json(workout)
 
     }catch(error){
@@ -879,8 +796,7 @@ app.get('/users/workout-template', auth, async (req, res) =>{
 app.get('/users/workout-template/:id', auth, async(req, res) =>{
     const id = req.id
     const workout_id = parseInt(req.params.id)
-    console.log( id + ' ' +  workout_id)
-
+    
     try {
         const check = await prisma.workout_template.findUnique({
             where : { templateId : workout_id},
@@ -899,10 +815,6 @@ app.get('/users/workout-template/:id', auth, async(req, res) =>{
             }
         })
 
-        
-        
-        console.log('ARRIVA')
-        console.log(check)
 
         if(!check){
             return res.status(401).json({error : 'Unauthorized'})
@@ -911,7 +823,7 @@ app.get('/users/workout-template/:id', auth, async(req, res) =>{
         const {template_ex, ...rest} = check
         res.json({ ...rest , 'workout_ex' : template_ex})
     } catch (error) {
-        console.log(error.message)
+        
         return res.status(500).json({error : error.message})
     }
 
@@ -973,7 +885,6 @@ app.post('/users/workout-template/:id', auth, async (req, res) => {
                 })
             }
         }
-        console.log("SCHEDA SALVATA")
         res.json(plan)
 
     } catch (error) {

@@ -853,7 +853,7 @@
             
             
              <!-- Icona scheda allenamento -->
-             <a href="schede.html" class="icon-btn" title="Le mie schede">
+             <a href="schede.html" class="icon-btn" id="schede-button" title="Le mie schede">
                 <svg viewBox="0 0 24 24">
                     <rect x="4" y="3" width="16" height="18" rx="2"/>
                     <line x1="8" y1="8" x2="16" y2="8"/>
@@ -863,7 +863,7 @@
              </a>
             
              <!-- Icona profilo-->
-            <a href="profilo.html" class="icon-btn" title="Mio Profilo">
+            <a href="profilo.html" class="icon-btn" id="profilo-button" title="Mio Profilo">
                 <svg viewBox="0 0 24 24">
                     <circle cx="12" cy="8" r="4"/>
                     <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
@@ -1343,12 +1343,17 @@
 
                 if(response.status === 401){
                     localStorage.removeItem('gymbros-token')
+                    document.getElementById('schede-button').style.display = 'none'
                     return
                 }
 
                 document.getElementById('button_reg').style.display = 'none'
                 document.getElementById('account-divider').style.display = 'none'
                 
+                
+            }else{
+                document.getElementById('schede-button').style.display = 'none'
+                document.getElementById('profilo-button').href = 'auth.html'
             }
         }
         checkLogged()

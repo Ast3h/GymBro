@@ -666,9 +666,11 @@
     <div class="feedback-toast" id="feedback-toast"></div>
 
     <script>
-
+        const API   = 'http://localhost:3000';
         /* STATO LOCALE */
         let esercizioCorrente= null;
+
+        
 
         /* ricerca testuale: filtra per nome in combinazione con il filtro zona attivo */
         let _zonaAttiva = 'tutte';
@@ -767,19 +769,49 @@
             if (e.target === this) chiudiDettaglio();
         });
 
-        /* MODALE SELETTORE SCHEDA */
-        function apriSelettoreScheda() {
-            if (!esercizioCorrente) return;
-            document.getElementById('sel-nome-esercizio').textContent =
-                'Stai aggiungendo: ' + esercizioCorrente.nome;
-            chiudiDettaglio();
-
-            document.getElementById('modal-selettore').classList.add('open');
-        }
-
         function chiudiSelettore() {
             document.getElementById('modal-selettore').classList.remove('open');
         }
+
+        async function checkLogged(){
+            if(localStorage.getItem('gymbros-token')){
+                const response = await fetch(`${API}/auth/check`, {
+                method : 'GET',
+                headers : {
+                    'Authorization' : 'Bearer ' + localStorage.getItem('gymbros-token')
+                }
+                })
+
+                if(response.status === 401){
+                    localStorage.removeItem('gymbros-token')
+                    chiudiSelettore()
+                    mostraFeedback("Devi accedere per aggiungere esercizi alla scheda")
+                    return false
+                }
+                return true
+            }else{
+                chiudiSelettore()
+                mostraFeedback("Devi accedere per aggiungere esercizi alla scheda")
+                return false
+            }
+        }
+        /* MODALE SELETTORE SCHEDA */
+        async function apriSelettoreScheda() {
+            const logged = await checkLogged()
+            if(!logged) {
+                return
+            }else{
+                if (!esercizioCorrente) return;
+                document.getElementById('sel-nome-esercizio').textContent =
+                    'Stai aggiungendo: ' + esercizioCorrente.nome;
+                chiudiDettaglio();
+
+                document.getElementById('modal-selettore').classList.add('open');
+            }
+            
+        }
+
+        
 
         document.getElementById('modal-selettore').addEventListener('click', function(e) {
             if (e.target === this) chiudiSelettore();
@@ -787,7 +819,7 @@
 
         /* CREA RIGA SCHEDE NEL SELETTORE */
         function creaRigaScheda(scheda) {
-            console.log(scheda)
+            
             const row = document.createElement('div');
             row.className = 'sel-row';
             row.innerHTML = `
@@ -797,12 +829,12 @@
         }
 
         /* AGGIUNGE ESERCIZIO A SCHEDA */
+
         async function aggiungiAScheda(schedaId) {
             const nSet = parseInt(document.getElementById('reg-numero-serie').value) || 4;
             const nRep = parseInt(document.getElementById('reg-numero-reps').value) || 0;
             if (!esercizioCorrente) return;
-
-            const response = await fetch('http://localhost:3000/users/workout-plans', {
+            const response = await fetch(`${API}/users/workout-plans`, {
                 method: 'POST',
                 headers: {
                     'Authorization': 'Bearer ' + localStorage.getItem('gymbros-token'),
@@ -815,19 +847,27 @@
                     nrep:       nRep,
                 })
             });
-
+        
             if (response.status === 400) {
                 mostraFeedback('Esercizio già presente nella scheda');
             } else if (!response.ok) {
-                mostraFeedback('Errore');
+                mostraFeedback('Errore. Riprova tra qualche minuto');
+            }else if(response.status === 401){
+                localStorage.removeItem('gymbros-token')
+                window.location.href('auth.html')
+            }else{
+                mostraFeedback("Esercizio aggiunto alla scheda")
             }
+            
         }
 
-                function nuovaSchedaDaEsercizio() {
+        function nuovaSchedaDaEsercizio() {
             chiudiSelettore();
             apriCreaScheda();
         }       
+       
 
+       
         /* TOAST FEEDBACK */
         function mostraFeedback(messaggio) {
             const toast = document.getElementById('feedback-toast');
@@ -955,7 +995,7 @@
             document.getElementById('input-nome-scheda').style.borderColor = '';
 
             try {
-                const res = await fetch('http://localhost:3000/workout-plans', {
+                const res = await fetch(`${API}/workout-plans`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1010,7 +1050,7 @@
         }
 
         async function loadEx(){
-            const response = await fetch('http://localhost:3000/fullexercises', {
+            const response = await fetch(`${API}/fullexercises`, {
                 method : 'GET',
             })
             const divex = document.getElementById('grid-esercizi')
@@ -1044,7 +1084,7 @@
         loadEx()
 
         async function loadSchede(){
-            const response = await fetch('http://localhost:3000/users/workout-plans', {
+            const response = await fetch(`${API}/users/workout-plans`, {
                 method : 'GET',
                 headers : {
                     'Authorization' : 'Bearer ' + localStorage.getItem('gymbros-token'),
@@ -1053,8 +1093,9 @@
             })
 
             const data = await response.json()
-            document.getElementById('empty-schede').remove()
-            data.forEach(scheda =>{
+            if(response.ok){
+                document.getElementById('empty-schede').remove()
+                data.forEach(scheda =>{
                 workout = {
                     id:       scheda.workoutId,
                     nome:     scheda.name,
@@ -1067,8 +1108,10 @@
                 }
 
                 document.getElementById('sel-lista-schede').append(creaRigaScheda(workout))
-                console.log(workout)
-            })
+                
+            })  
+            }
+            
 
         }
 

@@ -121,6 +121,28 @@
             box-shadow:   0 0 0 2px var(--accent-dim);
         }
 
+        .feedback-toast {
+            position:      fixed;
+            bottom:        80px;
+            left:          50%;
+            transform:     translateX(-50%) translateY(20px);
+            background:    var(--surface);
+            border:        0.5px solid var(--accent);
+            border-radius: var(--radius);
+            padding:       10px 20px;
+            font-size:     0.8rem;
+            color:         var(--text);
+            z-index:       9999;
+            opacity:       0;
+            transition:    opacity 0.2s ease, transform 0.2s ease;
+            white-space:   nowrap;
+        }
+
+        .feedback-toast.show {
+            opacity:   1;
+            transform: translateX(-50%) translateY(0);
+        }      
+
         /* LIVELLO */
         .level-section {
             display:        flex;
@@ -403,16 +425,16 @@
                 <!-- bar immagini predefinite -->
                 <div class="avatar-picker" id="avatar-picker">
                     <img src="https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=Ryan"
-                         class="av-option" data-num="1" onclick="selezionaAvatar(this, 1)"
+                         id="avatar-op-1"  class="av-option" data-num="1" onclick="selezionaAvatar(this, 1) "
                          alt="Avatar 1" title="Avatar 1">
                     <img src="https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=Nolan"
-                         class="av-option" data-num="2" onclick="selezionaAvatar(this, 2)"
+                         id="avatar-op-2"  class="av-option" data-num="2" onclick="selezionaAvatar(this, 2)"
                          alt="Avatar 2" title="Avatar 2">
                     <img src="https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=Riley"
-                         class="av-option" data-num="3" onclick="selezionaAvatar(this, 3)"
+                         id="avatar-op-3"  class="av-option" data-num="3" onclick="selezionaAvatar(this, 3)"
                          alt="Avatar 3" title="Avatar 3">
                     <img src="https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=Ryker"
-                         class="av-option" data-num="4" onclick="selezionaAvatar(this, 4)"
+                         id="avatar-op-4"  class="av-option" data-num="4" onclick="selezionaAvatar(this, 4)"
                          alt="Avatar 4" title="Avatar 4">
                 </div>
                  <div class="prof-name"  id="prof-name">—</div>
@@ -590,8 +612,32 @@
             </div>
         </div>
 
+        <!-- toast feedback aggiunta -->
+        <div class="feedback-toast" id="feedback-toast"></div>
 
         <script>
+        const API   = 'http://localhost:3000';
+
+        async function checkLogged(){
+            if(localStorage.getItem('gymbros-token')){
+                const response = await fetch(`${API}/auth/check`, {
+                method : 'GET',
+                headers : {
+                    'Authorization' : 'Bearer ' + localStorage.getItem('gymbros-token')
+                }
+                })
+
+                if(response.status === 401){
+                    localStorage.removeItem('gymbros-token')
+                    window.location.href = 'auth.html'
+                }
+                
+            }else{
+                window.location.href = 'auth.html'
+            }
+        }
+        checkLogged()
+
         function stepPeso(delta) {
             const inp = document.getElementById('input-peso');
             const val = Math.min(300, Math.max(30, parseInt(inp.value || 70) + delta));
@@ -605,7 +651,7 @@
         let livelloCorrente = 1; 
         /* FETCH BACKEND*/
         async function getProfilo(){
-            const response = await fetch('http://localhost:3000/users/profile', {
+            const response = await fetch(`${API}/users/profile`, {
                 method : 'GET',
                 headers : {
                     'Authorization' : 'Bearer ' + localStorage.getItem('gymbros-token')
@@ -677,9 +723,9 @@
             /* seleziona visivamente */
             document.querySelectorAll('.av-option').forEach(o => o.classList.remove('selected'));
             el.classList.add('selected');
-
+            document.getElementById('prof-avatar-img').src = document.getElementById('avatar-op-' + numero).src
             try {
-                const response = await fetch('http://localhost:3000/users/avatar', {
+                const response = await fetch(`${API}/users/avatar`, {
                     method: 'PATCH',
                     headers: {
                         'Authorization': 'Bearer ' + localStorage.getItem('gymbros-token'),
@@ -691,6 +737,7 @@
                 if (response.ok) {
                     /* aggiorna l'immagine profilo in cima con il nuovo avatar */
                     document.getElementById('prof-avatar-img').src = el.src;
+                    document.getElementById('avatar-picker').classList.remove('open')
                 } else {
                     console.error('Errore aggiornamento avatar:', await response.json());
                 }
@@ -740,6 +787,14 @@
             document.getElementById('modal-level-name').textContent = LIVELLI[valore];
         }
 
+        /* TOAST NOTIFICHE */
+        function mostraFeedback(messaggio) {
+            const toast = document.getElementById('feedback-toast');
+            toast.textContent = messaggio;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2200);
+        }
+
         /*  MODALE MODIFICA  */
         function apriModaleModifica() {
             /* pre-popola i campi con i valori attuali */
@@ -782,7 +837,7 @@
 
            
             
-            const response = await fetch('http://localhost:3000/users/profile', {
+            const response = await fetch(`${API}/users/profile`, {
                 method : 'PATCH',
                 headers : {
                     "Authorization" : 'Bearer ' + localStorage.getItem('gymbros-token'),
@@ -798,11 +853,13 @@
             })
 
 
-            chiudiModaleModifica();}
+            chiudiModaleModifica();
+            mostraFeedback("Modifica avvenuta con successo")
+        }
 
         async function caricaSchedeProfilo() {
             try {
-                const res = await fetch('http://localhost:3000/users/workout-plans', {
+                const res = await fetch(`${API}/users/workout-plans`, {
                     headers: { Authorization: 'Bearer ' + localStorage.getItem('gymbros-token') }
                 });
                 if (!res.ok) return;
@@ -817,7 +874,7 @@
 
                 schede.forEach(s => {
                     const chip = document.createElement('a');
-                    chip.href        = 'scheda-dettaglio.html?id=' + s.workoutId;
+                    chip.href        = 'dettaglio.html?id=' + s.workoutId + '&tipo=Personale';
                     chip.className   = 'saved-chip';
                     chip.textContent = s.name;
                     wrap.appendChild(chip);

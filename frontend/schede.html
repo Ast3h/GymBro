@@ -296,6 +296,28 @@
             transition: color 0.18s; padding: 0 2px;
         }
 
+        .feedback-toast {
+            position:      fixed;
+            bottom:        80px;
+            left:          50%;
+            transform:     translateX(-50%) translateY(20px);
+            background:    var(--surface);
+            border:        0.5px solid var(--accent);
+            border-radius: var(--radius);
+            padding:       10px 20px;
+            font-size:     0.8rem;
+            color:         var(--text);
+            z-index:       9999;
+            opacity:       0;
+            transition:    opacity 0.2s ease, transform 0.2s ease;
+            white-space:   nowrap;
+        }
+
+        .feedback-toast.show {
+            opacity:   1;
+            transform: translateX(-50%) translateY(0);
+        }      
+
         .remove-btn:hover { color: #e24b4a; }
 
         .added-empty {
@@ -470,8 +492,12 @@
         </div>
     </div>
 
-    <script>
+    <div class="feedback-toast" id="feedback-toast"></div>
 
+    <script>
+    
+
+        const API   = 'http://localhost:3000';
         /* FILTRI */
         function filtraSchede(zona, tipo, btn) {
         const grid     = document.getElementById('grid-schede-' + tipo);
@@ -560,7 +586,7 @@
             }
 
             try {
-                const res = await fetch('http://localhost:3000/users/workout-plans/' + id, {
+                const res = await fetch(`http://localhost:3000/users/workout-plans/` + id, {
                     headers: { Authorization: 'Bearer ' + localStorage.getItem('gymbros-token') }
                 });
                 if (!res.ok) return;
@@ -578,7 +604,7 @@
 
                 /* carica esercizi per la ricerca se non già caricati */
                 if (_tuttiEsercizi.length === 0) {
-                    fetch('http://localhost:3000/fullexercises')
+                    fetch(`${API}/fullexercises`)
                         .then(r => r.json())
                         .then(data => {
                             _tuttiEsercizi = data.map(d => ({
@@ -693,7 +719,7 @@
             const token = localStorage.getItem('gymbros-token');
 
             try {
-                await fetch('http://localhost:3000/users/workout-plans/' + id + '/exercises', {
+                await fetch(`${API}/users/workout-plans/${id}/exercises`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
                     body: JSON.stringify({
@@ -742,7 +768,7 @@
                 'Questa azione è irreversibile. La scheda e tutti i suoi esercizi verranno rimossi.',
                 async () => {
                     try {
-                        await fetch('http://localhost:3000/users/workout-plans/' + id, {
+                        await fetch(`${API}/users/workout-plans/${id}`, {
                             method:  'DELETE',
                             headers: { Authorization: 'Bearer ' + localStorage.getItem('gymbros-token') }
                         });
@@ -761,13 +787,25 @@
         let _aggiunti       = [];  /* esercizi aggiunti alla scheda in costruzione */
         let _zonaFiltro     = 'tutte';
 
-        function apriCreaScheda() {
+        function mostraFeedback(messaggio) {
+            const toast = document.getElementById('feedback-toast');
+            toast.textContent = messaggio;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2200);
+        }
+
+        
+
+        async function apriCreaScheda() {
+            const logged = await checkLogged()
+            if(!logged){
+                return;
+            }
             _aggiunti = [];
             document.getElementById('input-nome-scheda').value = '';
-            
             document.getElementById('modal-crea-scheda').classList.add('open');
-
             
+               
         }
         
         function chiudiCreaScheda() {
@@ -890,7 +928,7 @@
 
             try {
                 const data_create = new Date().toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' })
-                const response = await fetch('http://localhost:3000/workout-plans', {
+                const response = await fetch(`${API}/workout-plans`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -935,7 +973,11 @@
         }
 
         async function loadSchede(){
-            const response = await fetch('http://localhost:3000/users/workout-plans', {
+            const logged = await checkLogged()
+            if(!logged){
+                return true;
+            }
+            const response = await fetch(`${API}/users/workout-plans`, {
                 method : 'GET',
                 headers : {
                     'Authorization' : 'Bearer ' + localStorage.getItem('gymbros-token'),
@@ -944,6 +986,7 @@
             })
 
             const data = await response.json()
+            
             document.getElementById('empty-personali').remove()
             data.forEach(scheda =>{
                 workout = {
@@ -962,7 +1005,7 @@
             })
 
             //CARICA SCHEDE PREDEFINITE
-            const res = await fetch('http://localhost:3000/users/workout-template', {
+            const res = await fetch(`${API}/users/workout-template`, {
                 method : 'GET',
                 headers : {
                     'Authorization' : 'Bearer ' + localStorage.getItem('gymbros-token'),

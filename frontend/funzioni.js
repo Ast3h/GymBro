@@ -60,6 +60,13 @@ function toggleAccent() {
     accentIsPink = localStorage.getItem('gymbros-accent') !== 'green';
     applyAccent(accentIsPink);
 })();
- 
 
+/* CHECK LOGIN */
+function checkLogged() {
+    if (!localStorage.getItem('gymbros-token')) {
+        window.location.href = 'auth.html';
+        return false;
+    }
+    return true;
+}
  

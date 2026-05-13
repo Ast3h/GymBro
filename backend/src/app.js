@@ -555,9 +555,17 @@ app.patch('/users/workout-set', auth, async (req, res) => {
         })
         if (!check) return res.status(401).json({ error: 'Unauthorized' })
 
-        const updated = await prisma.workout_set.updateMany({
-            where: { workoutId, exerciseId, setId },
-            data:  { pesi, rep }
+        const current = await prisma.workout_set.findFirst({
+            where: { workoutId, exerciseId, setId }
+        })
+
+        const updated = await prisma.workout_set.upsert({
+            where: { workoutId_exerciseId_setId: { workoutId, exerciseId, setId } },
+            update: {
+                pesi: (current && current.pesi > pesi) ? current.pesi : pesi,
+                rep
+            },
+            create: { workoutId, exerciseId, setId, pesi, rep }
         })
         res.json(updated)
     } catch (error) {
@@ -720,19 +728,33 @@ app.patch('/users/allenamenti/:id', auth, async (req, res) => {
 })
 
 /* GET RECORD PERSONALI */
+
 app.get('/users/record', auth, async (req, res) => {
+    res.set('Cache-Control', 'no-store');
     const uid = req.id
     try {
+        /* trova le workoutId con almeno un allenamento registrato */
+        const allenamenti = await prisma.allenamento.findMany({
+            where:    { userId: uid, workoutId: { not: null } },
+            select:   { workoutId: true },
+            distinct: ['workoutId'],
+        })
+        const workoutIds = allenamenti.map(a => a.workoutId).filter(Boolean)
+        
+        if (workoutIds.length === 0) return res.json([])
+
+        /* workout_set con pesi > 0 solo delle schede allenate */
         const sets = await prisma.workout_set.findMany({
             where: {
-                workout: { userId: uid },
-                pesi:    { gt: 0 },
+                workoutId: { in: workoutIds },
+                pesi:      { gt: 0 },
             },
             include: {
                 exercise: { select: { id: true, nameIt: true, macroPart: true, bodyPart: true } },
             },
         })
 
+        /* raggruppa per esercizio, mantieni il massimo */
         const mappa = {}
         for (const s of sets) {
             const id = s.exerciseId
@@ -891,4 +913,31 @@ app.post('/users/workout-template/:id', auth, async (req, res) => {
         console.error(error)
         res.status(500).json({ error: error.message })
     }
+})
+
+/* PATCH: aggiorna il peso massimo di un esercizio */
+app.patch('/users/record/:ezId', auth, async (req, res) => {
+    const uid  = req.id
+    const ezId = parseInt(req.params.ezId)
+    const { pesi, rep } = req.body
+    try {
+        await prisma.workout_set.updateMany({
+            where: { workout: { userId: uid }, exerciseId: ezId },
+            data:  { pesi: parseFloat(pesi) || 0, rep: parseInt(rep) || 0 }
+        })
+        res.json({ success: true })
+    } catch(e) { res.status(500).json({ error: e.message }) }
+})
+
+/* DELETE: azzera i pesi di tutti i set di un esercizio */
+app.delete('/users/record/:ezId', auth, async (req, res) => {
+    const uid  = req.id
+    const ezId = parseInt(req.params.ezId)
+    try {
+        await prisma.workout_set.updateMany({
+            where: { workout: { userId: uid }, exerciseId: ezId },
+            data:  { pesi: 0, rep: 0 }
+        })
+        res.json({ success: true })
+    } catch(e) { res.status(500).json({ error: e.message }) }
 })

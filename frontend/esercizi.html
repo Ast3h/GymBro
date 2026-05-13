@@ -1058,7 +1058,7 @@
             data.forEach(data => {
                 const ez = {
                 id : data.id,
-                zone : [data.macroPart, data.bodyPart],
+                zone : [...new Set([data.macroPart, data.bodyPart].filter(Boolean))],
                 img_url : data.videoUrl,
                 nome : data.nameIt,
                 }

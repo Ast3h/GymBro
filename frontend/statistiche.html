@@ -297,6 +297,28 @@
         .rec-label { font-size: 0.65rem; color: var(--muted); }
         .rec-val { font-size: 1rem; font-weight: 600; }
 
+        /* azioni sui record (modifica e elimina) */
+        .rec-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+            justify-content: flex-end;
+        }
+        .rec-btn {
+            font-size: 0.62rem; font-weight: 500; letter-spacing: 0.06em;
+            text-transform: uppercase; padding: 3px 8px;
+            border-radius: var(--radius); background: none;
+            cursor: pointer; transition: all 0.18s; font-family: var(--font-body);
+        }
+        .rec-btn-edit {
+            color: var(--muted); border: 0.5px solid var(--border);
+        }
+        .rec-btn-edit:hover { color: var(--accent); border-color: var(--accent); }
+        .rec-btn-del {
+            color: var(--muted); border: 0.5px solid var(--border);
+        }
+        .rec-btn-del:hover { color: #e24b4a; border-color: #e24b4a; }
+
         .rec-empty {
             padding: 24px; text-align: center;
             font-size: 0.78rem; color: var(--muted);
@@ -531,10 +553,38 @@
         <div class="modal-overlay" id="modal-conferma-elimina">
         <div class="annulla-box">
             <div class="annulla-title">Eliminare l'allenamento?</div>
-            <div class="annulla-sub">Questa azione è irreversibile. L'allenamento verrà rimosso dallo storico.</div>
+            <div class="annulla-sub">Questa azione è irreversibile. Il record verrà rimosso dallo storico.</div>
             <div class="annulla-btns">
                 <button class="annulla-continua" onclick="chiudiConfermaElimina()">Annulla</button>
                 <button class="annulla-conferma" id="btn-conferma-elimina" onclick="confermaElimina()">Elimina</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE MODIFICA RECORD -->
+    <div class="modal-overlay" id="modal-modifica-record">
+        <div class="modal" style="max-width:360px; flex-direction:column;">
+            <div class="modal-header" style="flex-shrink:0;">
+                <div>
+                    <div class="modal-title">Modifica record</div>
+                    <div class="modal-sub" id="mod-rec-nome">—</div>
+                </div>
+                <button class="modal-close" onclick="chiudiModificaRecord()">✕</button>
+            </div>
+            <div class="modal-body" style="display:flex; flex-direction:column; gap:14px;">
+                <input type="hidden" id="mod-rec-ezid">
+                <div class="form-row">
+                    <label class="form-label">Peso massimo (kg)</label>
+                    <input class="form-input" type="number" id="mod-rec-pesi" min="0" step="0.5">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">Reps</label>
+                    <input class="form-input" type="number" id="mod-rec-rep" min="0" step="1">
+                </div>
+            </div>
+            <div class="modal-footer" style="flex-shrink:0;">
+                <button class="btn-ghost" onclick="chiudiModificaRecord()">Annulla</button>
+                <button class="btn-primary" onclick="salvaModificaRecord()">Salva</button>
             </div>
         </div>
     </div>
@@ -930,6 +980,7 @@
                 });
                 if (!res.ok) return;
                 const record = await res.json();
+                console.log('[caricaRecord] record ricevuti:', record);
                 renderRecord(record);
             } catch(e) { console.error('Errore record:', e); }
         }
@@ -942,13 +993,24 @@
             }
             grid.innerHTML = '';
             const maxPesi = Math.max(...record.map(r => r.pesi));
-            record.forEach((r, idx) => {
+            record.forEach((r) => {
                 const card = document.createElement('div');
                 card.className = 'rec-card';
                 const zona = [r.macroPart, r.bodyPart].filter(Boolean)
                     .map(z => z.charAt(0).toUpperCase() + z.slice(1)).join(' · ');
-                const col   = 'var(--accent)';
-                const perc  = Math.round((r.pesi / maxPesi) * 100);
+                const col  = 'var(--accent)';
+                const perc = Math.round((r.pesi / maxPesi) * 100);
+
+                const btnEdit = document.createElement('button');
+                btnEdit.className = 'rec-btn rec-btn-edit';
+                btnEdit.textContent = 'Modifica';
+                btnEdit.onclick = () => apriModificaRecord(r);
+
+                const btnDel = document.createElement('button');
+                btnDel.className = 'rec-btn rec-btn-del';
+                btnDel.textContent = 'Elimina';
+                btnDel.onclick = () => apriConfermaRecord(r.exerciseId);
+
                 card.innerHTML =
                     '<div class="rec-name">' + r.nome + '</div>' +
                     '<div class="rec-zona">' + zona + '</div>' +
@@ -957,9 +1019,70 @@
                         '<span class="rec-label">Massimo</span>' +
                         '<span class="rec-val" style="color:' + col + ';">' + r.pesi + ' kg</span>' +
                     '</div>';
+                const actions = document.createElement('div');
+                actions.className = 'rec-actions';
+                actions.appendChild(btnEdit);
+                actions.appendChild(btnDel);
+                card.appendChild(actions);
                 grid.appendChild(card);
             });
         }
+
+        /* FUNZIONI MODIFICA E CONFERMA RECORD */
+        let _recordDaEliminare = null;
+
+        function apriModificaRecord(r) {
+            document.getElementById('mod-rec-ezid').value   = r.exerciseId;
+            document.getElementById('mod-rec-nome').textContent = r.nome;
+            document.getElementById('mod-rec-pesi').value   = r.pesi;
+            document.getElementById('mod-rec-rep').value    = r.rep || 0;
+            document.getElementById('modal-modifica-record').classList.add('open');
+        }
+
+        function chiudiModificaRecord() {
+            document.getElementById('modal-modifica-record').classList.remove('open');
+        }
+
+        /* SALVA MODIFICA RECORD */
+        async function salvaModificaRecord() {
+            const ezId = parseInt(document.getElementById('mod-rec-ezid').value);
+            const pesi = parseFloat(document.getElementById('mod-rec-pesi').value) || 0;
+            const rep  = parseInt(document.getElementById('mod-rec-rep').value)  || 0;
+            try {
+                const res = await fetch(`${API}/users/record/${ezId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN() },
+                    body: JSON.stringify({ pesi, rep })
+                });
+                if (!res.ok) { console.error('Errore modifica record:', await res.text()); return; }
+                chiudiModificaRecord();
+                caricaRecord();
+            } catch(e) { console.error('Errore:', e); }
+        }
+
+        function apriConfermaRecord(ezId) {
+            _recordDaEliminare = ezId;
+            document.getElementById('modal-conferma-elimina').classList.add('open');
+            document.getElementById('btn-conferma-elimina').onclick = confermaEliminaRecord;
+        }
+
+        async function confermaEliminaRecord() {
+            const ezId = _recordDaEliminare;
+            if (!ezId) return;
+            chiudiConfermaElimina();
+            try {
+                const res = await fetch(`${API}/users/record/${ezId}`, {
+                    method: 'DELETE',
+                    headers: { Authorization: 'Bearer ' + TOKEN() }
+                });
+                if (!res.ok) { console.error('Errore eliminazione record:', await res.text()); return; }
+                caricaRecord();
+            } catch(e) { console.error('Errore:', e); }
+        }
+
+        document.getElementById('modal-modifica-record').addEventListener('click', function(e) {
+            if (e.target === this) chiudiModificaRecord();
+        });
 
         /* MODALE AGGIUNGI */
         function apriAggiungi(dataStr) {

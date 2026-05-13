@@ -797,6 +797,15 @@
             font-family: var(--font-body); font-size: 0.82rem; outline: none;
         }
         .kg-wrap.done .kg-input-inner { background: transparent; color: var(--accent-green); }
+        .kg-input-inner {
+            -webkit-appearance: none;
+            -moz-appearance: textfield;
+        }
+        .kg-input-inner::-webkit-inner-spin-button,
+        .kg-input-inner::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
     </style>
 </head>
 <body>
@@ -992,7 +1001,7 @@
                         _serieState[id].push({
                             setId: i,
                             kg:    dbSet?.pesi ?? 0,
-                            reps:  dbSet?.rep  ?? (ex.nRep || 0),
+                            reps: dbSet?.rep ?? (i > 1 ? _serieState[id][i-2].reps : (ex.nRep || 0)),
                             done:  false,
                         });
                     }
@@ -1267,6 +1276,18 @@
 
             s.done = true;
             _serieCount++;
+
+            /* copia reps e kg alla serie successiva se esiste e non è ancora completata */
+            const prossima = _serieState[ezId][idx + 1];
+            if (prossima && !prossima.done) {
+                prossima.reps = s.reps;
+                prossima.kg   = s.kg;
+                /* aggiorna il display della serie successiva */
+                const elReps = document.getElementById('reps-' + ezId + '-' + (idx + 1));
+                const elKg   = document.getElementById('kg-'   + ezId + '-' + (idx + 1));
+                if (elReps) elReps.textContent = s.reps;
+                if (elKg)   elKg.value = s.kg;
+            }
 
             /* rende visivamente completata senza re-render completo */
             const rows = document.querySelectorAll(`.serie-row[data-ez="${ezId}"][data-idx="${idx}"]`);

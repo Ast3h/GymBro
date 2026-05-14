@@ -363,6 +363,36 @@
             color: var(--text); user-select: none;
         }
         .dur-unit { font-size: 0.72rem; color: var(--muted); padding: 0 12px 0 4px; flex-shrink: 0; }
+
+        /* DROPDOWN SCHEDE */
+        .scheda-trigger {
+            width: 100%; padding: 9px 12px; border-radius: var(--radius);
+            border: 0.5px solid var(--border); background: var(--surface2);
+            color: var(--text); font-family: var(--font-body); font-size: 0.85rem;
+            display: flex; align-items: center; justify-content: space-between;
+            cursor: pointer; transition: border-color 0.18s; user-select: none;
+        }
+        .scheda-trigger.open, .scheda-trigger:hover { border-color: var(--accent); }
+        .scheda-trigger svg { width: 14px; height: 14px; stroke: var(--muted); fill: none; stroke-width: 2; flex-shrink: 0; transition: transform 0.2s; }
+        .scheda-trigger.open svg { transform: rotate(180deg); stroke: var(--accent); }
+        .scheda-dropdown {
+            display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+            background: var(--surface); border: 0.5px solid var(--border);
+            border-radius: var(--radius); overflow: hidden; z-index: 50;
+        }
+        .scheda-dropdown.open { display: block; }
+        .scheda-opt {
+            padding: 10px 12px; font-size: 0.82rem; color: var(--muted);
+            border-bottom: 0.5px solid var(--surface2); cursor: pointer;
+            display: flex; align-items: center; justify-content: space-between;
+            transition: background 0.15s, color 0.15s;
+        }
+        .scheda-opt:last-child { border-bottom: none; }
+        .scheda-opt:hover { background: var(--surface2); color: var(--text); }
+        .scheda-opt.none-opt { font-style: italic; }
+        .scheda-opt.selected { background: var(--accent-dim); color: var(--accent); }
+        .scheda-opt svg { width: 14px; height: 14px; stroke: var(--accent); fill: none; stroke-width: 2.5; flex-shrink: 0; }
+        
     </style>
 </head>
 <body>
@@ -527,9 +557,21 @@
                 </div>
                 <div class="form-row">
                     <label class="form-label">Scheda usata (opzionale)</label>
-                    <select class="form-input" id="add-scheda">
-                        <option value="">— Nessuna scheda —</option>
-                    </select>
+                    
+                    <div style="position:relative;" id="add-scheda-wrap">
+                        <div class="scheda-trigger" id="add-scheda-trigger" onclick="toggleSchedaDropdown('add')">
+                            <span id="add-scheda-label">— Nessuna scheda —</span>
+                            <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+                        <div class="scheda-dropdown" id="add-scheda-dropdown">
+                            <div class="scheda-opt none-opt selected" data-value="" onclick="selectScheda('add','','— Nessuna scheda —')">
+                                <span>— Nessuna scheda —</span>
+                                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="add-scheda" value="">
+                    
                 </div>
                 <div class="form-row">
                     <label class="form-label">Durata in minuti (opzionale)</label>
@@ -613,14 +655,32 @@
             </div>
             <div class="modal-body" style="display:flex; flex-direction:column; gap:14px;">
                 <input type="hidden" id="mod-rec-ezid">
+                
                 <div class="form-row">
                     <label class="form-label">Peso massimo (kg)</label>
-                    <input class="form-input" type="number" id="mod-rec-pesi" min="0" step="0.5">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <div class="durata-stepper">
+                            <button type="button" class="dur-btn" onclick="stepRec('mod-rec-pesi', -0.5)">−</button>
+                            <span class="dur-val" id="mod-rec-pesi-val">0</span>
+                            <button type="button" class="dur-btn" onclick="stepRec('mod-rec-pesi', 0.5)">+</button>
+                        </div>
+                        <span class="dur-unit">kg</span>
+                    </div>
+                    <input type="hidden" id="mod-rec-pesi" value="0">
                 </div>
                 <div class="form-row">
                     <label class="form-label">Reps</label>
-                    <input class="form-input" type="number" id="mod-rec-rep" min="0" step="1">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <div class="durata-stepper">
+                            <button type="button" class="dur-btn" onclick="stepRec('mod-rec-rep', -1)">−</button>
+                            <span class="dur-val" id="mod-rec-rep-val">0</span>
+                            <button type="button" class="dur-btn" onclick="stepRec('mod-rec-rep', 1)">+</button>
+                        </div>
+                        <span class="dur-unit">reps</span>
+                    </div>
+                    <input type="hidden" id="mod-rec-rep" value="0">
                 </div>
+            
             </div>
             <div class="modal-footer" style="flex-shrink:0;">
                 <button class="btn-ghost" onclick="chiudiModificaRecord()">Annulla</button>
@@ -665,14 +725,18 @@
                 });
                 if (!res.ok) return;
                 _schede = await res.json();
-                const sel = document.getElementById('add-scheda');
-                while (sel.options.length > 1) sel.remove(1);
+                
+                const drop = document.getElementById('add-scheda-dropdown');
+                while (drop.children.length > 1) drop.removeChild(drop.lastChild);
                 _schede.forEach(s => {
-                    const opt = document.createElement('option');
-                    opt.value = s.workoutId;
-                    opt.textContent = s.name;
-                    sel.appendChild(opt);
+                    const opt = document.createElement('div');
+                    opt.className = 'scheda-opt';
+                    opt.dataset.value = s.workoutId;
+                    opt.innerHTML = `<span>${s.name}</span><svg viewBox="0 0 24 24" style="display:none"><polyline points="20 6 9 17 4 12"/></svg>`;
+                    opt.onclick = () => selectScheda('add', s.workoutId, s.name);
+                    drop.appendChild(opt);
                 });
+                
             } catch(e) { console.error('Errore schede:', e); }
         }
 
@@ -1077,8 +1141,13 @@
         function apriModificaRecord(r) {
             document.getElementById('mod-rec-ezid').value   = r.exerciseId;
             document.getElementById('mod-rec-nome').textContent = r.nome;
-            document.getElementById('mod-rec-pesi').value   = r.pesi;
-            document.getElementById('mod-rec-rep').value    = r.rep || 0;
+            
+            const pesi = r.pesi || 0;
+            const rep  = r.rep  || 0;
+            document.getElementById('mod-rec-pesi').value     = pesi;
+            document.getElementById('mod-rec-pesi-val').textContent = pesi;
+            document.getElementById('mod-rec-rep').value      = rep;
+            document.getElementById('mod-rec-rep-val').textContent  = rep;
             document.getElementById('modal-modifica-record').classList.add('open');
         }
 
@@ -1128,9 +1197,41 @@
         });
 
         /* MODALE AGGIUNGI */
+
+        function toggleSchedaDropdown(prefix) {
+            const trigger = document.getElementById(prefix + '-scheda-trigger');
+            const drop    = document.getElementById(prefix + '-scheda-dropdown');
+            trigger.classList.toggle('open');
+            drop.classList.toggle('open');
+        }
+
+        function selectScheda(prefix, value, label) {
+            document.getElementById(prefix + '-scheda').value            = value;
+            document.getElementById(prefix + '-scheda-label').textContent = label;
+            const drop = document.getElementById(prefix + '-scheda-dropdown');
+            drop.querySelectorAll('.scheda-opt').forEach(o => {
+                const sel = o.dataset.value === value;
+                o.classList.toggle('selected', sel);
+                o.querySelector('svg').style.display = sel ? 'block' : 'none';
+            });
+            drop.classList.remove('open');
+            document.getElementById(prefix + '-scheda-trigger').classList.remove('open');
+        }
+
+        document.addEventListener('click', function(e) {
+            const wrap = document.getElementById('add-scheda-wrap');
+            if (wrap && !wrap.contains(e.target)) {
+                document.getElementById('add-scheda-dropdown').classList.remove('open');
+                document.getElementById('add-scheda-trigger').classList.remove('open');
+            }
+        });
+
+
         function apriAggiungi(dataStr) {
-            document.getElementById('add-data').value   = dataStr || new Date().toISOString().split('T')[0];
-            document.getElementById('add-scheda').value = '';
+            document.getElementById('add-data').value = dataStr || new Date().toISOString().split('T')[0];
+            
+            selectScheda('add', '', '— Nessuna scheda —');
+            
             document.getElementById('add-durata').value = '45';
             document.getElementById('add-durata-val').textContent = '45';
             document.getElementById('modal-aggiungi-all').classList.add('open');
@@ -1165,8 +1266,18 @@
             if (valEl) valEl.textContent = newVal;
         }
         
+        function stepRec(inputId, delta) {
+            const inp    = document.getElementById(inputId);
+            const valEl  = document.getElementById(inputId + '-val');
+            const cur    = parseFloat(inp.value) || 0;
+            const newVal = Math.max(0, Math.round((cur + delta) * 10) / 10);
+            inp.value = newVal;
+            if (valEl) valEl.textContent = newVal;
+        }
+        
         /*  START  */
         init();
+        
     </script>
 </body>
 </html>

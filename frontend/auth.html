@@ -239,6 +239,55 @@
             flex-shrink: 0;
         }
 
+        /* SCHERMATA DI SUCCESSO REGISTRAZIONE */
+        .reg-success {
+            display:         none;
+            flex-direction:  column;
+            align-items:     center;
+            justify-content: center;
+            gap:             14px;
+            padding:         48px 32px 40px;
+            text-align:      center;
+            flex:            1;
+        }
+
+        .reg-success.show { display: flex; }
+
+        .success-ring {
+            width:           60px;
+            height:          60px;
+            border-radius:   50%;
+            border:          1.5px solid var(--accent);
+            background:      var(--accent-dim);
+            display:         flex;
+            align-items:     center;
+            justify-content: center;
+            flex-shrink:     0;
+        }
+
+        .success-ring svg {
+            width:           28px;
+            height:          28px;
+            stroke:          var(--accent);
+            fill:            none;
+            stroke-width:    2;
+            stroke-linecap:  round;
+            stroke-linejoin: round;
+        }
+
+        .success-title {
+            font-size:   1rem;
+            font-weight: 500;
+            color:       var(--text);
+        }
+
+        .success-sub {
+            font-size:   0.78rem;
+            color:       var(--muted);
+            line-height: 1.65;
+            max-width:   280px;
+        }
+
         /* errori validazione */
         .field-error {
             font-size:  0.68rem;
@@ -321,6 +370,66 @@
 
             .reg-body .full { grid-column: 1; }
         }
+        
+        .slider-wrap { display:flex; flex-direction:column; gap:8px; }
+        .slider-display { font-size:1.2rem; font-weight:600; color:var(--accent); text-align:center; }
+        .slider-display span { font-size:0.72rem; font-weight:400; color:var(--muted); margin-left:3px; }
+        .slider-input {
+            -webkit-appearance: none;
+            width: 100%; height: 5px;
+            border-radius: 3px;
+            background: var(--surface2);
+            outline: none;
+            border: 0.5px solid var(--border);
+        }
+        .slider-input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 2px solid var(--bg);
+            box-shadow: 0 0 0 1px var(--accent);
+            cursor: pointer;
+        }
+        .slider-input::-moz-range-thumb {
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 2px solid var(--bg);
+            cursor: pointer;
+        }
+        .slider-labels { display:flex; justify-content:space-between; }
+        .slider-label  { font-size:0.62rem; color:var(--muted); }
+
+        .reg-stepper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .reg-stepper-ctrl {
+            display: flex;
+            align-items: center;
+            border: 0.5px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            background: var(--bg);
+            flex: 1;
+        }
+        .reg-stepper-btn {
+            width: 36px; height: 36px;
+            background: var(--surface2); border: none;
+            color: var(--text); font-size: 1.1rem;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: background 0.15s, color 0.15s;
+        }
+        .reg-stepper-btn:hover  { background: var(--accent-dim); color: var(--accent); }
+        .reg-stepper-btn:active { background: var(--accent); color: #fff; }
+        .reg-stepper-val {
+            flex: 1; text-align: center;
+            font-size: 1rem; font-weight: 500;
+            color: var(--text); user-select: none;
+        }
+        .reg-stepper-unit { font-size: 0.75rem; color: var(--muted); flex-shrink: 0; }
     </style>
 </head>
 <body>
@@ -357,7 +466,7 @@
                     <span class="field-error" id="login-pass-err">Password errata</span>
                 </div>
                 <span class="field-error" id="login-err-cred" style="text-align:center; font-size:0.75rem; display:block, none;">Credenziali errate</span>
-                <button class="btn-primary" onclick="submitLogin()">Accedi</button>
+                <button type="button" class="btn-primary" onclick="submitLogin()">Accedi</button>
 
             </div>
 
@@ -365,7 +474,7 @@
             <div class="auth-right">
                 <div class="auth-right-title">Nuovo su GymBro?</div>
                 <div class="auth-right-sub">Crea il tuo account gratuito e inizia ad allenarti</div>
-                <button class="btn-ghost" onclick="apriRegistrazione()"
+                <button type="button" class="btn-ghost" onclick="apriRegistrazione()"
                         style="width:100%; font-size:0.7rem;">
                     Registrati
                 </button>
@@ -374,7 +483,7 @@
         </div>
     </div>
 
-    <!-- ── MODALE REGISTRAZIONE ── -->
+    <!--  MODALE REGISTRAZIONE  -->
     <div class="modal-overlay" id="modal-reg">
         <div class="modal reg-modal">
 
@@ -482,62 +591,91 @@
 
                 <div class="form-row">
                     <label class="form-label" for="reg-peso">Peso (kg)</label>
-                    <input class="form-input" type="number" id="reg-peso" placeholder="kg" min="30" max="300">
+                    <div class="reg-stepper">
+                        <div class="reg-stepper-ctrl">
+                            <button type="button" class="reg-stepper-btn" onclick="stepRegPeso(-1)">−</button>
+                            <span class="reg-stepper-val" id="reg-peso-val">70</span>
+                            <button type="button" class="reg-stepper-btn" onclick="stepRegPeso(1)">+</button>
+                        </div>
+                        <span class="reg-stepper-unit">kg</span>
+                    </div>
+                    <input type="hidden" id="reg-peso" value="70">
                 </div>
 
                 <div class="form-row">
                     <label class="form-label" for="reg-altezza">Altezza (cm)</label>
-                    <input class="form-input" type="number" id="reg-altezza" placeholder="cm" min="100" max="250">
+                    <div class="slider-wrap">
+                        <div class="slider-display" id="reg-altezza-display">170 <span>cm</span></div>
+                        <input type="range" class="slider-input" id="reg-altezza"
+                               min="100" max="250" value="170"
+                               oninput="aggiornaRegAltezza(this.value)">
+                        <div class="slider-labels">
+                            <span class="slider-label">100 cm</span>
+                            <span class="slider-label">250 cm</span>
+                        </div>
+                    </div>
                 </div>
 
             </div>
 
             <div class="reg-footer">
-                <button class="btn-ghost" onclick="tornaLogin()">← Accedi</button>
-                <button class="btn-primary" style="flex:1;" onclick="submitRegistrazione()">Crea account</button>
+                <button type="button" class="btn-ghost" onclick="tornaLogin()">← Accedi</button>
+                <button type="button" class="btn-primary" style="flex:1;" onclick="submitRegistrazione()">Crea account</button>
             </div>
+
+            <!-- SCHERMATA DI SUCCESSO -->
+            <div class="reg-success" id="reg-success">
+                <div class="success-ring">
+                    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div class="success-title">Account creato!</div>
+                <div class="success-sub">La registrazione è andata a buon fine.<br>Ora puoi accedere con le tue credenziali.</div>
+                <button type="button" class="btn-primary" onclick="tornaLogin()" style="margin-top:8px; padding:10px 28px;">Vai al login</button>
+            </div>
+
 
         </div>
     </div>
     <script>
         const API   = 'http://localhost:3000';
 
-        if(sessionStorage.getItem("conferma-reg")){
-            alert(sessionStorage.getItem("conferma-reg"))
-            sessionStorage.removeItem("conferma-reg")
-        }
-
         const LIVELLI = ['', 'Principiante', 'Novizio', 'Intermedio', 'Esperto', 'Avanzato'];
         let livelloReg   = 0;
         let obiettivoReg = '';
         let sessoReg     = '';
 
-        /* ── NAVIGAZIONE TRA MODALI ── */
+        /*  NAVIGAZIONE TRA MODALI  */
         function apriRegistrazione() {
             document.getElementById('modal-auth').classList.remove('open');
             document.getElementById('modal-reg').classList.add('open');
         }
 
         function tornaLogin() {
+            
+            document.querySelector('.reg-header').style.display = '';
+            document.querySelector('.reg-body').style.display   = '';
+            document.querySelector('.reg-footer').style.display = '';
+            document.getElementById('reg-success').classList.remove('show');
+            
             document.getElementById('modal-reg').classList.remove('open');
             document.getElementById('modal-auth').classList.add('open');
         }
 
-        /* ── OBIETTIVO ── */
+        /*  OBIETTIVO  */
         function selezionaObiettivo(el, valore) {
             document.querySelectorAll('.obj-opt').forEach(o => o.classList.remove('selected'));
             el.classList.add('selected');
             obiettivoReg = valore;
         }
 
-        /* ── SESSO ── */
+        /*  SESSO  */
         function selezionaSesso(el, valore) {
             document.querySelectorAll('#sesso-options .obj-opt').forEach(o => o.classList.remove('selected'));
             el.classList.add('selected');
             sessoReg = valore;
         }
 
-        /* ── LIVELLO REGISTRAZIONE ── */
+        /*  LIVELLO REGISTRAZIONE  */
         function setLivelloReg(valore) {
             livelloReg = valore;
             document.querySelectorAll('#reg-level-bar .level-seg').forEach((seg, i) => {
@@ -546,7 +684,7 @@
             document.getElementById('reg-level-name').textContent = LIVELLI[valore];
         }
 
-        /* ── VALIDAZIONE LOGIN ── */
+        /*  VALIDAZIONE LOGIN  */
         async function submitLogin() {
             let ok = true;
 
@@ -589,7 +727,7 @@
             }
         }
 
-        /* ── VALIDAZIONE REGISTRAZIONE ── */
+        /*  VALIDAZIONE REGISTRAZIONE  */
         async function submitRegistrazione() {
             let ok = true;
 
@@ -657,8 +795,12 @@
             })
 
             if(response.ok){
-                sessionStorage.setItem("conferma-reg", "Registrazione avvenuta con successo! Effettua il login.")
-                tornaLogin()
+                
+                document.querySelector('.reg-header').style.display = 'none';
+                document.querySelector('.reg-body').style.display   = 'none';
+                document.querySelector('.reg-footer').style.display = 'none';
+                document.getElementById('reg-success').classList.add('show');
+
             }
         }
 
@@ -676,6 +818,16 @@
             : /* occhio aperto */
             `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
             <circle cx="12" cy="12" r="3"/>`;
+        }
+        function stepRegPeso(delta) {
+            const inp = document.getElementById('reg-peso');
+            const val = Math.min(300, Math.max(30, parseInt(inp.value || 70) + delta));
+            inp.value = val;
+            document.getElementById('reg-peso-val').textContent = val;
+        }
+
+        function aggiornaRegAltezza(val) {
+            document.getElementById('reg-altezza-display').innerHTML = val + ' <span>cm</span>';
         }
     </script>
 </body>

@@ -108,7 +108,9 @@ app.post('/auth/register', async(req, res) =>{
                     data : new Date()
                 }
             })
-        res.json(user)
+        
+        res.status(201).json({ message: 'Registrazione avvenuta con successo' })
+        
     }catch(error){
         if(error.code === 'P2002'){
             const campo = error.meta.target[0]

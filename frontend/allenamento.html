@@ -327,8 +327,8 @@
         }
 
         .serie-check-btn.done {
-            background: #8cc63f;
-            border-color: #8cc63f;
+            background: var(--accent);
+            border-color: var(--accent);
         }
 
         .add-serie-btn {
@@ -403,7 +403,7 @@
 
         .btn-pausa:hover { background: var(--accent-dim); }
 
-        /* ── MODALE RECAP ── */
+        /*  MODALE RECAP  */
         .modal-overlay.open .modal { display: flex; }
 
         @media (max-width: 600px) {
@@ -1049,7 +1049,7 @@
             card.className    = 'ez-all-card';
             card.dataset.ezId = id;
 
-            /* ── HEADER ── */
+            /*  HEADER  */
             const hdr = document.createElement('div');
             hdr.className = 'ez-all-header';
             hdr.onclick = () => apriDettaglioEz(id, nome, zona, video);
@@ -1087,7 +1087,7 @@
             hdr.appendChild(colBtn);
             card.appendChild(hdr);
 
-            /* ── CORPO (collassabile) ── */
+            /*  CORPO (collassabile)  */
             const body = document.createElement('div');
             body.className = 'ez-card-body';
 
@@ -1464,8 +1464,8 @@
                 _pausaElapsed = Date.now() - _startTime;
                 _inPausa = true;
                 btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;"><polygon points="5 3 19 12 5 21 5 3"/></svg> Riprendi';
-                btn.style.borderColor = '#8cc63f';
-                btn.style.color = '#8cc63f';
+                btn.style.borderColor = '#var(--accent)';
+                btn.style.color = 'var(--accent)';
             }
         }
 

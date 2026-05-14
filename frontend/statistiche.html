@@ -297,7 +297,6 @@
         .rec-label { font-size: 0.65rem; color: var(--muted); }
         .rec-val { font-size: 1rem; font-weight: 600; }
 
-        /* azioni sui record (modifica e elimina) */
         .rec-actions {
             display: flex;
             gap: 6px;
@@ -339,6 +338,31 @@
             }
         }
 
+        .durata-stepper {
+            display: flex;
+            align-items: center;
+            border: 0.5px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            background: var(--bg);
+            width: 100%;
+        }
+        .dur-btn {
+            width: 36px; height: 36px;
+            background: var(--surface2); border: none;
+            color: var(--text); font-size: 1.1rem;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: background 0.15s, color 0.15s;
+            flex-shrink: 0;
+        }
+        .dur-btn:hover  { background: var(--accent-dim); color: var(--accent); }
+        .dur-btn:active { background: var(--accent); color: #fff; }
+        .dur-val {
+            flex: 1; text-align: center;
+            font-size: 0.95rem; font-weight: 500;
+            color: var(--text); user-select: none;
+        }
+        .dur-unit { font-size: 0.72rem; color: var(--muted); padding: 0 12px 0 4px; flex-shrink: 0; }
     </style>
 </head>
 <body>
@@ -509,7 +533,15 @@
                 </div>
                 <div class="form-row">
                     <label class="form-label">Durata in minuti (opzionale)</label>
-                    <input class="form-input" type="number" id="add-durata" placeholder="es. 45" min="1" max="300">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <div class="durata-stepper">
+                            <button type="button" class="dur-btn" onclick="stepDurata('add-durata', -5)">−</button>
+                            <span class="dur-val" id="add-durata-val">45</span>
+                            <button type="button" class="dur-btn" onclick="stepDurata('add-durata', 5)">+</button>
+                        </div>
+                        <span class="dur-unit">min</span>
+                    </div>
+                    <input type="hidden" id="add-durata" value="45">
                 </div>
             </div>
             <div class="modal-footer" style="flex-shrink:0;">
@@ -539,7 +571,15 @@
                 </div>
                 <div class="form-row">
                     <label class="form-label">Durata in minuti (opzionale)</label>
-                    <input class="form-input" type="number" id="mod-all-durata" placeholder="es. 45" min="1" max="300">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <div class="durata-stepper">
+                            <button type="button" class="dur-btn" onclick="stepDurata('mod-all-durata', -5)">−</button>
+                            <span class="dur-val" id="mod-all-durata-val">45</span>
+                            <button type="button" class="dur-btn" onclick="stepDurata('mod-all-durata', 5)">+</button>
+                        </div>
+                        <span class="dur-unit">min</span>
+                    </div>
+                    <input type="hidden" id="mod-all-durata" value="45">
                 </div>
             </div>
             <div class="modal-footer" style="flex-shrink:0;">
@@ -553,7 +593,7 @@
         <div class="modal-overlay" id="modal-conferma-elimina">
         <div class="annulla-box">
             <div class="annulla-title">Eliminare l'allenamento?</div>
-            <div class="annulla-sub">Questa azione è irreversibile. Il record verrà rimosso dallo storico.</div>
+            <div class="annulla-sub">Questa azione è irreversibile. L'allenamento verrà rimosso dallo storico.</div>
             <div class="annulla-btns">
                 <button class="annulla-continua" onclick="chiudiConfermaElimina()">Annulla</button>
                 <button class="annulla-conferma" id="btn-conferma-elimina" onclick="confermaElimina()">Elimina</button>
@@ -561,7 +601,7 @@
         </div>
     </div>
 
-    <!-- MODALE MODIFICA RECORD -->
+    <!-- Modale modifica record personale -->
     <div class="modal-overlay" id="modal-modifica-record">
         <div class="modal" style="max-width:360px; flex-direction:column;">
             <div class="modal-header" style="flex-shrink:0;">
@@ -922,7 +962,9 @@
         function apriModifica(a) {
             document.getElementById('mod-all-id').value    = a.id;
             document.getElementById('mod-all-sub').textContent = formattaData(a.data);
-            document.getElementById('mod-all-durata').value = a.durataSec ? Math.round(a.durataSec / 60) : '';
+            const durVal = a.durataSec ? Math.round(a.durataSec / 60) : 45;
+            document.getElementById('mod-all-durata').value = durVal;
+            document.getElementById('mod-all-durata-val').textContent = durVal;
 
             /* popola select schede */
             const sel = document.getElementById('mod-all-scheda');
@@ -985,6 +1027,7 @@
             } catch(e) { console.error('Errore record:', e); }
         }
 
+        /* Pulsanti Modifica ed Elimina in ogni card record */
         function renderRecord(record) {
             const grid = document.getElementById('rec-grid');
             if (!record.length) {
@@ -1028,7 +1071,7 @@
             });
         }
 
-        /* FUNZIONI MODIFICA E CONFERMA RECORD */
+        /* Funzioni modifica e conferma elimina record */
         let _recordDaEliminare = null;
 
         function apriModificaRecord(r) {
@@ -1043,7 +1086,7 @@
             document.getElementById('modal-modifica-record').classList.remove('open');
         }
 
-        /* SALVA MODIFICA RECORD */
+        /* SALVA MODIFICA*/
         async function salvaModificaRecord() {
             const ezId = parseInt(document.getElementById('mod-rec-ezid').value);
             const pesi = parseFloat(document.getElementById('mod-rec-pesi').value) || 0;
@@ -1088,7 +1131,8 @@
         function apriAggiungi(dataStr) {
             document.getElementById('add-data').value   = dataStr || new Date().toISOString().split('T')[0];
             document.getElementById('add-scheda').value = '';
-            document.getElementById('add-durata').value = '';
+            document.getElementById('add-durata').value = '45';
+            document.getElementById('add-durata-val').textContent = '45';
             document.getElementById('modal-aggiungi-all').classList.add('open');
         }
 
@@ -1113,6 +1157,14 @@
             return m + ':' + String(s).padStart(2, '0');
         }
 
+        function stepDurata(inputId, delta) {
+            const inp    = document.getElementById(inputId);
+            const valEl  = document.getElementById(inputId + '-val');
+            const newVal = Math.min(300, Math.max(1, parseInt(inp.value || 45) + delta));
+            inp.value = newVal;
+            if (valEl) valEl.textContent = newVal;
+        }
+        
         /*  START  */
         init();
     </script>

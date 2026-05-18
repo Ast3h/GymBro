@@ -785,6 +785,7 @@
                 });
                 if (!res.ok) return;
                 _allenamenti = await res.json();
+                console.log('[allenamenti]', _allenamenti);
                 renderKpiAllenamenti();
                 renderCalendario();
                 renderStorico();
@@ -1005,7 +1006,7 @@
 
             if (allList.length === 1) {
                 const a = allList[0];
-                namEl.textContent    = a.workout?.name || 'Allenamento libero';
+                namEl.textContent    = a.workout?.name || a.nomeLibero || 'Allenamento libero';
                 metaEl.innerHTML     = a.durataSec ? '<span class="acc">' + formattaDurata(a.durataSec) + '</span>' : '';
                 delBtn.style.display = 'block';
                 delBtn.onclick       = () => eliminaAllenamento(a.id);
@@ -1024,7 +1025,7 @@
                     item.className = 'cal-multi-item';
                     item.innerHTML =
                         '<div class="cal-multi-item-info">' +
-                            '<div class="cal-multi-item-name">' + (a.workout?.name || 'Allenamento libero') + '</div>' +
+                            '<div class="cal-multi-item-name">' + (a.workout?.name || a.nomeLibero || 'Allenamento libero') + '</div>' +
                             (a.durataSec ? '<div class="cal-multi-item-meta">' + formattaDurata(a.durataSec) + '</div>' : '') +
                         '</div>' +
                         '<button class="cal-multi-edit" onclick="apriModifica(' + JSON.stringify(a).replace(/"/g, '&quot;') + ')">Modifica</button>' +
@@ -1060,7 +1061,7 @@
                 row.className = 'storico-row';
                 row.innerHTML =
                     '<div class="storico-td muted">' + formattaData(a.data) + '</div>' +
-                    '<div class="storico-td">'       + (a.workout?.name || '—') + '</div>' +
+                    '<div class="storico-td">'       + (a.workout?.name || a.nomeLibero || '—') + '</div>' +
                     '<div class="storico-td accent">' + (a.durataSec ? formattaDurata(a.durataSec) : '—') + '</div>' +
                     '<button class="storico-del" onclick="eliminaAllenamento(' + a.id + ')" title="Elimina">' +
                         '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>' +

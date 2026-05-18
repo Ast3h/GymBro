@@ -700,10 +700,9 @@
 
             const nEx = (_scheda.workout_ex || []).length;
             if(_scheda.tipo === 'predefinita'){
+                /* Si nascondono solo modifica ed elimina, il pulsante avvia rimane visibile */
                 const azioni = document.getElementById('scheda-azioni');
-                const btn    = document.getElementById('start-btn');
                 if (azioni) azioni.style.display = 'none';
-                if (btn)    btn.style.display    = 'none';
             } else {
                 const btnPred = document.getElementById('start-btn-predefinito');
                 if (btnPred) btnPred.style.display = 'none';

@@ -980,7 +980,11 @@
             if (!schedaId) { window.location.href = 'schede.html'; return; }
 
             try {
-                const res = await fetch(`${API}/users/workout-plans/${schedaId}`, {
+                const endpoint = tipo === 'predefinita'
+                    ? `${API}/users/workout-template/${schedaId}`
+                    : `${API}/users/workout-plans/${schedaId}`;
+
+                const res = await fetch(endpoint, {
                     headers: { Authorization: 'Bearer ' + TOKEN() }
                 });
 
@@ -1449,7 +1453,7 @@
         function chiudiDettaglioEz(e) {
             if (e && e.target !== document.getElementById('ez-detail-overlay')) return;
             document.getElementById('ez-detail-overlay').classList.remove('show');
-            /* NOTA: FERMA IL VIDEO QUANDO SI CHIUDE IL MODALE */
+            /* ferma il video quando si chiude il modale */
             document.getElementById('ez-video-wrap').innerHTML = '';
         }
 
@@ -1517,25 +1521,26 @@
             const durataSec = Math.floor(durataMs / 1000);
             const token = TOKEN();
 
-            /* aggiorna i workout_set con i pesi e rep usati */
-            for (const [ezIdStr, serie] of Object.entries(_serieState)) {
-                const ezId = parseInt(ezIdStr);
-                for (const s of serie) {
-                    if (!s.done) continue;
-                    try {
-                        await fetch(`${API}/users/workout-set`, {
-                            method: 'PATCH',
-                            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-                            body: JSON.stringify({
-                                workoutId:  schedaId,
-                                exerciseId: ezId,
-                                setId:      s.setId,
-                                pesi:       s.kg   || 0,
-                                rep:        s.reps || 0,
-                            })
-                        });
-                    } catch(e) {
-                        console.error('Errore salvataggio serie:', e);
+            if (tipo !== 'predefinita') {
+                for (const [ezIdStr, serie] of Object.entries(_serieState)) {
+                    const ezId = parseInt(ezIdStr);
+                    for (const s of serie) {
+                        if (!s.done) continue;
+                        try {
+                            await fetch(`${API}/users/workout-set`, {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+                                body: JSON.stringify({
+                                    workoutId:  schedaId,
+                                    exerciseId: ezId,
+                                    setId:      s.setId,
+                                    pesi:       s.kg   || 0,
+                                    rep:        s.reps || 0,
+                                })
+                            });
+                        } catch(e) {
+                            console.error('Errore salvataggio serie:', e);
+                        }
                     }
                 }
             }
@@ -1552,8 +1557,9 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
                     body: JSON.stringify({
-                        workoutId: schedaId,
-                        data:      new Date().toISOString(),
+                        workoutId:  tipo === 'predefinita' ? null : schedaId,
+                        nomeLibero: tipo === 'predefinita' ? (_scheda?.name || null) : null,
+                        data:       new Date().toISOString(),
                         durataSec,
                         volume,
                     })

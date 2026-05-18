@@ -491,7 +491,7 @@
                 <div class="switch-knob"></div>
             </div>
 
-            <a href="schede.html" class="icon-btn" title="Le mie schede">
+            <a href="schede.html" id="schede-btn" class="icon-btn" title="Le mie schede">
                 <svg viewBox="0 0 24 24">
                     <rect x="4" y="3" width="16" height="18" rx="2"/>
                     <line x1="8" y1="8" x2="16" y2="8"/>
@@ -499,7 +499,7 @@
                     <line x1="8" y1="16" x2="12" y2="16"/>
                 </svg>
             </a>
-            <a href="profilo.html" class="icon-btn" title="Profilo">
+            <a href="profilo.html" class="icon-btn" id="profilo-btn" title="Profilo">
                 <svg viewBox="0 0 24 24">
                     <circle cx="12" cy="8" r="4"/>
                     <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
@@ -513,9 +513,9 @@
     <!-- SIDEBAR -->
     <nav class="sidebar" id="sidebar">
         <a href="esercizi.html" class="sidebar-item" style="color:var(--text); border-bottom:0.5px solid var(--border); margin-bottom:4px; padding-bottom:12px;">Esercizi</a>
-        <a href="index.html" class="sidebar-item">Home</a>
-        <a href="schede.html" class="sidebar-item">Schede</a>
-        <a href="profilo.html" class="sidebar-item">Profilo</a>
+        <a href="index.html"  class="sidebar-item">Home</a>
+        <a href="schede.html" id="sidebar-schede" class="sidebar-item">Schede</a>
+        <a href="profilo.html" id="sidebar-profilo" class="sidebar-item">Profilo</a>
     </nav>
 
     <!--  CONTENUTO  -->
@@ -608,9 +608,7 @@
                 <button class="modal-close" onclick="chiudiSelettore()">✕</button>
             </div>
             <div class="modal-body">
-                <!--
-                    BACKEND: riempire con creaRigaScheda() via fetch('/api/schede/utente')
-                -->
+                
                 <div class="form-row-inline" style="padding-bottom: 10px; ">
                     <div class="form-row" style="width: 100%;">
                         <label class="form-label" for="reg-numero-serie">#Serie</label>
@@ -669,7 +667,7 @@
         const API   = 'http://localhost:3000';
         /* STATO LOCALE */
         let esercizioCorrente= null;
-
+        let logged = null
         
 
         /* ricerca testuale: filtra per nome in combinazione con il filtro zona attivo */
@@ -772,34 +770,16 @@
         function chiudiSelettore() {
             document.getElementById('modal-selettore').classList.remove('open');
         }
+        
+        
+        
 
-        async function checkLogged(){
-            if(localStorage.getItem('gymbros-token')){
-                const response = await fetch(`${API}/auth/check`, {
-                method : 'GET',
-                headers : {
-                    'Authorization' : 'Bearer ' + localStorage.getItem('gymbros-token')
-                }
-                })
-
-                if(response.status === 401){
-                    localStorage.removeItem('gymbros-token')
-                    chiudiSelettore()
-                    mostraFeedback("Devi accedere per aggiungere esercizi alla scheda")
-                    return false
-                }
-                return true
-            }else{
-                chiudiSelettore()
-                mostraFeedback("Devi accedere per aggiungere esercizi alla scheda")
-                return false
-            }
-        }
         /* MODALE SELETTORE SCHEDA */
         async function apriSelettoreScheda() {
-            const logged = await checkLogged()
+            
             if(!logged) {
-                return
+                chiudiDettaglio()
+                mostraFeedback("Devi effettuare l'accesso")
             }else{
                 if (!esercizioCorrente) return;
                 document.getElementById('sel-nome-esercizio').textContent =
@@ -834,6 +814,7 @@
             const nSet = parseInt(document.getElementById('reg-numero-serie').value) || 4;
             const nRep = parseInt(document.getElementById('reg-numero-reps').value) || 0;
             if (!esercizioCorrente) return;
+            
             const response = await fetch(`${API}/users/workout-plans`, {
                 method: 'POST',
                 headers: {
@@ -850,11 +831,10 @@
         
             if (response.status === 400) {
                 mostraFeedback('Esercizio già presente nella scheda');
-            } else if (!response.ok) {
+            }else if (!response.ok) {
                 mostraFeedback('Errore. Riprova tra qualche minuto');
             }else if(response.status === 401){
-                localStorage.removeItem('gymbros-token')
-                window.location.href('auth.html')
+                mostraFeedback('Per aggiungere un esercizio deve effettuare il login');
             }else{
                 mostraFeedback("Esercizio aggiunto alla scheda")
             }
@@ -1084,6 +1064,7 @@
         loadEx()
 
         async function loadSchede(){
+
             const response = await fetch(`${API}/users/workout-plans`, {
                 method : 'GET',
                 headers : {
@@ -1092,7 +1073,21 @@
                 }
             })
 
+            if(response.status === 401){
+                logged = false
+                document.getElementById('profilo-btn').href = 'auth.html'
+                document.getElementById('profilo-btn').title = 'Vai al login'
+                document.getElementById('schede-btn').href = 'auth.html'
+                document.getElementById('schede-btn').title = 'Vai al login'
+                document.getElementById('sidebar-profilo').href = 'auth.html'
+                document.getElementById('sidebar-schede').href = 'auth.html'
+                return
+            }else{
+                logged = true
+            }
+
             const data = await response.json()
+            
             if(response.ok){
                 document.getElementById('empty-schede').remove()
                 data.forEach(scheda =>{

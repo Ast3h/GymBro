@@ -683,7 +683,7 @@
         function renderScheda() {
             if (!_scheda) return;
 
-            document.title = 'GymBro — ' + _scheda.name;
+            document.title = 'GymBro - ' + _scheda.name;
 
             const zone = [...new Set(
                 (_scheda.workout_ex || []).map(ex => ex.exercise?.macroPart).filter(Boolean)

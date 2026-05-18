@@ -378,8 +378,13 @@
         .scheda-dropdown {
             display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0;
             background: var(--surface); border: 0.5px solid var(--border);
-            border-radius: var(--radius); overflow: hidden; z-index: 50;
+            border-radius: var(--radius); overflow-x: hidden; overflow-y: auto;
+            max-height: 220px; z-index: 50;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
         }
+        .scheda-dropdown::-webkit-scrollbar { width: 4px; }
+        .scheda-dropdown::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
         .scheda-dropdown.open { display: block; }
         .scheda-opt {
             padding: 10px 12px; font-size: 0.82rem; color: var(--muted);
@@ -720,23 +725,54 @@
 
         async function caricaSchede() {
             try {
-                const res = await fetch(`${API}/users/workout-plans`, {
-                    headers: { Authorization: 'Bearer ' + TOKEN() }
-                });
-                if (!res.ok) return;
-                _schede = await res.json();
-                
+                // vengono caricate in parallelo sia le schede personali che quelle predefinite
+                const [resPersonali, resPredefinite] = await Promise.all([
+                    fetch(`${API}/users/workout-plans`,   { headers: { Authorization: 'Bearer ' + TOKEN() } }),
+                    fetch(`${API}/users/workout-template`, { headers: { Authorization: 'Bearer ' + TOKEN() } }),
+                ]);
+
+                const personali   = resPersonali.ok   ? await resPersonali.json()   : [];
+                const predefinite = resPredefinite.ok ? await resPredefinite.json() : [];
+
+                // le schede personali usano workoutId, le predefinite usano templateId
+                _schede = [
+                    ...personali.map(s   => ({ id: 'p_' + s.workoutId,   name: s.name,   tipo: 'Personale'   })),
+                    ...predefinite.map(s => ({ id: 't_' + s.templateId,  name: s.name,   tipo: 'Predefinita' })),
+                ];
+
                 const drop = document.getElementById('add-scheda-dropdown');
                 while (drop.children.length > 1) drop.removeChild(drop.lastChild);
-                _schede.forEach(s => {
+
+                if (personali.length > 0) {
+                    const hdr = document.createElement('div');
+                    hdr.style.cssText = 'padding:6px 12px; font-size:0.6rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); border-bottom:0.5px solid var(--border);';
+                    hdr.textContent = 'Personali';
+                    drop.appendChild(hdr);
+                }
+                personali.forEach(s => {
                     const opt = document.createElement('div');
                     opt.className = 'scheda-opt';
-                    opt.dataset.value = s.workoutId;
+                    opt.dataset.value = 'p_' + s.workoutId;
                     opt.innerHTML = `<span>${s.name}</span><svg viewBox="0 0 24 24" style="display:none"><polyline points="20 6 9 17 4 12"/></svg>`;
-                    opt.onclick = () => selectScheda('add', s.workoutId, s.name);
+                    opt.onclick = () => selectScheda('add', 'p_' + s.workoutId, s.name);
                     drop.appendChild(opt);
                 });
-                
+
+                if (predefinite.length > 0) {
+                    const hdr = document.createElement('div');
+                    hdr.style.cssText = 'padding:6px 12px; font-size:0.6rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); border-bottom:0.5px solid var(--border); border-top:0.5px solid var(--border); margin-top:4px;';
+                    hdr.textContent = 'Predefinite';
+                    drop.appendChild(hdr);
+                }
+                predefinite.forEach(s => {
+                    const opt = document.createElement('div');
+                    opt.className = 'scheda-opt';
+                    opt.dataset.value = 't_' + s.templateId;
+                    opt.innerHTML = `<span>${s.name}</span><svg viewBox="0 0 24 24" style="display:none"><polyline points="20 6 9 17 4 12"/></svg>`;
+                    opt.onclick = () => selectScheda('add', 't_' + s.templateId, s.name);
+                    drop.appendChild(opt);
+                });
+
             } catch(e) { console.error('Errore schede:', e); }
         }
 
@@ -759,13 +795,19 @@
             const durata = document.getElementById('add-durata').value;
             if (!data) { document.getElementById('add-data').focus(); return; }
 
+            // controllo aggiuntivo lato JS per bloccare date future anche se il campo max venisse aggirato
+            const oggi = new Date().toISOString().split('T')[0];
+            if (data > oggi) { document.getElementById('add-data').focus(); return; }
+
             try {
+                const workoutId = scheda ? parseInt(scheda.replace(/^[pt]_/, '')) : null;
+
                 const res = await fetch(`${API}/users/allenamenti`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN() },
                     body: JSON.stringify({
                         data:      new Date(data).toISOString(),
-                        workoutId: scheda ? parseInt(scheda) : null,
+                        workoutId,
                         durataSec: durata ? parseInt(durata) * 60 : null,
                     })
                 });
@@ -1228,7 +1270,11 @@
 
 
         function apriAggiungi(dataStr) {
-            document.getElementById('add-data').value = dataStr || new Date().toISOString().split('T')[0];
+            const oggi = new Date().toISOString().split('T')[0];
+            // imposta max sull'input data per bloccare la selezione di date future
+            const inputData = document.getElementById('add-data');
+            inputData.max = oggi;
+            inputData.value = dataStr || oggi;
             
             selectScheda('add', '', '— Nessuna scheda —');
             

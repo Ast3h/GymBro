@@ -965,6 +965,7 @@
             return m + ':' + s;
         }
 
+        /* AVVIA TIMER PRINCIPALE*/
         function avviaTimerAllenamento() {
             _timerInterval = setInterval(() => {
                 const elapsed = Math.floor((Date.now() - _startTime) / 1000);
@@ -1031,6 +1032,7 @@
             });
         }
 
+        /*CREA CARD COMPLETA ESERCIZIO*/
         function creaCardEsercizio(ex) {
             const id        = ex.exerciseId;
             const nome      = ex.exercise?.nameIt || ex.exercise?.name || 'Esercizio';
@@ -1145,6 +1147,7 @@
             return card;
         }
 
+        /* CREA RIGA SERIE*/
         function creaSerieRow(id, i, s, nome) {
             const row = document.createElement('div');
             row.className      = 'serie-row' + (s.done ? ' done' : '');
@@ -1238,6 +1241,7 @@
             }
         }
 
+        /* AGGIORNA LE REPS DI UNA SERIE*/
         function aggiornaReps(ezId, idx, val) {
             if (_serieState[ezId] && _serieState[ezId][idx]) {
                 _serieState[ezId][idx].reps = parseInt(val) || 0;
@@ -1355,6 +1359,7 @@
             setSub.textContent   = '';
             overlay.classList.add('show');
 
+            /* DECREMENTA TIMER RIPOSO*/
             function tick() {
                 const m = Math.floor(_ripososeconds / 60);
                 const s = _ripososeconds % 60;
@@ -1391,6 +1396,7 @@
             document.getElementById('timer-edit-overlay').classList.add('show');
         }
 
+        /* CONVERTI SECONDI IN STRINGA*/
         function formattaPreset(sec) {
             if (sec < 60)  return sec + 's';
             if (sec === 60) return '1 min';
@@ -1398,12 +1404,14 @@
             return Math.floor(sec/60) + ' min';
         }
 
+        /* SELEZIONA PRESET TIMER */
         function setTimerPreset(sec) {
             _timerPresetVal = sec;
             document.querySelectorAll('.timer-preset').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
         }
 
+        /* SALVA TEMPO DI RIPOSO SCELTO PER L'ESERCIZIO*/
         function confermaTimerEdit() {
             if (_timerEditTarget !== null) {
                 _riposi[_timerEditTarget] = _timerPresetVal;
@@ -1448,6 +1456,7 @@
         /*  PAUSA / RIPRENDI  */
         let _inPausa = false;
 
+        /* PULSANTE PAUSA E RIPRENDI*/
         function togglePausa() {
             const btn = document.getElementById('btn-pausa');
             if (_inPausa) {
@@ -1565,6 +1574,7 @@
             document.getElementById('annulla-overlay').classList.remove('open');
         }
 
+        /*FERMA TIMER E TORNA A SCHEDE*/
         function confermaAnnulla() {
             clearInterval(_timerInterval);
             clearInterval(_riposoInterval);

@@ -711,6 +711,7 @@
             await Promise.all([caricaProfilo(), caricaSchede(), caricaAllenamenti(), caricaRecord()]);
         }
 
+        /*CARICA DATI PROFILO PER CALCOLO IMC*/
         async function caricaProfilo() {
             try {
                 const res = await fetch(`${API}/users/profile`, {
@@ -723,6 +724,7 @@
             } catch(e) { console.error('Errore profilo:', e); }
         }
 
+        /* carica in parallelo le schede personali e quelle predefinite */
         async function caricaSchede() {
             try {
                 // vengono caricate in parallelo sia le schede personali che quelle predefinite
@@ -775,7 +777,7 @@
 
             } catch(e) { console.error('Errore schede:', e); }
         }
-
+        /* CARICA STORICO ALLENAMENTI*/
         async function caricaAllenamenti() {
             try {
                 const res = await fetch(`${API}/users/allenamenti`, {
@@ -789,13 +791,14 @@
             } catch(e) { console.error('Errore allenamenti:', e); }
         }
 
+        /* SALVA NUOVO ALLENAMENTO MANUALE*/
         async function salvaAggiungi() {
             const data   = document.getElementById('add-data').value;
             const scheda = document.getElementById('add-scheda').value;
             const durata = document.getElementById('add-durata').value;
             if (!data) { document.getElementById('add-data').focus(); return; }
 
-            // controllo aggiuntivo lato JS per bloccare date future anche se il campo max venisse aggirato
+            // controllo per bloccare date future anche se il campo max venisse aggirato
             const oggi = new Date().toISOString().split('T')[0];
             if (data > oggi) { document.getElementById('add-data').focus(); return; }
 
@@ -987,6 +990,7 @@
             document.querySelectorAll('.cal-day.selected').forEach(e => e.classList.remove('selected'));
         }
 
+        /* MOSTRA DETTAGLIO GIORNO SELEZIONATO*/
         function mostraDettaglio(allList, el, dataStr) {
             document.querySelectorAll('.cal-day.selected').forEach(e => e.classList.remove('selected'));
             el.classList.add('selected');
@@ -1033,6 +1037,7 @@
             document.getElementById('cal-detail').classList.add('visible');
         }
 
+        /* CAMBIA MESE */
         function cambiaMe(delta) {
             _calMese += delta;
             if (_calMese < 0)  { _calMese = 11; _calAnno--; }
@@ -1121,6 +1126,7 @@
             if (e.target === this) chiudiModifica();
         });
 
+        /* CARICA RECORD */
         async function caricaRecord() {
             try {
                 const res = await fetch(`${API}/users/record`, {
@@ -1177,7 +1183,7 @@
             });
         }
 
-        /* Funzioni modifica e conferma elimina record */
+        /* MODALE RECORD */
         let _recordDaEliminare = null;
 
         function apriModificaRecord(r) {
@@ -1197,7 +1203,7 @@
             document.getElementById('modal-modifica-record').classList.remove('open');
         }
 
-        /* SALVA MODIFICA*/
+        /* SALVA MODIFICA RECORD*/
         async function salvaModificaRecord() {
             const ezId = parseInt(document.getElementById('mod-rec-ezid').value);
             const pesi = parseFloat(document.getElementById('mod-rec-pesi').value) || 0;
@@ -1220,6 +1226,7 @@
             document.getElementById('btn-conferma-elimina').onclick = confermaEliminaRecord;
         }
 
+        /* MODALE CONFERMA ELIMINA RECORD */
         async function confermaEliminaRecord() {
             const ezId = _recordDaEliminare;
             if (!ezId) return;
@@ -1239,7 +1246,6 @@
         });
 
         /* MODALE AGGIUNGI */
-
         function toggleSchedaDropdown(prefix) {
             const trigger = document.getElementById(prefix + '-scheda-trigger');
             const drop    = document.getElementById(prefix + '-scheda-dropdown');
@@ -1268,7 +1274,7 @@
             }
         });
 
-
+        /* MODALE AGGIUNGI ALLENAMENTO*/
         function apriAggiungi(dataStr) {
             const oggi = new Date().toISOString().split('T')[0];
             // imposta max sull'input data per bloccare la selezione di date future

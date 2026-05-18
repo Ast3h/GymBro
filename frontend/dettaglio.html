@@ -805,7 +805,7 @@
 
         let _editEsercizi  = [];
         let _tuttiEsercizi = [];
-
+        
         async function apriModaleModifica() {
             _editEsercizi = (_scheda?.workout_ex || []).map(ex => ({
                 id:   ex.exerciseId,
@@ -886,6 +886,7 @@
             if (el) el.textContent = _editEsercizi[idx].nRep;
         }
 
+        /* RIMUOVE ESERCIZIO DALLA LISTA TEMPORANEAMENTE*/
         function rimuoviEditEz(idx) {
             _editEsercizi.splice(idx, 1);
             renderModEzList();
@@ -960,6 +961,7 @@
             chiudiSheetEsercizi();
         }
 
+        /* RENDERIZZA I FILTRI PER GRUPPO MUSCOLARE */
         function renderSheetCats() {
             const cats = document.getElementById('sheet-cats');
             if (!cats) return;
@@ -971,12 +973,14 @@
             ).join('');
         }
 
+        /* SELEZIONA UN FILTRO PER GRUPPO MUSCOLARE */
         function selezionaCat(cat) {
             _sheetCatAttiva = cat;
             renderSheetCats();
             renderSheetEzList();
         }
 
+        /* AGGIORNA LA LISTA DEGLI ESERCIZI NEL SHEET */
         function filtroSheetEz() {
             renderSheetEzList();
         }
@@ -1013,6 +1017,7 @@
             }).join('');
         }
 
+        /* AGGIUNGE/RIMUOVE ESERCIZIO DALLA SELEZIONE*/
         function toggleSheetEz(id) {
             if (_sheetSelezione.has(id)) {
                 _sheetSelezione.delete(id);
@@ -1028,6 +1033,7 @@
             }
         }
 
+        /* MODALE VIDEO*/
         function apriVideo(url) {
             document.getElementById('video-player').src = url;
             document.getElementById('modal-video').classList.add('open');
@@ -1051,6 +1057,7 @@
             if (e.target === this) chiudiVideo();
         });
 
+        /*SALVA PREDEFINITA COME PERSONALE*/
         async function salvaAllenamento(){
             const id_scheda = parseInt(params.get('id'))
 
@@ -1083,6 +1090,7 @@
             document.getElementById('modal-conferma-dettaglio').classList.remove('open');
         }
 
+        /* CALLBACK INIETTATA E CHIUSURA MODALE*/
         function confermaDettaglio() {
             const cb = _callbackDettaglio;
             chiudiConfermaDettaglio();

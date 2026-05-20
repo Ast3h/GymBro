@@ -69,7 +69,7 @@ app.post('/auth/register', async(req, res) =>{
 
     //CONTROLLO EMAIL PASSWORD E USERNAME SIANO PRESENTI E VALIDI
     const reg_email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if(!email ){
+    if(!email){
         return res.status(400).json({error : "L'email è obbligatoria"})
     }
     if(!reg_email.test(email)){
@@ -115,9 +115,7 @@ app.post('/auth/register', async(req, res) =>{
         if(error.code === 'P2002'){
             const campo = error.meta.target[0]
 
-            if(campo == 'username'){
-                return res.status(400).json({error : "Username non disponibile"})
-            }
+            
             if(campo == 'email'){
                 return res.status(400).json({error : "Email già in uso"})
             }

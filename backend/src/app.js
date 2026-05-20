@@ -669,17 +669,20 @@ app.get('/users/allenamenti', auth, async (req, res) => {
 })
 
 /* POST salva un allenamento */
+/* NOTA: nomeLibero viene usato per salvare il nome delle schede predefinite, separato dal campo note dell'utente */
 app.post('/users/allenamenti', auth, async (req, res) => {
-    const { data, workoutId, durataSec, volume, note } = req.body
+    const { data, workoutId, durataSec, volume, note, nomeLibero } = req.body
+    console.log('[POST allenamenti] body ricevuto:', req.body)
     try {
         const nuovo = await prisma.allenamento.create({
             data: {
-                userId:    req.id,
-                workoutId: workoutId ? parseInt(workoutId) : null,
-                data:      new Date(data),
-                durataSec: durataSec ?? null,
-                volume:    volume    ?? null,
-                note:      note      ?? null,
+                userId:     req.id,
+                workoutId:  workoutId ? parseInt(workoutId) : null,
+                data:       new Date(data),
+                durataSec:  durataSec  ?? null,
+                volume:     volume     ?? null,
+                note:       note       ?? null,
+                nomeLibero: nomeLibero ?? null,
             },
             include: { workout: { select: { name: true } } }
         })
@@ -707,7 +710,7 @@ app.delete('/users/allenamenti/:id', auth, async (req, res) => {
 /* SALVA MODIFICHE CALENDARIO */
 app.patch('/users/allenamenti/:id', auth, async (req, res) => {
     const id = parseInt(req.params.id)
-    const { workoutId, durataSec, volume } = req.body
+    const { workoutId, durataSec, volume, nomeLibero } = req.body
     try {
         const check = await prisma.allenamento.findUnique({ where: { id } })
         if (!check || check.userId !== req.id)
@@ -715,9 +718,10 @@ app.patch('/users/allenamenti/:id', auth, async (req, res) => {
         const aggiornato = await prisma.allenamento.update({
             where: { id },
             data: {
-                workoutId: workoutId !== undefined ? (workoutId ? parseInt(workoutId) : null) : check.workoutId,
-                durataSec: durataSec ?? check.durataSec,
-                volume:    volume    ?? check.volume,
+                workoutId:  workoutId !== undefined ? (workoutId ? parseInt(workoutId) : null) : check.workoutId,
+                durataSec:  durataSec  ?? check.durataSec,
+                volume:     volume     ?? check.volume,
+                nomeLibero: nomeLibero ?? check.nomeLibero,
             },
             include: { workout: { select: { name: true } } }
         })

@@ -90,15 +90,16 @@ model storico_forma{
 }
 
 model allenamento {
-  id        Int           @id @default(autoincrement())
-  userId    Int
-  workoutId Int?
-  data      DateTime
-  durataSec Int?
-  volume    Int?
-  note      String?
-  user      User          @relation(fields: [userId], references: [id])
-  workout   workout_plan? @relation(fields: [workoutId], references: [workoutId])
+  id          Int           @id @default(autoincrement())
+  userId      Int
+  workoutId   Int?
+  data        DateTime
+  durataSec   Int?
+  volume      Int?
+  note        String?
+  nomeLibero  String?
+  user        User          @relation(fields: [userId], references: [id])
+  workout     workout_plan? @relation(fields: [workoutId], references: [workoutId])
 }
 
 ///schede di allenamento predefinite

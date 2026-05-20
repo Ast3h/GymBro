@@ -149,28 +149,6 @@ body {
 .color-switch.green { border-color: var(--accent-green); }
 .color-switch.green .switch-knob { left: 3px; background: var(--accent-green); }
 
-/* HAMBURGER (solo su mobile) */
-.hamburger-btn{
-    display: none;
-    flex-direction: column;
-    gap: 4px;
-    cursor: pointer;
-    background: none;
-    border: none;
-    padding: 4px;
-}
-
-.hamburger-btn span{
-    display: block;
-    width: 18px;
-    height: 1.5px;
-    background: var(--muted);
-    border-radius: 2px;
-    transition: background 0.18s;
-}
-
-.hamburger-btn:hover span { background: var(--text);}
-
 /* SIDEBAR MOBILE*/
 .sidebar-overlay {
     display: none;
@@ -500,13 +478,6 @@ body {
 /* RESPONSIVE*/
 @media (max-width: 600px){
     .topbar{ padding: 0 16px;}
-    .hamburger-btn{ display: flex;}
-
-    .sidebar{
-        transform: translateX(-100%);
-    }
-
-    .sidebar.open{ transform: translateX(0);}
 
     .page-layout{
         padding-left: 0;

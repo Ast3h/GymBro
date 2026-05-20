@@ -28,6 +28,9 @@
 
         /*  TOPBAR ALLENAMENTO -> NON USA gymbros.js  */
         .all-topbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
             height: 52px;
             background: var(--surface);
             border-bottom: 0.5px solid var(--border);
@@ -91,6 +94,7 @@
             display: flex;
             border-bottom: 0.5px solid var(--border);
             flex-shrink: 0;
+            margin-top: 52px;
         }
 
         .stat-item {
@@ -120,7 +124,7 @@
         /*  SCROLL CONTENT  */
         .all-scroll {
             padding: 14px;
-            padding-bottom: 80px; /* spazio per il bottom bar fisso */
+            padding-bottom: 80px; 
             display: flex;
             flex-direction: column;
             gap: 12px;
@@ -906,15 +910,27 @@
             </div>
         </div>
     </div>
-
+    
+    <!-- MODALE CONFERMA ANNULLAMENTO -->
+    <div class="modal-overlay" id="annulla-overlay">
+        <div class="annulla-box">
+            <div class="annulla-title">Annullare l'allenamento?</div>
+            <div class="annulla-sub">Stai per interrompere la sessione. I progressi non salvati andranno persi.</div>
+            <div class="annulla-btns">
+                <button class="annulla-continua" onclick="chiudiAnnulla()">Continua</button>
+                <button class="annulla-conferma" onclick="confermaAnnulla()">Annulla sessione</button>
+            </div>
+        </div>
+    </div>
     <script>
         const TOKEN = () => localStorage.getItem('gymbros-token');
         const API   = 'http://localhost:3000';
 
         /*  LEGGE L'ID DELLA SCHEDA DALL'URL  */
-        const params   = new URLSearchParams(window.location.search);
-        const schedaId = parseInt(params.get('id'));
-        const tipo = params.get('tipo')
+        var params   = new URLSearchParams(window.location.search);
+        var schedaId = parseInt(params.get('id'));
+        var tipo = params.get('tipo')
+        console.log('tipo:', tipo);
 
         /* aggiorna il link back con l'id corretto */
         document.getElementById('back-btn').href = 'dettaglio.html?id=' + schedaId + '&tipo=' + tipo;
@@ -1483,10 +1499,14 @@
         }
 
         /*  FINE ALLENAMENTO → apre modale recap  */
-        function fineAllenamento() {
-            if (_inPausa) togglePausa(); /* riprendi il timer prima di calcolare */
+        let _elapsedAlRecap = 0;
 
-            const elapsed = Math.floor((Date.now() - _startTime) / 1000);
+        function fineAllenamento() {
+            clearInterval(_timerInterval);
+            clearInterval(_riposoInterval);
+
+            _elapsedAlRecap = Math.floor((Date.now() - _startTime) / 1000);
+            const elapsed = _elapsedAlRecap;
             const nTot    = (_scheda?.workout_ex || []).length;
             const nEzDone = Object.values(_serieState).filter(s => s.some(r => r.done)).length;
 
@@ -1511,7 +1531,8 @@
 
         function chiudiRecap() {
             document.getElementById('modal-recap').classList.remove('open');
-            window.location.href = 'schede.html';
+            _startTime = Date.now() - (_elapsedAlRecap * 1000);
+            avviaTimerAllenamento();
         }
 
         /*  SALVA IN STATISTICHE  */
@@ -1584,24 +1605,12 @@
         function confermaAnnulla() {
             clearInterval(_timerInterval);
             clearInterval(_riposoInterval);
-            window.location.href = 'dettaglio.html?id=' + schedaId;
+            window.location.href = 'dettaglio.html?id=' + schedaId + '&tipo=' + tipo;
         }
 
         /*  START  */
         caricaScheda();
     </script>
-
-    <!-- MODALE CONFERMA ANNULLAMENTO -->
-    <div class="modal-overlay" id="annulla-overlay">
-        <div class="annulla-box">
-            <div class="annulla-title">Annullare l'allenamento?</div>
-            <div class="annulla-sub">Stai per interrompere la sessione. I progressi non salvati andranno persi.</div>
-            <div class="annulla-btns">
-                <button class="annulla-continua" onclick="chiudiAnnulla()">Continua</button>
-                <button class="annulla-conferma" onclick="confermaAnnulla()">Annulla sessione</button>
-            </div>
-        </div>
-    </div>
 
     <!--  MODALE RECAP FINE ALLENAMENTO  -->
     <div class="modal-overlay" id="modal-recap">

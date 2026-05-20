@@ -548,7 +548,7 @@
             const tags= scheda.zone.map(z => `<span class= "tag">${z}</span>`).join('');
             const livelloBadge= scheda.livello ? `<span class="tag">${scheda.livello}</span>`: '';
 
-            const azioni= scheda.tipo === 'personale' ?
+            const azioni= scheda.tipo === 'Personale' ?
                 `<div class="scheda-actions">
                     <button class="scheda-btn" onclick="event.stopPropagation(); modificaScheda(${scheda.id})">Modifica</button>
                     <button class="scheda-btn danger" onclick="event.stopPropagation(); eliminaScheda('${scheda.id}')">Elimina</button>

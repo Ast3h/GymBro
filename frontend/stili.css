@@ -149,17 +149,6 @@ body {
 .color-switch.green { border-color: var(--accent-green); }
 .color-switch.green .switch-knob { left: 3px; background: var(--accent-green); }
 
-/* SIDEBAR MOBILE*/
-.sidebar-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 89;
-}
-
-.sidebar-overlay.open{display: block;}
-
 /* SIDEBAR*/
 .sidebar{
     position: fixed;
@@ -185,19 +174,13 @@ body {
     text-decoration: none;
     padding: 10px 20px;
     border-left: 2px solid transparent;
-    transition: color 0.18s, background 0.18s, border-color 0.18s;
+    transition: color 0.18s, background 0.18s;
     display: block;
 }
 
 .sidebar-item:hover{
     color: var(--text);
     background: var(--surface2);
-}
-
-.sidebar-item.active{
-    color: var(--accent);
-    border-left-color: var(--accent);
-    background: var(--accent-dim);
 }
 
 /* LAYOUT PAGINA */

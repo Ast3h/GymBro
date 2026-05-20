@@ -341,15 +341,6 @@ body {
     border: 0.5px solid var(--accent-dim);
 }
 
-/* CARD GENERICA ESERCIZIO*/
-.card{
-    background: var(--surface);
-    border: 0.5px solid var(--border);
-    border-radius: var(--radius);
-    transition: border-color 0.18s, background 0.18s;
-}
-
-.card:hover{ border-color: var(--accent);}
 
 /* MODALE (FINESTRA CHE SI APRE PER VEDERE ESERICIZIO) */
 .modal-overlay{
@@ -461,6 +452,9 @@ body {
 /* RESPONSIVE*/
 @media (max-width: 600px){
     .topbar{ padding: 0 16px;}
+
+    .sidebar { display: none; }
+    .sidebar-overlay { display: none; }
 
     .page-layout{
         padding-left: 0;

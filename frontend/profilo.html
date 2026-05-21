@@ -667,8 +667,8 @@
 
                 let etaCalcolata = oggi.getFullYear() - nascita.getFullYear()
 
-                if(oggi.getMonth() > nascita.getMonth() || (oggi.getMonth() === nascita.getMonth() && oggi.getDate() >= nascita.getDate())){
-                    etaCalcolata++
+                if(oggi.getMonth() < nascita.getMonth() || (oggi.getMonth() === nascita.getMonth() && oggi.getDate() < nascita.getDate())){
+                    etaCalcolata--
                 }
                 
                 document.getElementById('dato-eta').textContent = etaCalcolata
@@ -822,14 +822,29 @@
             const data = document.getElementById('input-nascita').value;
             const peso    = document.getElementById('input-peso').value;
             const altezza = document.getElementById('input-altezza').value;
+            let eta = null
+            if(data){
+                const oggi = new Date()
+                const nascita = new Date(data)
+                console.log(oggi)
+                console.log(nascita)
 
-            /* aggiorna visualizzazione locale */
-            /*
+                let etaCalcolata = oggi.getFullYear() - nascita.getFullYear()
+
+                if(oggi.getMonth() < nascita.getMonth() || (oggi.getMonth() === nascita.getMonth() && oggi.getDate() < nascita.getDate())){
+                    etaCalcolata--
+                }
+                
+                eta = etaCalcolata
+                
+            }
+            
+            
             if (nome)    document.getElementById('dato-nome').textContent    = nome;
-            if (eta)     document.getElementById('dato-eta').textContent      = eta + ' anni';
-            if (peso)    document.getElementById('dato-peso').textContent     = peso + ' kg';
-            if (altezza) document.getElementById('dato-altezza').textContent  = altezza + ' cm';
-            */
+            if (eta)     document.getElementById('dato-eta').textContent      = eta;
+            if (peso)    document.getElementById('dato-peso').textContent     = peso ;
+            if (altezza) document.getElementById('dato-altezza').textContent  = altezza ;
+            
             renderLivelloDisplay(livelloCorrente);
 
            

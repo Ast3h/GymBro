@@ -1474,6 +1474,7 @@
 
         /*  PAUSA / RIPRENDI  */
         let _inPausa = false;
+        let _pausaPerAnnulla = false;
 
         /* PULSANTE PAUSA E RIPRENDI*/
         function togglePausa() {
@@ -1593,10 +1594,22 @@
 
         /*  ANNULLA ALLENAMENTO -> apre modale interno che chiede conferma */
         function annullaAllenamento() {
+            if(!_inPausa){
+                clearInterval(_timerInterval);
+                _pausaElapsed = Date.now() - _startTime;
+                _pausaPerAnnulla = true;
+            }
+            
             document.getElementById('annulla-overlay').classList.add('open');
         }
 
         function chiudiAnnulla() {
+            if(_pausaPerAnnulla){
+                _startTime = Date.now() - (_pausaElapsed || 0);
+                avviaTimerAllenamento();
+                _pausaPerAnnulla = false
+            }
+            
             document.getElementById('annulla-overlay').classList.remove('open');
         }
 

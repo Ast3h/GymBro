@@ -550,8 +550,6 @@
 
             const azioni= scheda.tipo === 'Personale' ?
                 `<div class="scheda-actions">
-                    <button class="scheda-btn" onclick="event.stopPropagation(); modificaScheda(${scheda.id})">Modifica</button>
-                    <button class="scheda-btn danger" onclick="event.stopPropagation(); eliminaScheda('${scheda.id}')">Elimina</button>
                 </div>`
                 : `<div class="scheda-actions">
                 </div>`;

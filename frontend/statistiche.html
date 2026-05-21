@@ -757,20 +757,7 @@
                     drop.appendChild(opt);
                 });
 
-                if (predefinite.length > 0) {
-                    const hdr = document.createElement('div');
-                    hdr.style.cssText = 'padding:6px 12px; font-size:0.6rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); border-bottom:0.5px solid var(--border); border-top:0.5px solid var(--border); margin-top:4px;';
-                    hdr.textContent = 'Predefinite';
-                    drop.appendChild(hdr);
-                }
-                predefinite.forEach(s => {
-                    const opt = document.createElement('div');
-                    opt.className = 'scheda-opt';
-                    opt.dataset.value = 't_' + s.templateId;
-                    opt.innerHTML = `<span>${s.name}</span><svg viewBox="0 0 24 24" style="display:none"><polyline points="20 6 9 17 4 12"/></svg>`;
-                    opt.onclick = () => selectScheda('add', 't_' + s.templateId, s.name);
-                    drop.appendChild(opt);
-                });
+                
 
             } catch(e) { console.error('Errore schede:', e); }
         }
@@ -1080,7 +1067,7 @@
             while (sel.options.length > 1) sel.remove(1);
             _schede.forEach(s => {
                 const opt = document.createElement('option');
-                opt.value = s.workoutId;
+                opt.value = s.id ? s.id.toString().replace(/^[pt]_/, '') : s.workoutId;                
                 opt.textContent = s.name;
                 if (a.workoutId === s.workoutId) opt.selected = true;
                 sel.appendChild(opt);
@@ -1106,6 +1093,7 @@
                     body: JSON.stringify({
                         workoutId: scheda ? parseInt(scheda) : null,
                         durataSec: durata ? parseInt(durata) * 60 : null,
+                        nomeLibero: _allenamenti.find(a => a.id === id)?.nomeLibero ?? null
                     })
                 });
                 if (!res.ok) { console.error('Errore PATCH:', await res.text()); return; }

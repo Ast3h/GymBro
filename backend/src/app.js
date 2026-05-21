@@ -711,6 +711,7 @@ app.delete('/users/allenamenti/:id', auth, async (req, res) => {
 app.patch('/users/allenamenti/:id', auth, async (req, res) => {
     const id = parseInt(req.params.id)
     const { workoutId, durataSec, volume, nomeLibero } = req.body
+    console.log(req.body)
     try {
         const check = await prisma.allenamento.findUnique({ where: { id } })
         if (!check || check.userId !== req.id)

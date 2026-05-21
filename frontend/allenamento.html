@@ -930,7 +930,6 @@
         var params   = new URLSearchParams(window.location.search);
         var schedaId = parseInt(params.get('id'));
         var tipo = params.get('tipo')
-        console.log('tipo:', tipo);
 
         /* aggiorna il link back con l'id corretto */
         document.getElementById('back-btn').href = 'dettaglio.html?id=' + schedaId + '&tipo=' + tipo;

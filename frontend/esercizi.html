@@ -843,12 +843,14 @@
                 })
             });
         
-            if (response.status === 400) {
+            if (!response.ok) {
+                if (response.status === 400) {
                 mostraFeedback('Esercizio già presente nella scheda');
-            }else if (!response.ok) {
-                mostraFeedback('Errore. Riprova tra qualche minuto');
-            }else if(response.status === 401){
-                mostraFeedback('Per aggiungere un esercizio deve effettuare il login');
+                }else if(response.status === 401){
+                    mostraFeedback('Per aggiungere un esercizio deve effettuare il login');
+                }else{
+                    mostraFeedback('Errore. Riprova tra qualche minuto');
+                }
             }else{
                 mostraFeedback("Esercizio aggiunto alla scheda")
             }

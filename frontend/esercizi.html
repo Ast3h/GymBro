@@ -945,8 +945,6 @@
             const params = new URLSearchParams(window.location.search);
             const zona   = params.get('zona');
             if (zona) {
-                document.getElementById('zona-badge-label').textContent = zona;
-                document.getElementById('zona-badge').style.display = 'flex';
                 const chip = [...document.querySelectorAll('#filtri-zona .chip')]
                     .find(c => c.textContent === zona);
                 if (chip) filtraZona(zona, chip);
@@ -955,8 +953,6 @@
 
         function changeZonaUrl(zona){
             if(zona){
-                document.getElementById('zona-badge-label').textContent = zona;
-                document.getElementById('zona-badge').style.display = 'flex';
                 const chip = [...document.querySelectorAll('#filtri-zona .chip')]
                     .find(c => c.textContent === zona);
                 if (chip) filtraZona(zona, chip);

@@ -892,93 +892,11 @@
             if (e.target === this) chiudiCreaScheda();
         });
 
-        function filtraCreaZona(zona, btn) {
-            _zonaFiltro = zona;
-            document.querySelectorAll('#crea-filtri .chip').forEach(c => c.classList.remove('active'));
-            btn.classList.add('active');
-            aggiornaRisultati();
-        }
+        
 
-        function cercaEsercizi() {
-            aggiornaRisultati();
-        }
+        
 
-        function aggiornaRisultati() {
-            const query    = (document.getElementById('search-ez').value || '').toLowerCase().trim();
-            const results  = document.getElementById('ez-results');
-            const noRes    = document.getElementById('ez-no-results');
-            const idAggiunti = new Set(_aggiunti.map(e => e.id));
-
-            const filtrati = _tuttiEsercizi.filter(ez => {
-                const perZona     = _zonaFiltro === 'tutte' || ez.zone.includes(_zonaFiltro);
-                const perTesto    = !query || ez.nome.toLowerCase().includes(query);
-                const nonAggiunto = !idAggiunti.has(ez.id);
-                return perZona && perTesto && nonAggiunto;
-            });
-
-            results.innerHTML = '';
-
-            if (filtrati.length === 0) {
-                noRes.textContent = _tuttiEsercizi.length === 0
-                    ? 'Inizia a cercare o seleziona una zona'
-                    : 'Nessun esercizio trovato';
-                results.appendChild(noRes);
-                return;
-            }
-
-            filtrati.forEach(ez => {
-                const row = document.createElement('div');
-                row.className = 'ez-result-row';
-                row.innerHTML = `
-                    <div>
-                        <div class="ez-result-name">${ez.nome}</div>
-                        <div class="ez-result-zona">${ez.zone.join(' · ')}</div>
-                    </div>
-                    <button class="ez-add-btn" onclick="aggiungiEsercizio('${ez.id}')">+ Aggiungi</button>`;
-                results.appendChild(row);
-            });
-        }
-
-        function aggiungiEsercizio(id) {
-            const ez = _tuttiEsercizi.find(e => e.id === id);
-            if (!ez || _aggiunti.find(e => e.id === id)) return;
-            _aggiunti.push(ez);
-            aggiornaAggiunti();
-            aggiornaRisultati();
-        }
-
-        function rimuoviEsercizio(id) {
-            _aggiunti = _aggiunti.filter(e => e.id !== id);
-            aggiornaAggiunti();
-            aggiornaRisultati();
-        }
-
-        function aggiornaAggiunti() {
-            const lista = document.getElementById('added-list');
-            const count = document.getElementById('added-count');
-            const empty = document.getElementById('added-empty');
-
-            count.textContent = _aggiunti.length + ' ' + (_aggiunti.length === 1 ? 'esercizio' : 'esercizi');
-            lista.innerHTML   = '';
-
-            if (_aggiunti.length === 0) {
-                lista.appendChild(empty);
-                return;
-            }
-
-            _aggiunti.forEach(ez => {
-                const row = document.createElement('div');
-                row.className = 'added-row';
-                row.innerHTML = `
-                    <div>
-                        <div class="added-name">${ez.nome}</div>
-                        <div class="added-zona">${ez.zone.join(' · ')}</div>
-                    </div>
-                    <button class="remove-btn" onclick="rimuoviEsercizio('${ez.id}')">✕</button>`;
-                lista.appendChild(row);
-            });
-        }
-
+        
         async function salvaSchedaNuova() {
             const nome = document.getElementById('input-nome-scheda').value.trim();
             if (!nome) {

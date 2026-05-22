@@ -477,17 +477,7 @@
 
         </div>
 
-    <!-- MODALE CONFERMA ELIMINA SCHEDA -->
-    <div class="modal-overlay" id="modal-conferma-scheda">
-        <div class="annulla-box">
-            <div class="annulla-title" id="conferma-scheda-title">Eliminare questa scheda?</div>
-            <div class="annulla-sub" id="conferma-scheda-sub">Questa azione è irreversibile. La scheda e tutti i suoi esercizi verranno rimossi.</div>
-            <div class="annulla-btns">
-                <button class="annulla-continua" onclick="chiudiConfermaScheda()">Annulla</button>
-                <button class="annulla-conferma" onclick="confermaAzioneScheda()">Elimina</button>
-            </div>
-        </div>
-    </div>
+    
 
     <div class="feedback-toast" id="feedback-toast"></div>
 
@@ -497,45 +487,45 @@
         const API   = 'http://localhost:3000';
         /* FILTRI */
         function filtraSchede(zona, tipo, btn) {
-        const grid     = document.getElementById('grid-schede-' + tipo);
-        const filtriEl = document.getElementById('filtri-' + tipo);
-        const tutteBtn = filtriEl.querySelector('.chip:first-child');
+            const grid     = document.getElementById('grid-schede-' + tipo);
+            const filtriEl = document.getElementById('filtri-' + tipo);
+            const tutteBtn = filtriEl.querySelector('.chip:first-child');
 
-        /* se premi il chip già attivo, torna a "Tutte" */
-        if (btn.classList.contains('active') && zona !== 'tutte') {
-            filtriEl.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-            tutteBtn.classList.add('active');
-            zona = 'tutte';
-        } else {
-            filtriEl.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-            btn.classList.add('active');
-        }
-        if(tipo === 'predefinite'){
-            grid.querySelectorAll('.scheda-card').forEach(card => {
-            if (zona === 'tutte') {
-                card.style.display = 'block';
+            /* se premi il chip già attivo, torna a "Tutte" */
+            if (btn.classList.contains('active') && zona !== 'tutte') {
+                filtriEl.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+                tutteBtn.classList.add('active');
+                zona = 'tutte';
             } else {
-                if(card.dataset.livello === zona){
+                filtriEl.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+            }
+            if(tipo === 'predefinite'){
+                grid.querySelectorAll('.scheda-card').forEach(card => {
+                if (zona === 'tutte') {
                     card.style.display = 'block';
-                }else{
-                    card.style.display = 'none';
+                } else {
+                    if(card.dataset.livello === zona){
+                        card.style.display = 'block';
+                    }else{
+                        card.style.display = 'none';
+                    }
                 }
+                });
+                
+            }else{
+                grid.querySelectorAll('.scheda-card').forEach(card => {
+                if (zona === 'tutte') {
+                    card.style.display = 'block';
+                } else {
+                    const zone = card.dataset.zone ? card.dataset.zone.split(',') : [];
+                    card.style.display = zone.includes(zona) ? 'block' : 'none';
+                }
+                });
             }
-            });
-            
-        }else{
-            grid.querySelectorAll('.scheda-card').forEach(card => {
-            if (zona === 'tutte') {
-                card.style.display = 'block';
-            } else {
-                const zone = card.dataset.zone ? card.dataset.zone.split(',') : [];
-                card.style.display = zone.includes(zona) ? 'block' : 'none';
-            }
-            });
+        
+        
         }
-        
-        
-    }
 
         /* creaCardScheda(scheda)*/
         function creaCardScheda(scheda){
@@ -571,212 +561,8 @@
         /* AZIONI SCHEDE*/
         let _editEsercizi = {};
 
-        async function modificaScheda(id) {
-            const panel = document.getElementById('edit-panel-' + id);
-            if (!panel) return;
-
-            if (panel.classList.contains('open')) {
-                panel.classList.remove('open');
-                return;
-            }
-
-            try {
-                const res = await fetch(`http://localhost:3000/users/workout-plans/` + id, {
-                    headers: { Authorization: 'Bearer ' + localStorage.getItem('gymbros-token') }
-                });
-                if (!res.ok) return;
-                const scheda = await res.json();
-
-                _editEsercizi[id] = (scheda.workout_ex || []).map(ex => ({
-                    id:   ex.exerciseId,
-                    nome: ex.exercise?.nameIt || ex.exercise?.name || 'Esercizio',
-                    nSet: ex.nSet || 3,
-                    nRep: ex.nRep || 0,
-                }));
-
-                renderEditPanel(id, scheda.name, scheda.note);
-                panel.classList.add('open');
-
-                /* carica esercizi per la ricerca se non già caricati */
-                if (_tuttiEsercizi.length === 0) {
-                    fetch(`${API}/fullexercises`)
-                        .then(r => r.json())
-                        .then(data => {
-                            _tuttiEsercizi = data.map(d => ({
-                                id:   d.id,
-                                nome: d.nameIt,
-                                zone: [d.macroPart, d.bodyPart].filter(Boolean),
-                                macroPart: d.macroPart,
-                                bodyPart:  d.bodyPart,
-                            }));
-                        });
-                }
-
-            } catch(e) {
-                console.error('Errore caricamento scheda per modifica:', e);
-            }
-        }
-
-        function renderEditPanel(id, nome, note) {
-            const panel = document.getElementById('edit-panel-' + id);
-            if (!panel) return;
-
-            const ezRows = (_editEsercizi[id] || []).map((ez, i) => `
-                <div class="edit-ez-row">
-                    <div class="edit-ez-name">${ez.nome}</div>
-                    <span class="edit-ez-input-lbl">Serie</span>
-                    <input class="edit-ez-input" type="number" value="${ez.nSet}" min="1"
-                           onchange="aggiornaEditSerie(${id}, ${i}, this.value)">
-                    <span class="edit-ez-input-lbl">Reps</span>
-                    <input class="edit-ez-input" type="number" value="${ez.nRep || ''}" placeholder="—"
-                           onchange="aggiornaEditRep(${id}, ${i}, this.value)">
-                    <button class="edit-ez-remove" onclick="rimuoviEditEz(${id}, ${i})">✕</button>
-                </div>`).join('');
-
-            panel.innerHTML =
-                '<div>' +
-                    '<div class="edit-section-title">Nome scheda</div>' +
-                    '<input class="edit-input" type="text" id="edit-nome-' + id + '" value="' + (nome || '') + '">' +
-                '</div>' +
-                '<div>' +
-                    '<div class="edit-section-title">Note</div>' +
-                    '<input class="edit-input" type="text" id="edit-note-' + id + '" value="' + (note || '') + '" placeholder="Opzionale...">' +
-                '</div>' +
-                '<div>' +
-                    '<div class="edit-section-title">Esercizi nella scheda</div>' +
-                    '<div class="edit-ez-list" id="edit-ez-list-' + id + '">' + ezRows + '</div>' +
-                '</div>' +
-                '<div class="edit-search-wrap">' +
-                    '<div class="edit-section-title">Aggiungi esercizio</div>' +
-                    '<input class="edit-search-input" type="text" placeholder="🔍 Cerca per nome..." oninput="cercaEditEz(' + id + ', this.value)">' +
-                    '<div class="edit-search-results" id="edit-search-results-' + id + '"></div>' +
-                '</div>' +
-                '<div class="edit-footer">' +
-                    '<button class="btn-ghost" style="flex:1;" onclick="chiudiEditPanel(' + id + ')">Annulla</button>' +
-                    '<button class="btn-primary" style="flex:2;" onclick="salvaModificaScheda(' + id + ')">Salva modifiche</button>' +
-                '</div>';
-        }
-
-        function chiudiEditPanel(id) {
-            const panel = document.getElementById('edit-panel-' + id);
-            if (panel) panel.classList.remove('open');
-        }
-
-        function aggiornaEditSerie(schedaId, idx, val) {
-            if (_editEsercizi[schedaId]?.[idx]) _editEsercizi[schedaId][idx].nSet = parseInt(val) || 1;
-        }
-
-        function aggiornaEditRep(schedaId, idx, val) {
-            if (_editEsercizi[schedaId]?.[idx]) _editEsercizi[schedaId][idx].nRep = parseInt(val) || 0;
-        }
-
-        function rimuoviEditEz(schedaId, idx) {
-            if (!_editEsercizi[schedaId]) return;
-            _editEsercizi[schedaId].splice(idx, 1);
-            renderEditPanel(schedaId,
-                document.getElementById('edit-nome-' + schedaId)?.value,
-                document.getElementById('edit-note-' + schedaId)?.value);
-        }
-
-        function cercaEditEz(schedaId, query) {
-            const res = document.getElementById('edit-search-results-' + schedaId);
-            if (!res) return;
-            if (!query.trim()) { res.innerHTML = ''; return; }
-            const idUsati  = new Set((_editEsercizi[schedaId] || []).map(e => e.id));
-            const filtrati = _tuttiEsercizi.filter(ez =>
-                ez.nome.toLowerCase().includes(query.toLowerCase()) && !idUsati.has(ez.id)
-            ).slice(0, 8);
-            res.innerHTML = filtrati.map(ez =>
-                '<div class="edit-result-row">' +
-                    '<div>' +
-                        '<div class="edit-result-name">' + ez.nome + '</div>' +
-                        '<div class="edit-result-zona">' + (ez.zone || []).join(' · ') + '</div>' +
-                    '</div>' +
-                    '<button class="edit-add-btn" onclick="aggiungiEditEz(' + schedaId + ', ' + ez.id + ')">+ Add</button>' +
-                '</div>'
-            ).join('');
-        }
-
-        function aggiungiEditEz(schedaId, ezId) {
-            const ez = _tuttiEsercizi.find(e => e.id == ezId);
-            if (!ez || !_editEsercizi[schedaId]) return;
-            if (_editEsercizi[schedaId].find(e => e.id == ezId)) return;
-            _editEsercizi[schedaId].push({ id: ez.id, nome: ez.nome, nSet: 3, nRep: 0 });
-            renderEditPanel(schedaId,
-                document.getElementById('edit-nome-' + schedaId)?.value,
-                document.getElementById('edit-note-' + schedaId)?.value);
-        }
-
-        async function salvaModificaScheda(id) {
-            const nome  = document.getElementById('edit-nome-' + id)?.value.trim();
-            const note  = document.getElementById('edit-note-' + id)?.value.trim();
-            if (!nome) return;
-            const token = localStorage.getItem('gymbros-token');
-
-            try {
-                await fetch(`${API}/users/workout-plans/${id}/exercises`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-                    body: JSON.stringify({
-                        esercizi: _editEsercizi[id].map(ez => ({
-                            exerciseId: ez.id,
-                            nSet: ez.nSet,
-                            nRep: ez.nRep,
-                        }))
-                    })
-                });
-
-                chiudiEditPanel(id);
-                const card = document.querySelector('.scheda-card[data-id="' + id + '"]');
-                if (card) card.querySelector('.scheda-name').textContent = nome;
-
-            } catch(e) {
-                console.error('Errore salvataggio:', e);
-            }
-        }
         let _callbackConferma = null;
-        function apriConfermaScheda(title, sub, callback) {
-            document.getElementById('conferma-scheda-title').textContent = title;
-            document.getElementById('conferma-scheda-sub').textContent   = sub;
-            _callbackConferma = callback;
-            document.getElementById('modal-conferma-scheda').classList.add('open');
-        }
-
-        function chiudiConfermaScheda() {
-            _callbackConferma = null;
-            document.getElementById('modal-conferma-scheda').classList.remove('open');
-        }
-
-        function confermaAzioneScheda() {
-            chiudiConfermaScheda();
-            if (_callbackConferma) _callbackConferma();
-        }
-
-        document.getElementById('modal-conferma-scheda').addEventListener('click', function(e) {
-            if (e.target === this) chiudiConfermaScheda();
-        });
-
-        /* ELIMINA SCHEDA con modale conferma */
-        function eliminaScheda(id) {
-            apriConfermaScheda(
-                'Eliminare questa scheda?',
-                'Questa azione è irreversibile. La scheda e tutti i suoi esercizi verranno rimossi.',
-                async () => {
-                    try {
-                        await fetch(`${API}/users/workout-plans/${id}`, {
-                            method:  'DELETE',
-                            headers: { Authorization: 'Bearer ' + localStorage.getItem('gymbros-token') }
-                        });
-                        /* rimuovi la card dal DOM senza ricaricare */
-                        const card = document.querySelector('[data-scheda-id="' + id + '"]');
-                        if (card) card.remove();
-                    } catch(e) {
-                        console.error('Errore eliminazione scheda:', e);
-                    }
-                }
-            );
-        }
-
+        
         /*  MODALE CREA SCHEDA  */
         let _tuttiEsercizi  = [];  
         let _aggiunti       = [];  /* esercizi aggiunti alla scheda in costruzione */
@@ -811,101 +597,8 @@
             if (e.target === this) chiudiCreaScheda();
         });
 
-        /* filtra per zona nel modale */
-        function filtraCreaZona(zona, btn) {
-            _zonaFiltro = zona;
-            document.querySelectorAll('#crea-filtri .chip').forEach(c => c.classList.remove('active'));
-            btn.classList.add('active');
-            aggiornaRisultati();
-        }
-
-        /* filtra per testo nel modale */
-        function cercaEsercizi() {
-            aggiornaRisultati();
-        }
-
-        /* renderizza i risultati filtrati */
-        function aggiornaRisultati() {
-            const query   = (document.getElementById('search-ez').value || '').toLowerCase().trim();
-            const results = document.getElementById('ez-results');
-            const noRes   = document.getElementById('ez-no-results');
-
-            /* filtra per zona e testo */
-            const idAggiunti = new Set(_aggiunti.map(e => e.id));
-            const filtrati   = _tuttiEsercizi.filter(ez => {
-                const perZona  = _zonaFiltro === 'tutte' || ez.macroPart.includes(_zonaFiltro);
-                const perTesto = !query || ez.nome.toLowerCase().includes(query);
-                const nonAggiunto = !idAggiunti.has(ez.id);
-                return perZona && perTesto && nonAggiunto;
-            });
-
-            results.innerHTML = '';
-
-            if (filtrati.length === 0) {
-                if (_tuttiEsercizi.length === 0) {
-                    noRes.textContent = 'Inizia a cercare o seleziona una zona';
-                } else {
-                    noRes.textContent = 'Nessun esercizio trovato';
-                }
-                results.appendChild(noRes);
-                return;
-            }
-
-            filtrati.forEach(ez => {
-                const row = document.createElement('div');
-                row.className = 'ez-result-row';
-                row.innerHTML = `
-                    <div>
-                        <div class="ez-result-name">${ez.nome}</div>
-                        <div class="ez-result-zona">${ez.macroPart} · ${ez.bodyPart}</div>
-                    </div>
-                    <button class="ez-add-btn" onclick="aggiungiEsercizio('${ez.id}')">+ Aggiungi</button>`;
-                results.appendChild(row);
-            });
-        }
-
-        /* aggiunge un esercizio alla scheda in costruzione */
-        function aggiungiEsercizio(id) {
-            const ez = _tuttiEsercizi.find(e => e.id === id);
-            if (!ez || _aggiunti.find(e => e.id === id)) return;
-            _aggiunti.push(ez);
-            aggiornaAggiunti();
-            aggiornaRisultati(); /* rimuove l'esercizio dai risultati */
-        }
-
-        /* rimuove un esercizio dalla scheda in costruzione */
-        function rimuoviEsercizio(id) {
-            _aggiunti = _aggiunti.filter(e => e.id !== id);
-            aggiornaAggiunti();
-            aggiornaRisultati(); /* lo fa riapparire nei risultati */
-        }
-
-        /* renderizza la lista degli aggiunti */
-        function aggiornaAggiunti() {
-            const lista   = document.getElementById('added-list');
-            const count   = document.getElementById('added-count');
-            const empty   = document.getElementById('added-empty');
-
-            count.textContent = _aggiunti.length + ' ' + (_aggiunti.length === 1 ? 'esercizio' : 'esercizi');
-            lista.innerHTML   = '';
-
-            if (_aggiunti.length === 0) {
-                lista.appendChild(empty);
-                return;
-            }
-
-            _aggiunti.forEach(ez => {
-                const row = document.createElement('div');
-                row.className = 'added-row';
-                row.innerHTML = `
-                    <div>
-                        <div class="added-name">${ez.nome}</div>
-                        <div class="added-zona">${ez.macroPart} · ${ez.bodyPart}</div>
-                    </div>
-                    <button class="remove-btn" onclick="rimuoviEsercizio('${ez.id}')">✕</button>`;
-                lista.appendChild(row);
-            });
-        }
+        
+        
 
         /* salva la scheda */
         async function salvaSchedaNuova() {
